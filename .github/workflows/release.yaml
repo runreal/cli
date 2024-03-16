@@ -1,0 +1,66 @@
+name: 'Release'
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  DENO_DIR: ~/.deno-cache
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        deno-version: [1.37.2]
+
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          token: ${{ secrets.GH_RUNREAL_TOKEN }}
+          pull-request-title-pattern: "chore${scope}: release${component} ${version}"
+          release-type: simple
+          extra-files: |
+            README.md
+            src/version.ts
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+      
+      - name: Setup Deno ${{ matrix.deno-version }}
+        if: ${{ steps.release.outputs.release_created }}
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ matrix.deno-version }}
+          
+      - name: Deno Compile [windows]
+        if: ${{ steps.release.outputs.release_created }}
+        run: deno task compile-win
+
+      - name: Deno Compile [macos]
+        if: ${{ steps.release.outputs.release_created }}
+        run: deno task compile-macos
+
+      - name: Deno Compile [linux]
+        if: ${{ steps.release.outputs.release_created }}
+        run: deno task compile-linux
+
+      - name: Upload Artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ steps.release.outputs.tag_name }} ./build/runreal-win-x64.exe ./build/runreal-macos-arm ./build/runreal-linux-x64
+
+      - name: Cache Deno dependencies 
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: ${{ hashFiles('deno.lock') }}
