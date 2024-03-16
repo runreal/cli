@@ -18,7 +18,7 @@ jobs:
     
     strategy:
       matrix:
-        deno-version: [1.37.2]
+        deno-version: [1.41.3]
 
     steps:
       - uses: google-github-actions/release-please-action@v3
