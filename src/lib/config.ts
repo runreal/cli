@@ -1,6 +1,33 @@
 import { deepmerge, dotenv, path, ulid, ValidationError } from '/deps.ts'
 import { CliOptions, RunrealConfig } from '/lib/types.ts'
 import { execSync } from '/lib/utils.ts'
+import { z } from 'https://deno.land/x/zod/mod.ts'
+
+const ConfigSchema = z.object({
+	engine: z.object({
+		path: z.string(),
+		cachePath: z.string().optional(),
+	}),
+	project: z.object({
+		name: z.string().optional(),
+		path: z.string(),
+	}),
+	build: z.object({
+		path: z.string(),
+		id: z.string().optional(),
+		branch: z.string().optional(),
+		branchSafe: z.string().optional(),
+		commit: z.string().optional(),
+		commitShort: z.string().optional(),
+	}),
+	buildkite: z.object({
+		branch: z.string(),
+		checkout: z.string(),
+		buildNumber: z.string(),
+		buildCheckoutPath: z.string(),
+		buildPipelineSlug: z.string(),
+	}),
+})
 
 class Config {
 	private config: Partial<RunrealConfig> = {
@@ -174,21 +201,20 @@ class Config {
 
 	private validateConfig() {
 		this.config = this.resolvePaths(this.config)
+		try {
+			ConfigSchema.parse(this.config)
 
-		if (!this.config.engine || !this.config.engine.path) {
-			throw new ValidationError('Invalid config: Missing engine path')
+			this.populateGitData()
+			this.config.build.id = this.determineBuildId()
+		} catch (e) {
+			if (e instanceof z.ZodError) {
+				const errors = e.errors.map((err) => {
+					return '  config.' + err.path.join('.') + ' is ' + err.message
+				})
+				throw new ValidationError('Invalid config: \n' + errors.join('\n'))
+			}
+			throw new ValidationError('Invalid config')
 		}
-
-		if (!this.config.project || !this.config.project.path) {
-			throw new ValidationError('Invalid config: Missing project path')
-		}
-
-		if (!this.config.build || !this.config.build.path) {
-			throw new ValidationError('Invalid config: Missing build path')
-		}
-
-		this.populateGitData()
-		this.config.build.id = this.determineBuildId()
 	}
 }
 

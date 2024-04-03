@@ -24,13 +24,13 @@ export const build = new Command<GlobalOptions>()
 	})
 	.option('-d, --dry-run', 'Dry run')
 	.arguments('<target:string>')
-	.action(async (options, target = EngineTarget.Editor) => {
+	.action(async (options: unknown, target = EngineTarget.Editor) => {
 		const { platform, configuration, dryRun } = options as BuildOptions
 		const { engine: { path: enginePath }, project: { path: projectPath } } = config.get(options as CliOptions)
 
-		const engine = await createEngine(enginePath)
+		const engine = createEngine(enginePath)
 		const validTargets = await engine.parseEngineTargets()
-		const extraArgs = []
+		const extraArgs: string[] = []
 
 		const projectFile = await findProjectFile(projectPath).catch(() => null)
 		if (projectFile) {
