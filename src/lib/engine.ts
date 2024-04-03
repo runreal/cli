@@ -92,10 +92,10 @@ export abstract class Engine {
 
 	abstract getPlatformName(): EnginePlatform
 	abstract getBuildScript(): string
-	abstract getCleanScript(): string
 	abstract getRunUATScript(): string
 	abstract getGenerateScript(): string
 	abstract getGitDependencesBin(): string
+	abstract parseEngineTargets(): Promise<string[]>
 
 	getEngineVersionData(): EngineVersionData {
 		const engineVersionFile = path.join(
@@ -158,19 +158,6 @@ export abstract class Engine {
 		return await exec(buildScript, args, options)
 	}
 
-	async parseEngineTargets(): Promise<string[]> {
-		const args = ['-Mode=QueryTargets']
-		await this.ubt(args, { quiet: true })
-		try {
-			const targetInfoJson = path.resolve(this.enginePath + '\\Engine\\Intermediate\\TargetInfo.json')
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
-			const targets = Targets.map((target: TargetInfo) => target.Name)
-			return targets
-		} catch (e) {
-			return []
-		}
-	}
-
 	async parseProjectTargets(projectPath: string): Promise<string[]> {
 		const projectFile = await findProjectFile(projectPath)
 		const args = ['-Mode=QueryTargets', `-Project=${projectFile}`]
@@ -196,7 +183,7 @@ export abstract class Engine {
 		platform?: EnginePlatform
 		extraArgs?: string[]
 	}) {
-		const cleanScript = this.getCleanScript()
+		// TODO
 		const args = [target, configuration, platform, ...extraArgs]
 		console.log('[runClean]', args)
 		return await exec(cleanScript, args)
@@ -234,16 +221,6 @@ class WindowsEngine extends Engine {
 		)
 		return buildScript
 	}
-	getCleanScript(): string {
-		const cleanScript = path.join(
-			this.enginePath,
-			'Engine',
-			'Build',
-			'BatchFiles',
-			'Clean.bat',
-		)
-		return cleanScript
-	}
 	getRunUATScript(): string {
 		const runUATScript = path.join(
 			this.enginePath,
@@ -276,6 +253,145 @@ class WindowsEngine extends Engine {
 		)
 		return gitDependenciesBin
 	}
+	async parseEngineTargets(): Promise<string[]> {
+		const args = ['-Mode=QueryTargets']
+		await this.ubt(args, { quiet: true })
+		try {
+			const targetInfoJson = path.resolve(this.enginePath + '\\Engine\\Intermediate\\TargetInfo.json')
+			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const targets = Targets.map((target: TargetInfo) => target.Name)
+			return targets
+		} catch (e) {
+			console.log(e)
+			return []
+		}
+	}
+}
+
+class MacosEngine extends Engine {
+	getPlatformName(): EnginePlatform {
+		return EnginePlatform.Windows
+	}
+	getBuildScript(): string {
+		const buildScript = path.join(
+			this.enginePath,
+			'Engine',
+			'Build',
+			'BatchFiles',
+			'Mac',
+			'Build.sh',
+		)
+		return buildScript
+	}
+	getRunUATScript(): string {
+		const runUATScript = path.join(
+			this.enginePath,
+			'Engine',
+			'Build',
+			'BatchFiles',
+			'RunUAT.sh',
+		)
+		return runUATScript
+	}
+	getGenerateScript(): string {
+		const generateScript = path.join(
+			this.enginePath,
+			'Engine',
+			'Build',
+			'BatchFiles',
+			'Mac',
+			'GenerateProjectFiles.sh',
+		)
+		return generateScript
+	}
+	getGitDependencesBin(): string {
+		const gitDependenciesBin = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'DotNET',
+			'GitDependencies',
+			'osx-x64',
+			'GitDependencies',
+		)
+		return gitDependenciesBin
+	}
+	async parseEngineTargets(): Promise<string[]> {
+		const args = ['-Mode=QueryTargets']
+		await this.ubt(args, { quiet: true })
+		try {
+			const targetInfoJson = path.resolve(this.enginePath + '/Engine/Intermediate/TargetInfo.json')
+			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const targets = Targets.map((target: TargetInfo) => target.Name)
+			return targets
+		} catch (e) {
+			console.log(e)
+			return []
+		}
+	}
+}
+
+class LinuxEngine extends Engine {
+	getPlatformName(): EnginePlatform {
+		return EnginePlatform.Windows
+	}
+	getBuildScript(): string {
+		const buildScript = path.join(
+			this.enginePath,
+			'Engine',
+			'Build',
+			'BatchFiles',
+			'Linux',
+			'Build.sh',
+		)
+		return buildScript
+	}
+	getRunUATScript(): string {
+		const runUATScript = path.join(
+			this.enginePath,
+			'Engine',
+			'Build',
+			'BatchFiles',
+			'RunUAT.sh',
+		)
+		return runUATScript
+	}
+	getGenerateScript(): string {
+		const generateScript = path.join(
+			this.enginePath,
+			'Engine',
+			'Build',
+			'BatchFiles',
+			'Linux',
+			'GenerateProjectFiles.sh',
+		)
+		return generateScript
+	}
+	getGitDependencesBin(): string {
+		const gitDependenciesBin = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'DotNET',
+			'GitDependencies',
+			'linux-x64',
+			'GitDependencies',
+		)
+		return gitDependenciesBin
+	}
+	async parseEngineTargets(): Promise<string[]> {
+		const args = ['-Mode=QueryTargets']
+		await this.ubt(args, { quiet: true })
+		try {
+			const targetInfoJson = path.resolve(this.enginePath + '/Engine/Intermediate/TargetInfo.json')
+			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const targets = Targets.map((target: TargetInfo) => target.Name)
+			return targets
+		} catch (e) {
+			console.log(e)
+			return []
+		}
+	}
 }
 
 // Factory function to create the appropriate Engine instance
@@ -284,9 +400,9 @@ export function createEngine(enginePath: string): Engine {
 		case 'windows':
 			return new WindowsEngine(enginePath)
 		case 'darwin':
-			return new WindowsEngine(enginePath)
+			return new MacosEngine(enginePath)
 		case 'linux':
-			return new WindowsEngine(enginePath)
+			return new LinuxEngine(enginePath)
 		default:
 			throw new Error(`Unsupported platform: ${Deno.build.os}`)
 	}
