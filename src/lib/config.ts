@@ -1,4 +1,5 @@
 import { deepmerge, dotenv, path, ulid, ValidationError } from '/deps.ts'
+import { parse } from "https://deno.land/std@0.221.0/jsonc/parse.ts";
 import { CliOptions, RunrealConfig } from '/lib/types.ts'
 import { execSync } from '/lib/utils.ts'
 import { z } from 'https://deno.land/x/zod/mod.ts'
@@ -123,7 +124,7 @@ class Config {
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
-			return JSON.parse(data) as RunrealConfig
+			return parse(data) as RunrealConfig
 		} catch (e) { /* pass */ }
 		return null
 	}
