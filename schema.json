@@ -1,6 +1,10 @@
 {
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Runreal JSON-Schema spec version"
+    },
     "engine": {
       "type": "object",
       "properties": {

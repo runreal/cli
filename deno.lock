@@ -117,6 +117,7 @@
     "https://deno.land/std@0.204.0/io/slice_long_to_bytes.ts": "bb8f82ac58779e72b0b012735014a89348594645a2d4838a95b89b66ddd08200",
     "https://deno.land/std@0.204.0/io/string_reader.ts": "fa67c001c2753a699a9bda4eb29abfa7c14a7ade09d31d601ad0bb09f1b869f8",
     "https://deno.land/std@0.204.0/io/string_writer.ts": "fd7dafd8e788aada5b4df92367a3f5fc7d0ce2daae6363ca8e317c4d1c40d8be",
+    "https://deno.land/std@0.204.0/jsonc/parse.ts": "c1096e2b7ffb4996d7ed841dfdb29a4fccc78edcc55299beaa20d6fe5facf7b6",
     "https://deno.land/std@0.204.0/path/_common/assert_path.ts": "061e4d093d4ba5aebceb2c4da3318bfe3289e868570e9d3a8e327d91c2958946",
     "https://deno.land/std@0.204.0/path/_common/basename.ts": "0d978ff818f339cd3b1d09dc914881f4d15617432ae519c1b8fdc09ff8d3789a",
     "https://deno.land/std@0.204.0/path/_common/common.ts": "9e4233b2eeb50f8b2ae10ecc2108f58583aea6fd3e8907827020282dc2b76143",
