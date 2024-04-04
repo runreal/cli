@@ -1,34 +1,9 @@
 import { deepmerge, dotenv, path, ulid, ValidationError } from '/deps.ts'
-import { parse } from "https://deno.land/std@0.221.0/jsonc/parse.ts";
+import { parse } from 'https://deno.land/std@0.221.0/jsonc/parse.ts'
 import { CliOptions, RunrealConfig } from '/lib/types.ts'
 import { execSync } from '/lib/utils.ts'
+import { ConfigSchema } from '/lib/schema.ts'
 import { z } from 'https://deno.land/x/zod/mod.ts'
-
-const ConfigSchema = z.object({
-	engine: z.object({
-		path: z.string(),
-		cachePath: z.string().optional(),
-	}),
-	project: z.object({
-		name: z.string().optional(),
-		path: z.string(),
-	}),
-	build: z.object({
-		path: z.string(),
-		id: z.string().optional(),
-		branch: z.string().optional(),
-		branchSafe: z.string().optional(),
-		commit: z.string().optional(),
-		commitShort: z.string().optional(),
-	}),
-	buildkite: z.object({
-		branch: z.string(),
-		checkout: z.string(),
-		buildNumber: z.string(),
-		buildCheckoutPath: z.string(),
-		buildPipelineSlug: z.string(),
-	}),
-})
 
 class Config {
 	private config: Partial<RunrealConfig> = {
@@ -123,8 +98,9 @@ class Config {
 
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
-			const data = await Deno.readTextFile(path.resolve(configPath))
-			return parse(data) as RunrealConfig
+			const data = await Deno.readTextFile(path.resolve(configPath)) as string
+			const parsed = parse(data) as unknown
+			return parsed as RunrealConfig
 		} catch (e) { /* pass */ }
 		return null
 	}
@@ -203,10 +179,10 @@ class Config {
 	private validateConfig() {
 		this.config = this.resolvePaths(this.config)
 		try {
-			ConfigSchema.parse(this.config)
+			this.config = ConfigSchema.parse(this.config)
 
 			this.populateGitData()
-			this.config.build.id = this.determineBuildId()
+			this.config.build!.id = this.determineBuildId()
 		} catch (e) {
 			if (e instanceof z.ZodError) {
 				const errors = e.errors.map((err) => {

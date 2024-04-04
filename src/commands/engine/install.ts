@@ -76,11 +76,11 @@ export const install = new Command()
 			source,
 			destination,
 			branch,
-			useMirror: cfg.git.mirrors,
-			mirrorPath: cfg.git.mirrorsPath,
+			useMirror: cfg.git?.mirrors || false,
+			mirrorPath: cfg.git?.mirrorsPath,
 			dryRun,
 		})
 		if (setup) {
-			await runEngineSetup({ enginePath: clonedPath, gitDependsCache: cfg.git.dependenciesCachePath, dryRun })
+			await runEngineSetup({ enginePath: clonedPath, gitDependsCache: cfg.git?.dependenciesCachePath, dryRun })
 		}
 	})

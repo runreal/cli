@@ -1,3 +1,4 @@
+import { z } from 'https://deno.land/x/zod/mod.ts'
 import { GlobalOptions } from '/index.ts'
 import { DebugOptions } from '../commands/debug.ts'
 
@@ -6,6 +7,7 @@ import { RestoreOptions } from '/commands/engine/restore.ts'
 import { SetupOptions } from '/commands/engine/setup.ts'
 import { InstallOptions } from '/commands/engine/install.ts'
 import { UpdateOptions } from '/commands/engine/update.ts'
+import { ConfigSchema } from '/lib/schema.ts'
 
 export type CliOptions = Partial<
 	& GlobalOptions
@@ -52,13 +54,7 @@ export interface BuildkiteMetadata {
 	buildPipelineSlug: string
 }
 
-export interface RunrealConfig {
-	engine: EngineConfig
-	project: ProjectConfig
-	git: GitConfig
-	build: BuildConfig
-	buildkite: BuildkiteMetadata
-}
+export type RunrealConfig = z.infer<typeof ConfigSchema>
 
 export interface UeDepsManifestData {
 	Name: string
