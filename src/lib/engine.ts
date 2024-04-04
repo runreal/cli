@@ -1,5 +1,4 @@
-import { globber } from 'https://deno.land/x/globber@0.1.0/mod.ts'
-import { path } from '/deps.ts'
+import { globber, path } from '/deps.ts'
 import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
 import { config } from '/lib/config.ts'
 

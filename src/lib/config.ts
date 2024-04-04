@@ -1,9 +1,7 @@
-import { deepmerge, dotenv, path, ulid, ValidationError } from '/deps.ts'
-import { parse } from 'https://deno.land/std@0.221.0/jsonc/parse.ts'
+import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '/deps.ts'
 import { CliOptions, RunrealConfig } from '/lib/types.ts'
 import { execSync } from '/lib/utils.ts'
 import { ConfigSchema } from '/lib/schema.ts'
-import { z } from 'https://deno.land/x/zod/mod.ts'
 
 class Config {
 	private config: Partial<RunrealConfig> = {
