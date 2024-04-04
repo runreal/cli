@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/runreal/cli/compare/v1.0.0...v1.1.0) (2024-04-04)
+
+
+### Features
+
+* add json-schema generation ([#5](https://github.com/runreal/cli/issues/5)) ([33f8838](https://github.com/runreal/cli/commit/33f8838f32a306915b6155f252c8b3f576d640f0))
+* add zod schema + linux/macos engine support ([7101171](https://github.com/runreal/cli/commit/71011717a791ba2d7d67d6adb9ac01e500416b14))
+
 ## 1.0.0 (2024-03-16)
 
 
