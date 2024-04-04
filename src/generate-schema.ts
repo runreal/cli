@@ -1,4 +1,4 @@
-import { zodToJsonSchema } from 'npm:zod-to-json-schema'
+import { zodToJsonSchema } from '/deps.ts'
 
 import { ConfigSchema } from '/lib/schema.ts'
 

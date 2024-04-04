@@ -1,6 +1,6 @@
-import { z } from 'https://deno.land/x/zod/mod.ts'
-
+import { z } from '/deps.ts'
 export const ConfigSchema = z.object({
+	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),
 	engine: z.object({
 		path: z.string().describe('Path to the engine folder'),
 		cachePath: z
