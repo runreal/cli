@@ -8,7 +8,7 @@ export type ExecOptions = typeof exec extends Command<any, any, infer Options, a
 	: never
 
 // Object containing the allowed substitutions
-const getSubstitutions = (cfg: RunrealConfig) => ({
+const getSubstitutions = (cfg: RunrealConfig): Record<string, string | undefined> => ({
 	'engine.path': cfg.engine.path,
 	'project.path': cfg.project.path,
 	'project.name': cfg.project.name,
@@ -22,12 +22,12 @@ const getSubstitutions = (cfg: RunrealConfig) => ({
 // This helper function will take a command string with placeholders and a substitutions object
 // It will replace all placeholders in the command with their corresponding values
 // If the key is not found in substitutions, keep the original placeholder
-function interpolateCommand(input: string[], substitutions: Record<string, string>) {
+function interpolateCommand(input: string[], substitutions: Record<string, string | undefined>) {
 	// This regular expression matches all occurrences of ${placeholder}
 	const placeholderRegex = /\$\{([^}]+)\}/g
 	return input.map((arg) =>
-		arg.replace(placeholderRegex, (_, key) => {
-			return key in substitutions ? substitutions[key] : _
+		arg.replace(placeholderRegex, (_, key: string) => {
+			return key in substitutions ? substitutions[key] || key : _
 		})
 	)
 }
@@ -82,7 +82,7 @@ export const exec = new Command<GlobalOptions>()
 			throw new ValidationError(`Workflow ${workflow} not found`)
 		}
 
-		const steps = []
+		const steps: { command: string; args: string[] }[] = []
 		for await (const step of run.steps) {
 			const command = interpolateCommand([step.command], getSubstitutions(cfg))[0]
 			const args = interpolateCommand(step.args || [], getSubstitutions(cfg))

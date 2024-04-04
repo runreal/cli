@@ -1,5 +1,7 @@
+import { globber } from 'https://deno.land/x/globber@0.1.0/mod.ts'
 import { path } from '/deps.ts'
 import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
+import { config } from '/lib/config.ts'
 
 interface EngineVersionData {
 	MajorVersion: number
@@ -177,16 +179,29 @@ export abstract class Engine {
 		configuration = EngineConfiguration.Development,
 		platform = this.getPlatformName(),
 		extraArgs = [],
+		dryRun = false,
 	}: {
 		target: EngineTarget | string
 		configuration?: EngineConfiguration
 		platform?: EnginePlatform
 		extraArgs?: string[]
+		dryRun?: boolean
 	}) {
-		// TODO
 		const args = [target, configuration, platform, ...extraArgs]
 		console.log('[runClean]', args)
-		return await exec(cleanScript, args)
+		const binaryGlob = path.join(config.get().project.path, '**/Binaries')
+		const intermediateGlob = path.join(config.get().project.path, '**/Intermediate')
+		const iterator = globber({
+			include: [binaryGlob, intermediateGlob],
+		})
+		for await (const file of iterator) {
+			if (dryRun) {
+				console.log('Would delete:', file.relative)
+				continue
+			}
+			console.log('Deleting:', file.relative)
+			await Deno.remove(file.relative)
+		}
 	}
 
 	async runBuildGraph(buildGraphScript: string, args: string[] = []) {
