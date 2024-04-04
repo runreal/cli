@@ -2,11 +2,22 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "npm:ts-deepmerge": "npm:ts-deepmerge@6.2.0"
+      "npm:ts-deepmerge": "npm:ts-deepmerge@6.2.0",
+      "npm:zod-to-json-schema": "npm:zod-to-json-schema@3.22.5_zod@3.22.4"
     },
     "npm": {
       "ts-deepmerge@6.2.0": {
         "integrity": "sha512-2qxI/FZVDPbzh63GwWIZYE7daWKtwXZYuyc8YNq0iTmMUwn4mL0jRLsp6hfFlgbdRSR4x2ppe+E86FnvEpN7Nw==",
+        "dependencies": {}
+      },
+      "zod-to-json-schema@3.22.5_zod@3.22.4": {
+        "integrity": "sha512-+akaPo6a0zpVCCseDed504KBJUQpEW5QZw7RMneNmKw+fGaML1Z9tUNLnHHAC8x6dzVRO1eB2oEMyZRnuBZg7Q==",
+        "dependencies": {
+          "zod": "zod@3.22.4"
+        }
+      },
+      "zod@3.22.4": {
+        "integrity": "sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==",
         "dependencies": {}
       }
     }

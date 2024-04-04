@@ -1,0 +1,140 @@
+{
+  "type": "object",
+  "properties": {
+    "engine": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the engine folder"
+        },
+        "cachePath": {
+          "type": "string",
+          "description": "Path to the engine cache folder"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source repository"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to the project folder"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the build folder"
+        },
+        "id": {
+          "type": "string",
+          "description": "Build id"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Branch name"
+        },
+        "branchSafe": {
+          "type": "string",
+          "description": "Branch name safe for filenames"
+        },
+        "commit": {
+          "type": "string",
+          "description": "Commit hash"
+        },
+        "commitShort": {
+          "type": "string",
+          "description": "Short commit hash"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "buildkite": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": "string",
+          "description": "Buildkite branch name"
+        },
+        "checkout": {
+          "type": "string",
+          "description": "Buildkite commit hash"
+        },
+        "buildNumber": {
+          "type": "string",
+          "description": "Buildkite build number"
+        },
+        "buildCheckoutPath": {
+          "type": "string",
+          "description": "Buildkite build checkout path"
+        },
+        "buildPipelineSlug": {
+          "type": "string",
+          "description": "Buildkite pipeline slug"
+        }
+      },
+      "required": [
+        "branch",
+        "checkout",
+        "buildNumber",
+        "buildCheckoutPath",
+        "buildPipelineSlug"
+      ],
+      "additionalProperties": false
+    },
+    "git": {
+      "type": "object",
+      "properties": {
+        "dependenciesCachePath": {
+          "type": "string",
+          "description": "Path to git dependencies cache folder"
+        },
+        "mirrors": {
+          "type": "boolean",
+          "description": "Use git mirrors"
+        },
+        "mirrorsPath": {
+          "type": "string",
+          "description": "Path to git mirrors folder"
+        }
+      },
+      "required": [
+        "dependenciesCachePath",
+        "mirrors",
+        "mirrorsPath"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "engine",
+    "project",
+    "build",
+    "buildkite"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}
