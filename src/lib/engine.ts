@@ -174,24 +174,17 @@ export abstract class Engine {
 		}
 	}
 
-	async runClean({
-		target,
-		configuration = EngineConfiguration.Development,
-		platform = this.getPlatformName(),
-		extraArgs = [],
+	static async runClean({
 		dryRun = false,
 	}: {
-		target: EngineTarget | string
-		configuration?: EngineConfiguration
-		platform?: EnginePlatform
-		extraArgs?: string[]
 		dryRun?: boolean
 	}) {
-		const args = [target, configuration, platform, ...extraArgs]
-		console.log('[runClean]', args)
+		console.log('[runClean]', { dryRun })
 		const binaryGlob = path.join(config.get().project.path, '**/Binaries')
 		const intermediateGlob = path.join(config.get().project.path, '**/Intermediate')
+		const cwd = config.get().project?.path
 		const iterator = globber({
+			cwd,
 			include: [binaryGlob, intermediateGlob],
 		})
 		for await (const file of iterator) {

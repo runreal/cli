@@ -77,6 +77,6 @@ export const update = new Command<GlobalOptions>()
 		], { cwd: cfg.engine.path, dryRun })
 
 		if (setup) {
-			await runEngineSetup({ enginePath: cfg.engine.path, gitDependsCache: cfg.git.dependenciesCachePath, dryRun })
+			await runEngineSetup({ enginePath: cfg.engine.path, gitDependsCache: cfg.git?.dependenciesCachePath, dryRun })
 		}
 	})

@@ -12,6 +12,7 @@ import { buildgraph } from './commands/buildgraph/index.ts'
 import { workflow } from './commands/workflow/index.ts'
 import { config } from './lib/config.ts'
 import { logger, LogLevel } from './lib/logger.ts'
+import { clean } from './commands/clean.ts'
 
 export type GlobalOptions = typeof cmd extends
 	Command<void, void, void, [], infer Options extends Record<string, unknown>> ? Options
@@ -45,6 +46,7 @@ await cmd
 	.description('the Unreal Engine runner')
 	.command('init', init)
 	.command('debug', debug)
+	.command('clean', clean)
 	.command('build', build)
 	.command('engine', engine)
 	.command('uat', uat)

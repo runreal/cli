@@ -29,5 +29,5 @@ export const ConfigSchema = z.object({
 		dependenciesCachePath: z.string(),
 		mirrors: z.boolean(),
 		mirrorsPath: z.string(),
-	}),
+	}).optional(),
 })
