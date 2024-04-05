@@ -1,6 +1,6 @@
 import { Command, EnumType, ValidationError } from '/deps.ts'
 import { config } from '/lib/config.ts'
-import { getSubstitutions, render } from '/lib/template.ts'
+import { render } from '/lib/template.ts'
 import { cmd, GlobalOptions } from '/index.ts'
 import { CliOptions, RunrealConfig } from '/lib/types.ts'
 import { exec as execCmd, randomBuildkiteEmoji } from '/lib/utils.ts'
@@ -60,8 +60,8 @@ export const exec = new Command<GlobalOptions>()
 
 		const steps: { command: string; args: string[] }[] = []
 		for await (const step of run.steps) {
-			const command = render(step.command, getSubstitutions(cfg))[0]
-			const args = render(step.args, getSubstitutions(cfg))
+			const command = render(step.command, cfg)[0]
+			const args = render(step.args, cfg)
 			steps.push({ command, args })
 		}
 
