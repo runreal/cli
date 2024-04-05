@@ -35,9 +35,10 @@ export const ConfigSchema = z.object({
 		.object({
 			dependenciesCachePath: z
 				.string()
+				.optional()
 				.describe('Path to git dependencies cache folder'),
-			mirrors: z.boolean().describe('Use git mirrors'),
-			mirrorsPath: z.string().describe('Path to git mirrors folder'),
+			mirrors: z.boolean().optional().describe('Use git mirrors'),
+			mirrorsPath: z.string().optional().describe('Path to git mirrors folder'),
 		})
 		.optional(),
 })
