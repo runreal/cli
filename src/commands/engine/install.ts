@@ -2,6 +2,7 @@ import { Command, ValidationError } from '/deps.ts'
 import { cloneRepo, runEngineSetup } from '/lib/utils.ts'
 import { CliOptions } from '/lib/types.ts'
 import { config } from '/lib/config.ts'
+import { Source } from '/lib/source.ts'
 
 export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
 	: never
@@ -33,7 +34,7 @@ export const install = new Command()
 	.arguments('[source:string] [destination:file]')
 	.action(async (
 		options,
-		source,
+		engineSource,
 		destination,
 		...args
 	) => {
@@ -47,10 +48,10 @@ export const install = new Command()
 			// gitMirrorsPath,
 		} = options as InstallOptions
 		const cfg = config.get(options as CliOptions)
-		source = source || cfg.engine.source
+		engineSource = engineSource || cfg.engine.source
 		destination = destination || cfg.engine.path
 
-		if (!source) {
+		if (!engineSource) {
 			throw new ValidationError('missing source')
 		}
 		if (!destination) {
@@ -72,12 +73,11 @@ export const install = new Command()
 				}
 			}
 		}
-		const clonedPath = await cloneRepo({
-			source,
+		const source = Source(cfg.engine.path, cfg.engine.repoType)
+		const clonedPath = source.clone({
+			source: engineSource,
 			destination,
 			branch,
-			useMirror: cfg.git?.mirrors || false,
-			mirrorPath: cfg.git?.mirrorsPath,
 			dryRun,
 		})
 		if (setup) {
