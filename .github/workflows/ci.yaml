@@ -35,6 +35,9 @@ jobs:
           run: deno fmt --check
           continue-on-error: true
 
+        - name: Deno Test
+          run: deno test
+
         - name: Deno Info
           run: deno info src/index.ts
 
