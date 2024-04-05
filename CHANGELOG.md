@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/runreal/cli/compare/v1.1.0...v1.1.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* default required values for config.git ([#9](https://github.com/runreal/cli/issues/9)) ([2c1e080](https://github.com/runreal/cli/commit/2c1e0803d903831a3ccc99d084b103cab14a6ff5))
+
 ## [1.1.0](https://github.com/runreal/cli/compare/v1.0.0...v1.1.0) (2024-04-04)
 
 
