@@ -27,6 +27,7 @@ jobs:
           token: ${{ secrets.GH_RUNREAL_TOKEN }}
           pull-request-title-pattern: "chore${scope}: release${component} ${version}"
           release-type: simple
+          draft: true
           extra-files: |
             README.md
             src/version.ts
