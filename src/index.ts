@@ -1,5 +1,5 @@
 import { VERSION } from './version.ts'
-import { Command, EnumType, ulid } from '/deps.ts'
+import { Command, EnumType, ulid } from './deps.ts'
 
 import { debug } from './commands/debug.ts'
 import { build } from './commands/build.ts'

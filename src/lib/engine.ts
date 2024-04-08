@@ -1,6 +1,6 @@
-import { globber, path } from '/deps.ts'
+import { globber, path } from '../deps.ts'
 import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
-import { config } from '/lib/config.ts'
+import { config } from './config.ts'
 
 interface EngineVersionData {
 	MajorVersion: number

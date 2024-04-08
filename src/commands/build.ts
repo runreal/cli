@@ -1,10 +1,10 @@
-import { Command, EnumType, ValidationError } from '/deps.ts'
+import { Command, EnumType, ValidationError } from '../deps.ts'
 
-import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '/lib/engine.ts'
-import { findProjectFile, getProjectName } from '/lib/utils.ts'
-import { GlobalOptions } from '/index.ts'
-import { config } from '/lib/config.ts'
-import { CliOptions } from '/lib/types.ts'
+import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
+import { findProjectFile, getProjectName } from '../lib/utils.ts'
+import { GlobalOptions } from '../index.ts'
+import { config } from '../lib/config.ts'
+import { CliOptions } from '../lib/types.ts'
 
 const TargetError = (target: string, targets: string[]) => {
 	return new ValidationError(`Invalid Target: ${target}

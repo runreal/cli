@@ -1,5 +1,5 @@
-import { fmt } from '/deps.ts'
-import { createConfigDirSync, DefaultMap, getRandomInt } from '/lib/utils.ts'
+import { fmt } from '../deps.ts'
+import { createConfigDirSync, DefaultMap, getRandomInt } from './utils.ts'
 
 export enum LogLevel {
 	DEBUG = 'DEBUG',

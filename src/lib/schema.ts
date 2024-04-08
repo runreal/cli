@@ -1,4 +1,4 @@
-import { z } from '/deps.ts'
+import { z } from '../deps.ts'
 
 export const ConfigSchema = z.object({
 	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),

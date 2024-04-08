@@ -1,8 +1,8 @@
-import { Command, EnumType, ValidationError } from '/deps.ts'
-import { config } from '/lib/config.ts'
-import { cmd, GlobalOptions } from '/index.ts'
-import { CliOptions, RunrealConfig } from '/lib/types.ts'
-import { exec as execCmd, randomBuildkiteEmoji } from '/lib/utils.ts'
+import { Command, EnumType, ValidationError } from '../../deps.ts'
+import { config } from '../../lib/config.ts'
+import { cmd, GlobalOptions } from '../../index.ts'
+import { CliOptions, RunrealConfig } from '../../lib/types.ts'
+import { exec as execCmd, randomBuildkiteEmoji } from '../../lib/utils.ts'
 
 export type ExecOptions = typeof exec extends Command<any, any, infer Options, any, any> ? Options
 	: never
