@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/runreal/cli/compare/v1.1.1...v1.1.2) (2024-04-08)
+
+
+### Bug Fixes
+
+* add workflows to schema ([7429e12](https://github.com/runreal/cli/commit/7429e12d739f2c94fdfec550d97beb9fc79d5943))
+
 ## [1.1.1](https://github.com/runreal/cli/compare/v1.1.0...v1.1.1) (2024-04-05)
 
 
