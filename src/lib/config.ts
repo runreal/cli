@@ -1,7 +1,7 @@
-import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '/deps.ts'
-import { CliOptions, RunrealConfig } from '/lib/types.ts'
-import { execSync } from '/lib/utils.ts'
-import { ConfigSchema } from '/lib/schema.ts'
+import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
+import { CliOptions, RunrealConfig } from '../lib/types.ts'
+import { execSync } from '../lib/utils.ts'
+import { ConfigSchema } from '../lib/schema.ts'
 
 class Config {
 	private config: Partial<RunrealConfig> = {

@@ -1,13 +1,13 @@
-import { z } from '/deps.ts'
-import { GlobalOptions } from '/index.ts'
+import { z } from '../deps.ts'
+import { GlobalOptions } from '../index.ts'
 import { DebugOptions } from '../commands/debug.ts'
 
-import { CacheOptions } from '/commands/engine/cache.ts'
-import { RestoreOptions } from '/commands/engine/restore.ts'
-import { SetupOptions } from '/commands/engine/setup.ts'
-import { InstallOptions } from '/commands/engine/install.ts'
-import { UpdateOptions } from '/commands/engine/update.ts'
-import { ConfigSchema } from '/lib/schema.ts'
+import { CacheOptions } from '../commands/engine/cache.ts'
+import { RestoreOptions } from '../commands/engine/restore.ts'
+import { SetupOptions } from '../commands/engine/setup.ts'
+import { InstallOptions } from '../commands/engine/install.ts'
+import { UpdateOptions } from '../commands/engine/update.ts'
+import { ConfigSchema } from './schema.ts'
 
 export type CliOptions = Partial<
 	& GlobalOptions

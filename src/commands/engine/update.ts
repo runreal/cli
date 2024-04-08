@@ -1,8 +1,8 @@
-import { Command, ValidationError } from '/deps.ts'
-import { GlobalOptions } from '/index.ts'
-import { deleteEngineHooks, exec, isGitRepo, runEngineSetup } from '/lib/utils.ts'
-import { config } from '/lib/config.ts'
-import { CliOptions } from '/lib/types.ts'
+import { Command, ValidationError } from '../../deps.ts'
+import { GlobalOptions } from '../../index.ts'
+import { deleteEngineHooks, exec, isGitRepo, runEngineSetup } from '../../lib/utils.ts'
+import { config } from '../../lib/config.ts'
+import { CliOptions } from '../../lib/types.ts'
 
 export type UpdateOptions = typeof update extends Command<any, any, infer Options, any, any> ? Options
 	: never

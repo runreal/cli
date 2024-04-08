@@ -1,6 +1,6 @@
-import { zodToJsonSchema } from '/deps.ts'
+import { zodToJsonSchema } from './deps.ts'
 
-import { ConfigSchema } from '/lib/schema.ts'
+import { ConfigSchema } from './lib/schema.ts'
 
 const schema = zodToJsonSchema(ConfigSchema, {
 	target: 'jsonSchema2019-09',

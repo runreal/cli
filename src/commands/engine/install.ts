@@ -1,7 +1,7 @@
-import { Command, ValidationError } from '/deps.ts'
-import { cloneRepo, runEngineSetup } from '/lib/utils.ts'
-import { CliOptions } from '/lib/types.ts'
-import { config } from '/lib/config.ts'
+import { Command, ValidationError } from '../../deps.ts'
+import { cloneRepo, runEngineSetup } from '../../lib/utils.ts'
+import { CliOptions } from '../../lib/types.ts'
+import { config } from '../../lib/config.ts'
 
 export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
 	: never

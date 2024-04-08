@@ -1,6 +1,6 @@
-import { mergeReadableStreams, path, xml2js } from '/deps.ts'
-import { createEngine, EngineConfiguration, EnginePlatform, EngineTarget } from '/lib/engine.ts'
-import { GitIgnoreFiles, UeDepsManifest } from '/lib/types.ts'
+import { mergeReadableStreams, path, xml2js } from '../deps.ts'
+import { createEngine, EngineConfiguration, EnginePlatform, EngineTarget } from './engine.ts'
+import { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 
 export async function exec(
 	cmd: string,

@@ -1,8 +1,8 @@
-import { Command, path } from '/deps.ts'
-import { GlobalOptions } from '/index.ts'
-import { exec, execSync, getGitDepsList, getGitIgnoreList } from '/lib/utils.ts'
-import { CliOptions } from '/lib/types.ts'
-import { config } from '/lib/config.ts'
+import { Command, path } from '../../deps.ts'
+import { GlobalOptions } from '../../index.ts'
+import { exec, execSync, getGitDepsList, getGitIgnoreList } from '../../lib/utils.ts'
+import { CliOptions } from '../../lib/types.ts'
+import { config } from '../../lib/config.ts'
 
 export type CacheOptions = typeof cache extends Command<any, any, infer Options, any, any> ? Options
 	: never
