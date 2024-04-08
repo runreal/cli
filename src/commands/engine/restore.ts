@@ -4,6 +4,7 @@ import { config } from '../../lib/config.ts'
 import { GlobalOptions } from '../../index.ts'
 import { CliOptions } from '../../lib/types.ts'
 import { exec, execSync } from '../../lib/utils.ts'
+import { Source } from '../../lib/source.ts'
 
 export type RestoreOptions = typeof restore extends Command<any, any, infer Options, any, any> ? Options
 	: never
@@ -18,19 +19,18 @@ export const restore = new Command<GlobalOptions>()
 	.action(
 		async (options, ..._args) => {
 			const { debug, cachePath } = options as RestoreOptions
-			const { engine: { path: enginePath } } = config.get(options as CliOptions)
+			const { engine: { path: enginePath, repoType } } = config.get(options as CliOptions)
 
-			const gitRevision = await execSync('git', ['rev-parse', 'HEAD'], {
-				cwd: enginePath,
-				quiet: true,
-			})
+			const source = Source(enginePath, repoType)
 
-			const manifestPath = path.join(cachePath, `${gitRevision.output}.txt`)
+			const ref = source.safeRef()
+
+			const manifestPath = path.join(cachePath, `${ref}.txt`)
 			const manifestFile = await Deno.stat(manifestPath)
-			const archivePath = path.join(cachePath, `${gitRevision.output}.7z`)
+			const archivePath = path.join(cachePath, `${ref}.7z`)
 			const archiveFile = await Deno.stat(archivePath)
 			if (!manifestFile.isFile || !archiveFile.isFile) {
-				throw new ValidationError(`Cache for ${gitRevision} does not exist`)
+				throw new ValidationError(`Cache for ${ref} does not exist`)
 			}
 
 			// extract the cache file

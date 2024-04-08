@@ -2,15 +2,18 @@ import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../dep
 import { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { execSync } from '../lib/utils.ts'
 import { ConfigSchema } from '../lib/schema.ts'
+import { Source } from './source.ts'
 
 class Config {
 	private config: Partial<RunrealConfig> = {
 		engine: {
 			path: '',
+			repoType: 'git',
 		},
 		project: {
 			name: '',
 			path: '',
+			repoType: 'git',
 		},
 		build: {
 			path: '',
@@ -27,6 +30,7 @@ class Config {
 			buildCheckoutPath: Deno.env.get('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
 			buildPipelineSlug: Deno.env.get('BUILDKITE_PIPELINE_SLUG') || '',
 		},
+		workflows: [],
 	}
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
@@ -47,7 +51,6 @@ class Config {
 		if (configPath) {
 			instance.mergeConfig(configPath)
 		}
-		const env = await instance.loadEnv()
 		return instance
 	}
 
@@ -69,17 +72,10 @@ class Config {
 	determineBuildId() {
 		const build = this.config.build
 		if (!build) return ulid()
-		if (build.branchSafe === '' || build.commitShort === '') return ulid()
-		const id = `${build.branchSafe}-${build.commitShort}`
-		return id
-	}
-
-	private async loadEnv() {
-		try {
-			const env = await dotenv.load({ export: true })
-			return env
-		} catch (e) { /* pass */ }
-		return {}
+		const source = Source(this.config.project?.path, this.config.project?.repoType)
+		const safeRef = source.safeRef()
+		if (!safeRef) return ulid()
+		return safeRef
 	}
 
 	private async searchForConfigFile(): Promise<string | null> {
@@ -147,11 +143,11 @@ class Config {
 		return config
 	}
 
-	private populateGitData() {
+	private populateBuild(): Partial<RunrealConfig['build']> {
 		const cwd = this.config.project?.path
-		if (!cwd) return
+		if (!cwd) return {}
 		try {
-			let branch
+			let branch: string
 			// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
 			if (Deno.env.get('BUILDKITE_BRANCH')) {
 				branch = this.config.buildkite?.branch || ''
@@ -162,16 +158,17 @@ class Config {
 			const commit = execSync('git', ['rev-parse', 'HEAD'], { cwd, quiet: false }).output.trim()
 			const commitShort = execSync('git', ['rev-parse', '--short', 'HEAD'], { quiet: false }).output.trim()
 
-			this.config.build = {
+			return {
 				...this.config.build,
-				id: this.config.build?.id || '',
 				path: this.config.build?.path || '',
 				branch,
 				branchSafe,
 				commit,
 				commitShort,
 			}
-		} catch (e) { /* pass */ }
+		} catch (e) {
+			return {}
+		}
 	}
 
 	private validateConfig() {
@@ -179,7 +176,7 @@ class Config {
 		try {
 			this.config = ConfigSchema.parse(this.config)
 
-			this.populateGitData()
+			this.config.build = this.populateBuild()
 			this.config.build!.id = this.determineBuildId()
 		} catch (e) {
 			if (e instanceof z.ZodError) {

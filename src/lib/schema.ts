@@ -9,10 +9,12 @@ export const ConfigSchema = z.object({
 			.optional()
 			.describe('Path to the engine cache folder'),
 		source: z.string().optional().describe('Source repository'),
+		repoType: z.string().describe('git or perforce'),
 	}),
 	project: z.object({
 		name: z.string().optional().describe('Project name'),
 		path: z.string().describe('Path to the project folder'),
+		repoType: z.string().describe('git or perforce'),
 	}),
 	build: z.object({
 		path: z.string().describe('Path to the build folder'),
@@ -49,9 +51,9 @@ export const ConfigSchema = z.object({
 				z.object({
 					command: z.string().describe('Command to execute'),
 					args: z.array(z.string()).optional().describe('Command arguments'),
-				})
+				}),
 			),
 		})
-		.optional()
+			.optional(),
 	),
 })
