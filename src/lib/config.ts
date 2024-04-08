@@ -4,6 +4,8 @@ import { execSync } from '../lib/utils.ts'
 import { ConfigSchema } from '../lib/schema.ts'
 import { Source } from './source.ts'
 
+const env = (key: string) => Deno.env.get(key) || ''
+
 class Config {
 	private config: Partial<RunrealConfig> = {
 		engine: {
@@ -24,11 +26,11 @@ class Config {
 			commitShort: '',
 		},
 		buildkite: {
-			branch: Deno.env.get('BUILDKITE_BRANCH') || '',
-			checkout: Deno.env.get('BUILDKITE_COMMIT') || '',
-			buildNumber: Deno.env.get('BUILDKITE_BUILD_NUMBER') || '0',
-			buildCheckoutPath: Deno.env.get('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
-			buildPipelineSlug: Deno.env.get('BUILDKITE_PIPELINE_SLUG') || '',
+			branch: env('BUILDKITE_BRANCH') || '',
+			checkout: env('BUILDKITE_COMMIT') || '',
+			buildNumber: env('BUILDKITE_BUILD_NUMBER') || '0',
+			buildCheckoutPath: env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
+			buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
 		},
 		workflows: [],
 	}
@@ -38,6 +40,7 @@ class Config {
 		'cachePath': 'engine.cachePath',
 		'projectPath': 'project.path',
 		'buildPath': 'build.path',
+		'buildId': 'build.id',
 		'gitDependenciesCachePath': 'git.dependenciesCachePath',
 		'gitMirrors': 'git.mirrors',
 		'gitMirrorsPath': 'git.mirrorsPath',
@@ -49,8 +52,9 @@ class Config {
 		const instance = new Config()
 		const configPath = await instance.searchForConfigFile()
 		if (configPath) {
-			instance.mergeConfig(configPath)
+			await instance.mergeConfig(configPath)
 		}
+		dotenv.loadSync({ export: true })
 		return instance
 	}
 
@@ -72,6 +76,8 @@ class Config {
 	determineBuildId() {
 		const build = this.config.build
 		if (!build) return ulid()
+		if (!this.config.project?.path) return ulid()
+		if (!this.config.project?.repoType) return ulid()
 		const source = Source(this.config.project?.path, this.config.project?.repoType)
 		const safeRef = source.safeRef()
 		if (!safeRef) return ulid()
@@ -143,9 +149,9 @@ class Config {
 		return config
 	}
 
-	private populateBuild(): Partial<RunrealConfig['build']> {
+	private populateBuild(): RunrealConfig['build'] | null {
 		const cwd = this.config.project?.path
-		if (!cwd) return {}
+		if (!cwd) return null
 		try {
 			let branch: string
 			// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
@@ -167,7 +173,7 @@ class Config {
 				commitShort,
 			}
 		} catch (e) {
-			return {}
+			return null
 		}
 	}
 
@@ -176,8 +182,11 @@ class Config {
 		try {
 			this.config = ConfigSchema.parse(this.config)
 
-			this.config.build = this.populateBuild()
-			this.config.build!.id = this.determineBuildId()
+			const bd = this.populateBuild()
+			if (bd) this.config.build = bd
+			if (!this.config.build?.id) {
+				this.config.build!.id = this.determineBuildId()
+			}
 		} catch (e) {
 			if (e instanceof z.ZodError) {
 				const errors = e.errors.map((err) => {

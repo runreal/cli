@@ -38,6 +38,8 @@ export const cmd = new Command()
 	.globalEnv('RUNREAL_PROJECT_PATH=<projectPath:string>', 'Overide path to project folder', { prefix: 'RUNREAL_' })
 	.globalOption('--project-path <projectPath:string>', 'Path to project folder')
 	.globalEnv('RUNREAL_BUILD_PATH=<buildPath:string>', 'Overide path to build output folder', { prefix: 'RUNREAL_' })
+	.globalOption('--build-id <buildId:string>', 'Overide build ID')
+	.globalEnv('RUNREAL_BUILD_ID=<buildId:string>', 'Overide build ID', { prefix: 'RUNREAL_' })
 	.globalOption('--build-path <buildPath:string>', 'Path to save build outputs')
 
 await cmd
