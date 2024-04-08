@@ -1,4 +1,5 @@
 import { z } from '/deps.ts'
+
 export const ConfigSchema = z.object({
 	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),
 	engine: z.object({
@@ -41,4 +42,16 @@ export const ConfigSchema = z.object({
 			mirrorsPath: z.string().optional().describe('Path to git mirrors folder'),
 		})
 		.optional(),
+	workflows: z.array(
+		z.object({
+			name: z.string().describe('Workflow name'),
+			steps: z.array(
+				z.object({
+					command: z.string().describe('Command to execute'),
+					args: z.array(z.string()).optional().describe('Command arguments'),
+				})
+			),
+		})
+		.optional()
+	),
 })
