@@ -1,5 +1,5 @@
-import { render } from '/lib/template.ts'
-import { assertEquals } from 'std/assert/mod.ts'
+import { assertEquals } from "https://deno.land/std/assert/mod.ts";
+import { render } from '../lib/template.ts'
 
 Deno.test('template test', () => {
 	const tmpl = '{"name": "${project.name}", "engine": "${engine.path}", "project": "${project.name}"}'
