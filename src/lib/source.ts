@@ -63,9 +63,11 @@ export class Perforce extends Base {
 
 export class Git extends Base {
 	executable: string = 'git'
+	private branch(): string {
+		return execSync(this.executable, ['branch', '--show-current'], { cwd: this.cwd, quiet: false }).output.trim()
+	}
 	ref(): string {
-		const branch = execSync(this.executable, ['branch', '--show-current'], { cwd: this.cwd, quiet: false }).output
-			.trim()
+		const branch = this.branch()
 		const commit = execSync(this.executable, ['rev-parse', 'HEAD'], { cwd: this.cwd, quiet: false }).output.trim()
 		return `${branch}/${commit}`
 	}
@@ -79,8 +81,8 @@ export class Git extends Base {
 	postClone(): void {
 	}
 	sync(): void {
+		execSync(this.executable, ['checkout', this.branch()], { cwd: this.cwd, quiet: false })
 		execSync(this.executable, ['fetch'], { cwd: this.cwd, quiet: false })
-		execSync(this.executable, ['checkout', this.ref()], { cwd: this.cwd, quiet: false })
 	}
 	clean(): void {
 		execSync(this.executable, ['clean', '-fd'], { cwd: this.cwd, quiet: false })
