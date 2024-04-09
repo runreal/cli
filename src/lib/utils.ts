@@ -242,7 +242,7 @@ export const runEngineSetup = async (
 		dryRun?: boolean
 	},
 ) => {
-	const engine = await createEngine(enginePath)
+	const engine = createEngine(enginePath)
 	const threads = 16
 	const args = [`--threads=${threads.toString()}`]
 	if (gitDependsCache) {
@@ -252,6 +252,8 @@ export const runEngineSetup = async (
 		args.push(`--exclude=${exclude}`)
 	})
 	const deps = await exec(engine.getGitDependencesBin(), args, { cwd: enginePath, dryRun })
+
+  await exec(engine.getGenerateScript(), [])
 }
 
 export const deleteEngineHooks = async (enginePath: string) => {
@@ -259,7 +261,7 @@ export const deleteEngineHooks = async (enginePath: string) => {
 	await Deno.remove(hooksPath, { recursive: true }).catch(() => {})
 }
 
-export const getGitDepsList = async (enginePath: string) => {
+export const getDepsList = async (enginePath: string) => {
 	const ueDependenciesManifest = path.join(enginePath, '.uedependencies')
 	const data = await Deno.readTextFile(ueDependenciesManifest)
 	const { WorkingManifest: { Files: { File } } } = xml2js(data, { compact: true }) as unknown as UeDepsManifest

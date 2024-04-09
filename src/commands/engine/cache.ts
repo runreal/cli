@@ -1,8 +1,9 @@
 import { Command, path } from '../../deps.ts'
 import { GlobalOptions } from '../../index.ts'
-import { exec, execSync, getGitDepsList, getGitIgnoreList } from '../../lib/utils.ts'
+import { exec, getDepsList, getGitIgnoreList } from '../../lib/utils.ts'
 import { CliOptions } from '../../lib/types.ts'
 import { config } from '../../lib/config.ts'
+import { Source } from '../../lib/source.ts'
 
 export type CacheOptions = typeof cache extends Command<any, any, infer Options, any, any> ? Options
 	: never
@@ -19,15 +20,18 @@ export const cache = new Command<GlobalOptions>()
 	.action(
 		async (options, ..._args) => {
 			const { debug, cachePath, ignorePdb, zstd } = options as CacheOptions
-			const { engine: { path: enginePath } } = config.get(options as CliOptions)
+			const { engine: { path: enginePath, repoType } } = config.get(options as CliOptions)
+
+			const source = Source(enginePath, repoType)
 
 			// initialize the cache dir
 			await Deno.mkdir(cachePath, { recursive: true })
 
 			// get the unreal .uedependencies files (ie GitDependencies.exe download)
-			const uedepsFiles = new Set((await getGitDepsList(enginePath)).map(({ name }) => name))
+			const uedepsFiles = new Set((await getDepsList(enginePath)).map(({ name }) => name))
 
 			// get the currently ignored files in the working copy (Engine/)
+			// TODO(source): migrate to Source
 			const { files: ignoredFiles } = getGitIgnoreList(enginePath, [
 				'Engine/Binaries',
 				'Engine/Build',
@@ -41,26 +45,23 @@ export const cache = new Command<GlobalOptions>()
 				.filter((file) => !uedepsFiles.has(file))
 				.filter((file) => (ignorePdb ? !file.endsWith('.pdb') : true))
 
-			const gitRevision = await execSync('git', ['rev-parse', 'HEAD'], {
-				cwd: enginePath,
-				quiet: true,
-			})
+			const gitRevision = source.ref()
 
 			if (debug) {
 				await Promise.all([
 					Deno.writeFile(
-						path.join(cachePath, `${gitRevision.output}-ignored.txt`),
+						path.join(cachePath, `${gitRevision}-ignored.txt`),
 						new TextEncoder().encode(ignoredFiles.join('\n')),
 					),
 					Deno.writeFile(
-						path.join(cachePath, `${gitRevision.output}-uedeps.txt`),
+						path.join(cachePath, `${gitRevision}-uedeps.txt`),
 						new TextEncoder().encode(Array.from(uedepsFiles).join('\n')),
 					),
 				])
 			}
 
-			const manifestFile = path.join(cachePath, `${gitRevision.output}.txt`)
-			const archiveFile = path.join(cachePath, `${gitRevision.output}.7z`)
+			const manifestFile = path.join(cachePath, `${gitRevision}.txt`)
+			const archiveFile = path.join(cachePath, `${gitRevision}.7z`)
 
 			// write the cache files to a manifest file so we can pass to 7z and use for restoring
 			await Deno.writeFile(
