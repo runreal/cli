@@ -2,7 +2,7 @@ common:
   - docker_deno: &deno_latest
       - docker#v5.10.0:
           image: denoland/deno:latest
-  - docker_deno: &deno_1.42.1
+  - docker_deno: &deno_142
       - docker#v5.10.0:
           image: denoland/deno:1.42.1
 
@@ -15,7 +15,7 @@ steps:
         matrix:
           plugins:
             - *deno_latest
-            - *deno_1.42.1
+            - *deno_142
         plugins: "{{matrix.plugins}}"
 
   - group: ":godmode: test projects"
