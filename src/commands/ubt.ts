@@ -1,9 +1,8 @@
 import { Command } from '../deps.ts'
 import { createEngine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
-import { GlobalOptions } from '../index.ts'
 import { findProjectFile } from '../lib/utils.ts'
 import { config } from '../lib/config.ts'
-import { CliOptions } from '../lib/types.ts'
+import { CliOptions, GlobalOptions } from '../lib/types.ts'
 
 export type UbtOptions = typeof ubt extends Command<any, any, infer Options, any, any> ? Options
 	: never

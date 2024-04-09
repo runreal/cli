@@ -1,5 +1,5 @@
-import { z } from '../deps.ts'
-import { GlobalOptions } from '../index.ts'
+import { Command, z } from '../deps.ts'
+import { cmd } from '../cmd.ts'
 import { DebugOptions } from '../commands/debug.ts'
 
 import { CacheOptions } from '../commands/engine/cache.ts'
@@ -8,6 +8,10 @@ import { SetupOptions } from '../commands/engine/setup.ts'
 import { InstallOptions } from '../commands/engine/install.ts'
 import { UpdateOptions } from '../commands/engine/update.ts'
 import { ConfigSchema } from './schema.ts'
+
+export type GlobalOptions = typeof cmd extends
+	Command<void, void, void, [], infer Options extends Record<string, unknown>> ? Options
+	: never
 
 export type CliOptions = Partial<
 	& GlobalOptions

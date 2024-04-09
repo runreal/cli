@@ -1,6 +1,6 @@
 import { Command } from '../../deps.ts'
 
-import { GlobalOptions } from '../../index.ts'
+import { GlobalOptions } from '../../lib/types.ts'
 import { install } from './install.ts'
 import { update } from './update.ts'
 import { cache } from './cache.ts'
