@@ -1,10 +1,7 @@
 common:
-  - docker_deno: &deno_latest
+  - docker_deno: &deno
       - docker#v5.10.0:
-          image: denoland/deno:latest
-  - docker_deno: &deno_142
-      - docker#v5.10.0:
-          image: denoland/deno:1.42.1
+          image: "denoland/deno:{{matrix}}"
 
 steps:
   - group: ":deno: deno [latest]"
@@ -13,11 +10,10 @@ steps:
       - label: "deno lint"
         command: "deno lint"
         matrix:
-          plugins:
-            - *deno_latest
-            - *deno_142
+          - "latest"
+          - "1.42.1"
         plugins: 
-          - "{{matrix.plugins}}"
+          - *deno
 
   - group: ":godmode: test projects"
     key: "test-projects"
