@@ -1,7 +1,7 @@
 common:
   - deno_matrix: &deno_matrix
       matrix:
-        - "ubuntu"
+        # - "ubuntu"
         - "ubuntu-1.42.1"
       plugins:
         - docker#v5.10.0:
@@ -49,6 +49,13 @@ steps:
     steps:
       - trigger: "test-project-minimal"
         label: ":godmode: test project minimal"
+        build:
+          message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+          env: 
+            RUNREAL_FROM_SOURCE: true
+            RUNREAL_FROM_REF: $BUILDKITE_COMMIT
+      - trigger: "test-project-full"
+        label: ":goberserk: test project full"
         build:
           message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
           env: 
