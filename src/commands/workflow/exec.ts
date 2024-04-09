@@ -59,10 +59,10 @@ export const exec = new Command<GlobalOptions>()
 		}
 
 		const steps: { command: string; args: string[] }[] = []
-		for await (const step of run.steps) {
-			const command = render(step.command, cfg)[0]
-			const args = render(step.args, cfg)
-			steps.push({ command, args })
+		for await (const {command, args =[]} of run.steps) {
+			const outputCommand = render(command, cfg)
+			const outputArgs = args.map((arg: string) => render(arg, cfg))
+			steps.push({ command: outputCommand, args: outputArgs })
 		}
 
 		if (dryRun) {
