@@ -16,7 +16,8 @@ steps:
           plugins:
             - *deno_latest
             - *deno_142
-        plugins: "{{matrix.plugins}}"
+        plugins: 
+          - "{{matrix.plugins}}"
 
   - group: ":godmode: test projects"
     key: "test-projects"
