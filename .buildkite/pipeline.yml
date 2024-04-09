@@ -1,8 +1,8 @@
 common:
   - deno_matrix: &deno_matrix
       matrix:
-        - "latest"
-        - "1.42.1"
+        - "ubuntu"
+        - "ubuntu-1.42.1"
       plugins:
         - docker#v5.10.0:
             image: "denoland/deno:{{matrix}}"
@@ -20,9 +20,6 @@ steps:
         command: "deno fmt --check"
         soft_fail:
           - exit_status: 1
-        <<: *deno_matrix
-      - label: "deno test"
-        command: "deno test"
         <<: *deno_matrix
       - label: "deno test"
         command: "deno test"
