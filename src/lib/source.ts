@@ -20,7 +20,7 @@ abstract class Base {
 	abstract clean(): void
 
 	safeRef(): string {
-		return this.ref().replace(/\/\//g, '-')
+		return this.ref().replace(/\/\//g, '/').replace(/\//g, '-')
 	}
 }
 
@@ -33,7 +33,14 @@ export class Perforce extends Base {
 		}).output.trim()
 		const change = execSync(this.executable, ['-F', '%change%', 'changes', '-m1'], { cwd: this.cwd, quiet: false })
 			.output.trim().replace('Change ', '')
-		return `${stream}/${change}`
+		const parts: string[] = []
+		if (stream) {
+			parts.push(stream)
+		}
+		if (change) {
+			parts.push(change)
+		}
+		return parts.join('/')
 	}
 
 	clone({
@@ -69,7 +76,14 @@ export class Git extends Base {
 	ref(): string {
 		const branch = this.branch()
 		const commit = execSync(this.executable, ['rev-parse', 'HEAD'], { cwd: this.cwd, quiet: false }).output.trim()
-		return `${branch}/${commit}`
+		const parts: string[] = []
+		if (branch) {
+			parts.push(branch)
+		}
+		if (commit) {
+			parts.push(commit)
+		}
+		return parts.join('/')
 	}
 
 	clone(opts: CloneOpts): string {
