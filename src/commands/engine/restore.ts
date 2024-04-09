@@ -1,8 +1,7 @@
 import { Command, path, ValidationError } from '../../deps.ts'
 
 import { config } from '../../lib/config.ts'
-import { GlobalOptions } from '../../index.ts'
-import { CliOptions } from '../../lib/types.ts'
+import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { exec, execSync } from '../../lib/utils.ts'
 import { Source } from '../../lib/source.ts'
 

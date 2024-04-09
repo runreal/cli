@@ -1,7 +1,6 @@
 import { Command, path } from '../../deps.ts'
-import { GlobalOptions } from '../../index.ts'
 import { exec, getDepsList, getGitIgnoreList } from '../../lib/utils.ts'
-import { CliOptions } from '../../lib/types.ts'
+import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { config } from '../../lib/config.ts'
 import { Source } from '../../lib/source.ts'
 

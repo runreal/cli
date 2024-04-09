@@ -1,7 +1,6 @@
 import { Command } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
-import { GlobalOptions } from '../../index.ts'
-import { CliOptions } from '../../lib/types.ts'
+import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { createEngine } from '../../lib/engine.ts'
 import { logger } from '../../lib/logger.ts'
 
