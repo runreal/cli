@@ -1,7 +1,30 @@
-- trigger: "test-project-minimal"
-  label: ":godmode: test project minimal"
-  build:
-    message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-    env: 
-      RUNREAL_FROM_SOURCE: true
-      RUNREAL_FROM_REF: $BUILDKITE_COMMIT
+common:
+  - docker_deno: &deno_latest
+      - docker#v5.10.0:
+          image: denoland/deno:latest
+  - docker_deno: &deno_1.42.1
+      - docker#v5.10.0:
+          image: denoland/deno:1.42.1
+
+steps:
+  - group: ":deno: deno [latest]"
+    key: "deno-latest"
+    steps:
+      - label: "deno lint"
+        command: "deno lint"
+        matrix:
+          plugins:
+            - *deno_latest
+            - *deno_1.42.1
+        plugins: "{{matrix.plugins}}"
+
+  - group: ":godmode: test projects"
+    key: "test-projects"
+    steps:
+      - trigger: "test-project-minimal"
+        label: ":godmode: test project minimal"
+        build:
+          message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+          env: 
+            RUNREAL_FROM_SOURCE: true
+            RUNREAL_FROM_REF: $BUILDKITE_COMMIT
