@@ -3,7 +3,7 @@ import { config } from '../../lib/config.ts'
 import { cmd, GlobalOptions } from '../../index.ts'
 import { CliOptions } from '../../lib/types.ts'
 import { exec as execCmd, randomBuildkiteEmoji } from '../../lib/utils.ts'
-import { render } from '../../lib/template.ts'
+import { getSubstitutions, render } from '../../lib/template.ts'
 
 export type ExecOptions = typeof exec extends Command<any, any, infer Options, any, any> ? Options
 	: never
@@ -59,10 +59,10 @@ export const exec = new Command<GlobalOptions>()
 		}
 
 		const steps: { command: string; args: string[] }[] = []
-		for await (const {command, args =[]} of run.steps) {
-			const outputCommand = render(command, cfg)
-			const outputArgs = args.map((arg: string) => render(arg, cfg))
-			steps.push({ command: outputCommand, args: outputArgs })
+		for await (const step of run.steps) {
+			const command = render([step.command], cfg)[0]
+			const args = render(step.args || [], cfg)
+			steps.push({ command, args })
 		}
 
 		if (dryRun) {
