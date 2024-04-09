@@ -9,7 +9,7 @@ common:
 
 steps:
   - group: ":deno: deno test"
-    key: "deno test"
+    key: "deno-test"
     steps:
       - label: "deno lint"
         command: "deno lint"
