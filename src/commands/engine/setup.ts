@@ -1,7 +1,6 @@
 import { Command } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
-import { GlobalOptions } from '../../index.ts'
-import { CliOptions } from '../../lib/types.ts'
+import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { runEngineSetup } from '../../lib/utils.ts'
 
 export type SetupOptions = typeof setup extends Command<any, any, infer Options, any, any> ? Options
