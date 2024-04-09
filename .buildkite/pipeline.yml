@@ -22,7 +22,7 @@ steps:
           - exit_status: 1
         <<: *deno_matrix
       - label: "deno test"
-        command: "deno test"
+        command: "deno test --allow-all"
         <<: *deno_matrix
 
   - group: ":deno: deno compile"
