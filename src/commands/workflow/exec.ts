@@ -1,36 +1,12 @@
 import { Command, EnumType, ValidationError } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
 import { cmd, GlobalOptions } from '../../index.ts'
-import { CliOptions, RunrealConfig } from '../../lib/types.ts'
+import { CliOptions } from '../../lib/types.ts'
 import { exec as execCmd, randomBuildkiteEmoji } from '../../lib/utils.ts'
+import { render } from '../../lib/template.ts'
 
 export type ExecOptions = typeof exec extends Command<any, any, infer Options, any, any> ? Options
 	: never
-
-// Object containing the allowed substitutions
-const getSubstitutions = (cfg: RunrealConfig): Record<string, string | undefined> => ({
-	'engine.path': cfg.engine.path,
-	'project.path': cfg.project.path,
-	'project.name': cfg.project.name,
-	'build.id': cfg.build.id,
-	'build.path': cfg.build.path,
-	'build.branch': cfg.build.branchSafe,
-	'build.commit': cfg.build.commitShort,
-	'buildkite.buildNumber': cfg.buildkite.buildNumber,
-})
-
-// This helper function will take a command string with placeholders and a substitutions object
-// It will replace all placeholders in the command with their corresponding values
-// If the key is not found in substitutions, keep the original placeholder
-function interpolateCommand(input: string[], substitutions: Record<string, string | undefined>) {
-	// This regular expression matches all occurrences of ${placeholder}
-	const placeholderRegex = /\$\{([^}]+)\}/g
-	return input.map((arg) =>
-		arg.replace(placeholderRegex, (_, key: string) => {
-			return key in substitutions ? substitutions[key] || key : _
-		})
-	)
-}
 
 enum Mode {
 	Local = 'local',
@@ -84,8 +60,8 @@ export const exec = new Command<GlobalOptions>()
 
 		const steps: { command: string; args: string[] }[] = []
 		for await (const step of run.steps) {
-			const command = interpolateCommand([step.command], getSubstitutions(cfg))[0]
-			const args = interpolateCommand(step.args || [], getSubstitutions(cfg))
+			const command = render(step.command, cfg)[0]
+			const args = render(step.args, cfg)
 			steps.push({ command, args })
 		}
 
