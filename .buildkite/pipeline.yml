@@ -1,7 +1,63 @@
-- trigger: "test-project-minimal"
-  label: ":godmode: test project minimal"
-  build:
-    message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-    env: 
-      RUNREAL_FROM_SOURCE: true
-      RUNREAL_FROM_REF: $BUILDKITE_COMMIT
+common:
+  - deno_matrix: &deno_matrix
+      matrix:
+        # - "ubuntu"
+        - "ubuntu-1.42.1"
+      plugins:
+        - docker#v5.10.0:
+            image: "denoland/deno:{{matrix}}"
+
+steps:
+  - group: ":deno: deno test"
+    key: "deno-test"
+    steps:
+      - label: "deno lint"
+        command: "deno lint"
+        soft_fail:
+          - exit_status: 1
+        <<: *deno_matrix
+      - label: "deno format"
+        command: "deno fmt --check"
+        soft_fail:
+          - exit_status: 1
+        <<: *deno_matrix
+      - label: "deno test"
+        command: "deno test"
+        <<: *deno_matrix
+
+  - group: ":deno: deno compile"
+    key: "deno-compile"
+    steps:
+      - label: ":windows: compile windows"
+        command:
+          - "apt-get update && apt-get install -y unzip"
+          - "deno task compile-win"
+        <<: *deno_matrix
+      - label: ":macos: compile macos"
+        command:
+          - "apt-get update && apt-get install -y unzip"
+          - "deno task compile-macos"
+        <<: *deno_matrix
+      - label: ":linux: compile linux"
+        command:
+          - "apt-get update && apt-get install -y unzip"
+          - "deno task compile-linux"
+        <<: *deno_matrix
+
+  - group: ":godmode: test projects"
+    key: "test-projects"
+    steps:
+      - trigger: "test-project-minimal"
+        label: ":godmode: test project minimal"
+        build:
+          message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+          env: 
+            RUNREAL_FROM_SOURCE: true
+            RUNREAL_FROM_REF: $BUILDKITE_COMMIT
+      - trigger: "test-project-full"
+        label: ":goberserk: test project full"
+        build:
+          message: "test runreal ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+          env: 
+            RUNREAL_FROM_SOURCE: true
+            RUNREAL_FROM_REF: $BUILDKITE_COMMIT
