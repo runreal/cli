@@ -1,18 +1,14 @@
-import { assertEquals } from "https://deno.land/std/assert/mod.ts";
+import { assertEquals } from 'https://deno.land/std/assert/mod.ts'
 import { render } from '../lib/template.ts'
+import { RunrealConfig } from '../lib/types.ts'
 
-Deno.test('template test', () => {
-	const tmpl = '{"name": "${project.name}", "engine": "${engine.path}", "project": "${project.name}"}'
-	const cfg = { project: { name: 'Deno' }, engine: { path: 'V8' } }
+Deno.test('template tests', () => {
+	const tmpl =
+		'{"name": "${project.name}", "engine": "${engine.path}\\BuildGraph\\Build.xml", "project": "${project.path}"}'
+	const cfg = { project: { name: 'Deno' }, engine: { path: 'C:\\Program Files\\V8' } } as RunrealConfig
 
-	const result = render(tmpl, cfg)
-	assertEquals(result, '{"name": "Deno", "engine": "V8", "project": "Deno"}')
-})
-
-Deno.test('template test with default path placeholder when undefined ', () => {
-	const tmpl = '{"name": "${project.name}", "engine": "${engine.path}", "project": "${project.path}"}'
-	const cfg = { project: { name: 'Deno' }, engine: { path: 'V8' } }
-
-	const result = render(tmpl, cfg)
-	assertEquals(result, '{"name": "Deno", "engine": "V8", "project": "project.path"}')
+	const result = render([tmpl], cfg)
+	assertEquals(result, [
+		'{"name": "Deno", "engine": "C:\\Program Files\\V8\\BuildGraph\\Build.xml", "project": "project.path"}',
+	])
 })
