@@ -2,15 +2,20 @@ import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../dep
 import { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { execSync } from '../lib/utils.ts'
 import { ConfigSchema } from '../lib/schema.ts'
+import { Source } from './source.ts'
+
+const env = (key: string) => Deno.env.get(key) || ''
 
 class Config {
 	private config: Partial<RunrealConfig> = {
 		engine: {
 			path: '',
+			repoType: 'git',
 		},
 		project: {
 			name: '',
 			path: '',
+			repoType: 'git',
 		},
 		build: {
 			path: '',
@@ -21,12 +26,13 @@ class Config {
 			commitShort: '',
 		},
 		buildkite: {
-			branch: Deno.env.get('BUILDKITE_BRANCH') || '',
-			checkout: Deno.env.get('BUILDKITE_COMMIT') || '',
-			buildNumber: Deno.env.get('BUILDKITE_BUILD_NUMBER') || '0',
-			buildCheckoutPath: Deno.env.get('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
-			buildPipelineSlug: Deno.env.get('BUILDKITE_PIPELINE_SLUG') || '',
+			branch: env('BUILDKITE_BRANCH') || '',
+			checkout: env('BUILDKITE_COMMIT') || '',
+			buildNumber: env('BUILDKITE_BUILD_NUMBER') || '0',
+			buildCheckoutPath: env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
+			buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
 		},
+		workflows: [],
 	}
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
@@ -34,6 +40,7 @@ class Config {
 		'cachePath': 'engine.cachePath',
 		'projectPath': 'project.path',
 		'buildPath': 'build.path',
+		'buildId': 'build.id',
 		'gitDependenciesCachePath': 'git.dependenciesCachePath',
 		'gitMirrors': 'git.mirrors',
 		'gitMirrorsPath': 'git.mirrorsPath',
@@ -45,9 +52,9 @@ class Config {
 		const instance = new Config()
 		const configPath = await instance.searchForConfigFile()
 		if (configPath) {
-			instance.mergeConfig(configPath)
+			await instance.mergeConfig(configPath)
 		}
-		const env = await instance.loadEnv()
+		dotenv.loadSync({ export: true })
 		return instance
 	}
 
@@ -69,17 +76,12 @@ class Config {
 	determineBuildId() {
 		const build = this.config.build
 		if (!build) return ulid()
-		if (build.branchSafe === '' || build.commitShort === '') return ulid()
-		const id = `${build.branchSafe}-${build.commitShort}`
-		return id
-	}
-
-	private async loadEnv() {
-		try {
-			const env = await dotenv.load({ export: true })
-			return env
-		} catch (e) { /* pass */ }
-		return {}
+		if (!this.config.project?.path) return ulid()
+		if (!this.config.project?.repoType) return ulid()
+		const source = Source(this.config.project?.path, this.config.project?.repoType)
+		const safeRef = source.safeRef()
+		if (!safeRef) return ulid()
+		return safeRef
 	}
 
 	private async searchForConfigFile(): Promise<string | null> {
@@ -147,11 +149,11 @@ class Config {
 		return config
 	}
 
-	private populateGitData() {
+	private populateBuild(): RunrealConfig['build'] | null {
 		const cwd = this.config.project?.path
-		if (!cwd) return
+		if (!cwd) return null
 		try {
-			let branch
+			let branch: string
 			// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
 			if (Deno.env.get('BUILDKITE_BRANCH')) {
 				branch = this.config.buildkite?.branch || ''
@@ -162,16 +164,17 @@ class Config {
 			const commit = execSync('git', ['rev-parse', 'HEAD'], { cwd, quiet: false }).output.trim()
 			const commitShort = execSync('git', ['rev-parse', '--short', 'HEAD'], { quiet: false }).output.trim()
 
-			this.config.build = {
+			return {
 				...this.config.build,
-				id: this.config.build?.id || '',
 				path: this.config.build?.path || '',
 				branch,
 				branchSafe,
 				commit,
 				commitShort,
 			}
-		} catch (e) { /* pass */ }
+		} catch (e) {
+			return null
+		}
 	}
 
 	private validateConfig() {
@@ -179,8 +182,11 @@ class Config {
 		try {
 			this.config = ConfigSchema.parse(this.config)
 
-			this.populateGitData()
-			this.config.build!.id = this.determineBuildId()
+			const bd = this.populateBuild()
+			if (bd) this.config.build = bd
+			if (!this.config.build?.id) {
+				this.config.build!.id = this.determineBuildId()
+			}
 		} catch (e) {
 			if (e instanceof z.ZodError) {
 				const errors = e.errors.map((err) => {
