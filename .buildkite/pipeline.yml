@@ -29,13 +29,19 @@ steps:
     key: "deno-compile"
     steps:
       - label: ":windows: compile windows"
-        command: "deno task compile-win"
+        command:
+          - "apt-get install -y unzip"
+          - "deno task compile-win"
         <<: *deno_matrix
       - label: ":macos: compile macos"
-        command: "deno task compile-macos"
+        command:
+          - "apt-get install -y unzip"
+          - "deno task compile-macos"
         <<: *deno_matrix
       - label: ":linux: compile linux"
-        command: "deno task compile-linux"
+        command:
+          - "apt-get install -y unzip"
+          - "deno task compile-linux"
         <<: *deno_matrix
 
   - group: ":godmode: test projects"
