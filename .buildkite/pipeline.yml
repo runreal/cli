@@ -1,19 +1,45 @@
 common:
-  - docker_deno: &deno
-      - docker#v5.10.0:
-          image: "denoland/deno:{{matrix}}"
+  - deno_matrix: &deno_matrix
+      matrix:
+        - "latest"
+        - "1.42.1"
+      plugins:
+        - docker#v5.10.0:
+            image: "denoland/deno:{{matrix}}"
 
 steps:
-  - group: ":deno: deno [latest]"
-    key: "deno-latest"
+  - group: ":deno: deno test"
+    key: "deno test"
     steps:
       - label: "deno lint"
         command: "deno lint"
-        matrix:
-          - "latest"
-          - "1.42.1"
-        plugins: 
-          - *deno
+        soft_fail:
+          - exit_status: 1
+        <<: *deno_matrix
+      - label: "deno format"
+        command: "deno fmt --check"
+        soft_fail:
+          - exit_status: 1
+        <<: *deno_matrix
+      - label: "deno test"
+        command: "deno test"
+        <<: *deno_matrix
+      - label: "deno test"
+        command: "deno test"
+        <<: *deno_matrix
+
+  - group: ":deno: deno compile"
+    key: "deno-compile"
+    steps:
+      - label: ":windows: compile windows"
+        command: "deno task compile-win"
+        <<: *deno_matrix
+      - label: ":macos: compile macos"
+        command: "deno task compile-macos"
+        <<: *deno_matrix
+      - label: ":linux: compile linux"
+        command: "deno task compile-linux"
+        <<: *deno_matrix
 
   - group: ":godmode: test projects"
     key: "test-projects"
