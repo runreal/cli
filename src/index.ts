@@ -45,7 +45,7 @@ await cmd
 	.version(VERSION)
 	.description('the Unreal Engine runner')
 	.command('init', init)
-	.command('debug', debug)
+	// .command('debug', debug)
 	.command('clean', clean)
 	.command('build', build)
 	.command('engine', engine)
