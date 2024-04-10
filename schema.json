@@ -14,15 +14,20 @@
         },
         "cachePath": {
           "type": "string",
-          "description": "Path to the engine cache folder"
+          "description": "Path to the engine cache folder <RUNREAL_ENGINE_PATH>"
         },
         "source": {
           "type": "string",
           "description": "Source repository"
+        },
+        "repoType": {
+          "type": "string",
+          "description": "git or perforce"
         }
       },
       "required": [
-        "path"
+        "path",
+        "repoType"
       ],
       "additionalProperties": false
     },
@@ -35,11 +40,16 @@
         },
         "path": {
           "type": "string",
-          "description": "Path to the project folder"
+          "description": "Path to the project folder <RUNREAL_PROJECT_PATH>"
+        },
+        "repoType": {
+          "type": "string",
+          "description": "git or perforce"
         }
       },
       "required": [
-        "path"
+        "path",
+        "repoType"
       ],
       "additionalProperties": false
     },
@@ -48,11 +58,11 @@
       "properties": {
         "path": {
           "type": "string",
-          "description": "Path to the build folder"
+          "description": "Path to the build folder <RUNREAL_BUILD_PATH>"
         },
         "id": {
           "type": "string",
-          "description": "Build id"
+          "description": "Build id <RUNREAL_BUILD_ID>"
         },
         "branch": {
           "type": "string",
@@ -114,7 +124,7 @@
       "properties": {
         "dependenciesCachePath": {
           "type": "string",
-          "description": "Path to git dependencies cache folder"
+          "description": "Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>"
         },
         "mirrors": {
           "type": "boolean",
@@ -122,22 +132,65 @@
         },
         "mirrorsPath": {
           "type": "string",
-          "description": "Path to git mirrors folder"
+          "description": "Path to git mirrors folder <RUNREAL_GIT_MIRRORS_PATH>"
         }
       },
-      "required": [
-        "dependenciesCachePath",
-        "mirrors",
-        "mirrorsPath"
-      ],
       "additionalProperties": false
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "not": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Workflow name"
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "command": {
+                      "type": "string",
+                      "description": "Command to execute"
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Command arguments"
+                    }
+                  },
+                  "required": [
+                    "command"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "name",
+              "steps"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
     }
   },
   "required": [
     "engine",
     "project",
     "build",
-    "buildkite"
+    "buildkite",
+    "workflows"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2019-09/schema#"
