@@ -1,5 +1,15 @@
 import { z } from '../deps.ts'
 
+export const InternalSchema = z.object({
+	buildkite: z.object({
+		branch: z.string().describe('Buildkite branch name'),
+		checkout: z.string().describe('Buildkite commit hash'),
+		buildNumber: z.string().describe('Buildkite build number'),
+		buildCheckoutPath: z.string().describe('Buildkite build checkout path'),
+		buildPipelineSlug: z.string().describe('Buildkite pipeline slug'),
+	}),
+})
+
 export const ConfigSchema = z.object({
 	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),
 	engine: z.object({
@@ -26,13 +36,6 @@ export const ConfigSchema = z.object({
 			.describe('Branch name safe for filenames'),
 		commit: z.string().optional().describe('Commit hash'),
 		commitShort: z.string().optional().describe('Short commit hash'),
-	}),
-	buildkite: z.object({
-		branch: z.string().describe('Buildkite branch name'),
-		checkout: z.string().describe('Buildkite commit hash'),
-		buildNumber: z.string().describe('Buildkite build number'),
-		buildCheckoutPath: z.string().describe('Buildkite build checkout path'),
-		buildPipelineSlug: z.string().describe('Buildkite pipeline slug'),
 	}),
 	git: z
 		.object({

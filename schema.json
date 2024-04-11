@@ -86,39 +86,6 @@
       ],
       "additionalProperties": false
     },
-    "buildkite": {
-      "type": "object",
-      "properties": {
-        "branch": {
-          "type": "string",
-          "description": "Buildkite branch name"
-        },
-        "checkout": {
-          "type": "string",
-          "description": "Buildkite commit hash"
-        },
-        "buildNumber": {
-          "type": "string",
-          "description": "Buildkite build number"
-        },
-        "buildCheckoutPath": {
-          "type": "string",
-          "description": "Buildkite build checkout path"
-        },
-        "buildPipelineSlug": {
-          "type": "string",
-          "description": "Buildkite pipeline slug"
-        }
-      },
-      "required": [
-        "branch",
-        "checkout",
-        "buildNumber",
-        "buildCheckoutPath",
-        "buildPipelineSlug"
-      ],
-      "additionalProperties": false
-    },
     "git": {
       "type": "object",
       "properties": {
@@ -189,7 +156,6 @@
     "engine",
     "project",
     "build",
-    "buildkite",
     "workflows"
   ],
   "additionalProperties": false,

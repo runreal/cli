@@ -1,7 +1,7 @@
 import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
 import { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { execSync } from '../lib/utils.ts'
-import { ConfigSchema } from '../lib/schema.ts'
+import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Source } from './source.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
@@ -180,7 +180,8 @@ class Config {
 	private validateConfig() {
 		this.config = this.resolvePaths(this.config)
 		try {
-			this.config = ConfigSchema.parse(this.config)
+			const Merged = ConfigSchema.and(InternalSchema)
+			this.config = Merged.parse(this.config)
 
 			const bd = this.populateBuild()
 			if (bd) this.config.build = bd

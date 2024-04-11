@@ -17,4 +17,7 @@ Deno.test('source', () => {
 	assertEquals(psource.safeRef(), 'main-1')
 	psource.ref = () => 'main//1'
 	assertEquals(psource.safeRef(), 'main-1')
+
+	psource.ref = () => '//main//1'
+	assertEquals(psource.safeRef(), 'main-1')
 })
