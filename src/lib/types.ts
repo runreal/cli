@@ -7,7 +7,7 @@ import { RestoreOptions } from '../commands/engine/restore.ts'
 import { SetupOptions } from '../commands/engine/setup.ts'
 import { InstallOptions } from '../commands/engine/install.ts'
 import { UpdateOptions } from '../commands/engine/update.ts'
-import { ConfigSchema } from './schema.ts'
+import { ConfigSchema, InternalSchema } from './schema.ts'
 
 export type GlobalOptions = typeof cmd extends
 	Command<void, void, void, [], infer Options extends Record<string, unknown>> ? Options
@@ -58,7 +58,8 @@ export interface BuildkiteMetadata {
 	buildPipelineSlug: string
 }
 
-export type RunrealConfig = z.infer<typeof ConfigSchema>
+type InternalRunrealConfig = z.infer<typeof InternalSchema>
+export type RunrealConfig = z.infer<typeof ConfigSchema> & InternalRunrealConfig
 
 export interface UeDepsManifestData {
 	Name: string

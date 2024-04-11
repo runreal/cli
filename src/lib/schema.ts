@@ -1,5 +1,15 @@
 import { z } from '../deps.ts'
 
+export const InternalSchema = z.object({
+	buildkite: z.object({
+		branch: z.string().describe('Buildkite branch name'),
+		checkout: z.string().describe('Buildkite commit hash'),
+		buildNumber: z.string().describe('Buildkite build number'),
+		buildCheckoutPath: z.string().describe('Buildkite build checkout path'),
+		buildPipelineSlug: z.string().describe('Buildkite pipeline slug'),
+	}),
+})
+
 export const ConfigSchema = z.object({
 	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),
 	engine: z.object({
@@ -7,18 +17,18 @@ export const ConfigSchema = z.object({
 		cachePath: z
 			.string()
 			.optional()
-			.describe('Path to the engine cache folder'),
+			.describe('Path to the engine cache folder <RUNREAL_ENGINE_PATH>'),
 		source: z.string().optional().describe('Source repository'),
 		repoType: z.string().describe('git or perforce'),
 	}),
 	project: z.object({
 		name: z.string().optional().describe('Project name'),
-		path: z.string().describe('Path to the project folder'),
+		path: z.string().describe('Path to the project folder <RUNREAL_PROJECT_PATH>'),
 		repoType: z.string().describe('git or perforce'),
 	}),
 	build: z.object({
-		path: z.string().describe('Path to the build folder'),
-		id: z.string().optional().describe('Build id'),
+		path: z.string().describe('Path to the build folder <RUNREAL_BUILD_PATH>'),
+		id: z.string().optional().describe('Build id <RUNREAL_BUILD_ID>'),
 		branch: z.string().optional().describe('Branch name'),
 		branchSafe: z
 			.string()
@@ -27,21 +37,14 @@ export const ConfigSchema = z.object({
 		commit: z.string().optional().describe('Commit hash'),
 		commitShort: z.string().optional().describe('Short commit hash'),
 	}),
-	buildkite: z.object({
-		branch: z.string().describe('Buildkite branch name'),
-		checkout: z.string().describe('Buildkite commit hash'),
-		buildNumber: z.string().describe('Buildkite build number'),
-		buildCheckoutPath: z.string().describe('Buildkite build checkout path'),
-		buildPipelineSlug: z.string().describe('Buildkite pipeline slug'),
-	}),
 	git: z
 		.object({
 			dependenciesCachePath: z
 				.string()
 				.optional()
-				.describe('Path to git dependencies cache folder'),
+				.describe('Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>'),
 			mirrors: z.boolean().optional().describe('Use git mirrors'),
-			mirrorsPath: z.string().optional().describe('Path to git mirrors folder'),
+			mirrorsPath: z.string().optional().describe('Path to git mirrors folder <RUNREAL_GIT_MIRRORS_PATH>'),
 		})
 		.optional(),
 	workflows: z.array(
