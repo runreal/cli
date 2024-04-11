@@ -43,6 +43,10 @@ export class Perforce extends Base {
 		return parts.join('/')
 	}
 
+	safeRef(): string {
+		return this.ref().split('//').filter(Boolean).join('-').replace(/\//g, '-')
+	}
+
 	clone({
 		source,
 		destination,
