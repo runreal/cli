@@ -20,20 +20,33 @@ abstract class Base {
 	abstract clean(): void
 
 	safeRef(): string {
-		return this.ref().replace(/\/\//g, '/').replace(/\//g, '-')
+		return this.ref().replace(/\/\//g, '/').replace(/\//g, '-').toLowerCase()
 	}
 }
 
 export class Perforce extends Base {
 	executable: string = 'p4'
+	stream(): string {
+		return execSync(this.executable, [
+			'-F',
+			'%Stream%',
+			'-ztag',
+			'client',
+			'-o',
+		], { cwd: this.cwd, quiet: true }).output.trim()
+	}
+	changelist(): string {
+		return execSync(this.executable, [
+			'-F',
+			'%change%',
+			'changes',
+			'-m1',
+		], { cwd: this.cwd, quiet: true }).output.trim().replace('Change ', '')
+	}
 	ref(): string {
-		const stream = execSync(this.executable, ['p4', '-F', '"%Stream%"', '-ztag', 'client', '-o'], {
-			cwd: this.cwd,
-			quiet: false,
-		}).output.trim()
-		const change = execSync(this.executable, ['-F', '%change%', 'changes', '-m1'], { cwd: this.cwd, quiet: false })
-			.output.trim().replace('Change ', '')
 		const parts: string[] = []
+		const stream = this.stream()
+		const change = this.changelist()
 		if (stream) {
 			parts.push(stream)
 		}
@@ -42,11 +55,9 @@ export class Perforce extends Base {
 		}
 		return parts.join('/')
 	}
-
 	safeRef(): string {
-		return this.ref().split('//').filter(Boolean).join('-').replace(/\//g, '-')
+		return this.ref().split('//').filter(Boolean).join('-').replace(/\//g, '-').toLowerCase()
 	}
-
 	clone({
 		source,
 		destination,
@@ -74,12 +85,15 @@ export class Perforce extends Base {
 
 export class Git extends Base {
 	executable: string = 'git'
-	private branch(): string {
-		return execSync(this.executable, ['branch', '--show-current'], { cwd: this.cwd, quiet: false }).output.trim()
+	branch(): string {
+		return execSync(this.executable, ['branch', '--show-current'], { cwd: this.cwd, quiet: true }).output.trim()
+	}
+	commit(): string {
+		return execSync(this.executable, ['rev-parse', 'HEAD'], { cwd: this.cwd, quiet: true }).output.trim()
 	}
 	ref(): string {
 		const branch = this.branch()
-		const commit = execSync(this.executable, ['rev-parse', 'HEAD'], { cwd: this.cwd, quiet: false }).output.trim()
+		const commit = this.commit()
 		const parts: string[] = []
 		if (branch) {
 			parts.push(branch)
@@ -89,7 +103,6 @@ export class Git extends Base {
 		}
 		return parts.join('/')
 	}
-
 	clone(opts: CloneOpts): string {
 		const { source, destination, branch, dryRun } = opts
 		const cmd = branch ? ['clone', '-b', branch, source, destination] : ['clone', source, destination]

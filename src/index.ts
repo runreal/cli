@@ -1,6 +1,6 @@
 import { VERSION } from './version.ts'
 
-import { debug } from './commands/debug.ts'
+import { debug } from './commands/debug/index.ts'
 import { build } from './commands/build.ts'
 import { engine } from './commands/engine/index.ts'
 import { init } from './commands/init.ts'
