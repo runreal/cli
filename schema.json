@@ -107,56 +107,48 @@
     "workflows": {
       "type": "array",
       "items": {
-        "anyOf": [
-          {
-            "not": {}
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Workflow name"
           },
-          {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Workflow name"
-              },
-              "steps": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "command": {
-                      "type": "string",
-                      "description": "Command to execute"
-                    },
-                    "args": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Command arguments"
-                    }
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "string",
+                  "description": "Command to execute"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
                   },
-                  "required": [
-                    "command"
-                  ],
-                  "additionalProperties": false
+                  "description": "Command arguments"
                 }
-              }
-            },
-            "required": [
-              "name",
-              "steps"
-            ],
-            "additionalProperties": false
+              },
+              "required": [
+                "command"
+              ],
+              "additionalProperties": false
+            }
           }
-        ]
+        },
+        "required": [
+          "name",
+          "steps"
+        ],
+        "additionalProperties": false
       }
     }
   },
   "required": [
     "engine",
     "project",
-    "build",
-    "workflows"
+    "build"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2019-09/schema#"
