@@ -1,5 +1,5 @@
-import { assertEquals } from 'https://deno.land/std@0.221.0/assert/mod.ts'
-import { Source, Perforce } from './source.ts'
+import { assertEquals } from 'https://deno.land/std/assert/mod.ts'
+import { Perforce, Source } from '../src/lib/source.ts'
 
 Deno.test('source git', () => {
 	const source = Source('cwd', 'git')

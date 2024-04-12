@@ -7,7 +7,7 @@ import { renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
-class Config {
+export class Config {
 	private config: Partial<RunrealConfig> = {
 		engine: {
 			path: '',
@@ -20,7 +20,7 @@ class Config {
 		},
 		build: {
 			path: '',
-			id: '',
+			id: env('RUNREAL_BUILD_ID') || '',
 			branch: '',
 			branchSafe: '',
 			commit: '',

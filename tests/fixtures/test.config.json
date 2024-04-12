@@ -1,0 +1,101 @@
+{
+	"project": {
+		"name": "MinimalProject",
+		"repoType": "perforce"
+	},
+	"engine": {
+		"repoType": "perforce"
+	},
+	"metadata": {
+		"test": "${build.id}-${project.name}"
+	},
+	"workflows": [
+		{
+			"name": "compile client",
+			"steps": [
+				{
+					"command": "runreal buildgraph run",
+					"args": [
+						"${project.path}\\Build\\MinimalProject.xml",
+						"-set:BuildId=${build.id}",
+						"-set:ProjectName=${project.name}",
+						"-set:ProjectPath=${project.path}",
+						"-set:OutputPath=${build.path}",
+						"-Target=Build Clients"
+					]
+				}
+			]
+		},
+		{
+			"name": "compile server",
+			"steps": [
+				{
+					"command": "runreal buildgraph run",
+					"args": [
+						"${project.path}\\Build\\MinimalProject.xml",
+						"-set:BuildId=${build.id}",
+						"-set:ProjectName=${project.name}",
+						"-set:ProjectPath=${project.path}",
+						"-set:OutputPath=${build.path}",
+						"-Target=Build Servers"
+					]
+				}
+			]
+		},
+		{
+			"name": "cook all",
+			"steps": [
+				{
+					"command": "runreal buildgraph run",
+					"args": [
+						"${project.path}\\Build\\MinimalProject.xml",
+						"-set:BuildId=${build.id}",
+						"-set:ProjectName=${project.name}",
+						"-set:ProjectPath=${project.path}",
+						"-set:OutputPath=${build.path}",
+						"-Target=Cook All"
+					]
+				}
+			]
+		},
+		{
+			"name": "package client",
+			"steps": [
+				{
+					"command": "runreal buildgraph run",
+					"args": [
+						"${project.path}\\Build\\MinimalProject.xml",
+						"-set:BuildId=${build.id}-${buildkite.buildNumber}",
+						"-set:ProjectName=${project.name}",
+						"-set:ProjectPath=${project.path}",
+						"-set:OutputPath=${build.path}",
+						"-set:ClientTargetName=${project.name}Game",
+						"-set:ServerTargetName=${project.name}Server",
+						"-set:ClientConfigurations=Development",
+						"-Target=Package Clients",
+						"-ListOnly"
+					]
+				}
+			]
+		},
+		{
+			"name": "package server",
+			"steps": [
+				{
+					"command": "runreal buildgraph run",
+					"args": [
+						"${project.path}\\Build\\MinimalProject.xml",
+						"-set:BuildId=${build.id}-${buildkite.buildNumber}",
+						"-set:ProjectName=${project.name}",
+						"-set:ProjectPath=${project.path}",
+						"-set:OutputPath=${build.path}",
+						"-set:ClientTargetName=${project.name}Game",
+						"-set:ServerTargetName=${project.name}Server",
+						"-Target=Package Servers",
+						"-Export=export.json"
+					]
+				}
+			]
+		}
+	]
+}

@@ -2,12 +2,12 @@ import { z } from '../deps.ts'
 
 export const InternalSchema = z.object({
 	buildkite: z.object({
-		branch: z.string().describe('Buildkite branch name'),
-		checkout: z.string().describe('Buildkite commit hash'),
-		buildNumber: z.string().describe('Buildkite build number'),
-		buildCheckoutPath: z.string().describe('Buildkite build checkout path'),
-		buildPipelineSlug: z.string().describe('Buildkite pipeline slug'),
-	}),
+		branch: z.string().describe('Buildkite branch name').optional(),
+		checkout: z.string().describe('Buildkite commit hash').optional(),
+		buildNumber: z.string().describe('Buildkite build number').optional(),
+		buildCheckoutPath: z.string().describe('Buildkite build checkout path').optional(),
+		buildPipelineSlug: z.string().describe('Buildkite pipeline slug').optional(),
+	}).optional(),
 	metadata: z.object({
 		test: z.string().describe('Build id <RUNREAL_BUILD_ID>'),
 	}).optional(),
@@ -59,7 +59,6 @@ export const ConfigSchema = z.object({
 					args: z.array(z.string()).optional().describe('Command arguments'),
 				}),
 			),
-		})
-			.optional(),
-	),
+		}),
+	).optional(),
 })

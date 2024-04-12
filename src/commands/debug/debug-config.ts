@@ -16,7 +16,7 @@ export const debugConfig = new Command<GlobalOptions>()
 			const rendered = config.renderConfig(cfg)
 			console.dir(rendered, { depth: null })
 			return
-		} 
+		}
 
 		console.dir(cfg, { depth: null })
 	})
