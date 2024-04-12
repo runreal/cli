@@ -8,6 +8,9 @@ export const InternalSchema = z.object({
 		buildCheckoutPath: z.string().describe('Buildkite build checkout path'),
 		buildPipelineSlug: z.string().describe('Buildkite pipeline slug'),
 	}),
+	metadata: z.object({
+		test: z.string().describe('Build id <RUNREAL_BUILD_ID>'),
+	}).optional(),
 })
 
 export const ConfigSchema = z.object({

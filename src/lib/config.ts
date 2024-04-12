@@ -3,6 +3,7 @@ import { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { execSync } from '../lib/utils.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Source } from './source.ts'
+import { renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
@@ -31,6 +32,9 @@ class Config {
 			buildNumber: env('BUILDKITE_BUILD_NUMBER') || '0',
 			buildCheckoutPath: env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
 			buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
+		},
+		metadata: {
+			test: env('RUNREAL_BUILD_ID') || '',
 		},
 		workflows: [],
 	}
@@ -64,6 +68,11 @@ class Config {
 		}
 		this.validateConfig()
 		return this.config as RunrealConfig
+	}
+
+	renderConfig(cfg: RunrealConfig): RunrealConfig {
+		const rendered = renderConfig(cfg)
+		return rendered
 	}
 
 	async mergeConfig(configPath: string) {
