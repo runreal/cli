@@ -1,6 +1,7 @@
 {
 	"tasks": {
-		"start": "deno run -A --watch=src src/index.ts",
+		"dev": "deno run -A --watch=src src/index.ts",
+		"test": "deno test -A --watch",
 		"run": "deno run -A src/index.ts",
 		"install": "deno install -A --force --global --name runreal src/index.ts",
 		"compile-win": "deno compile -A --target x86_64-pc-windows-msvc --output build/runreal-win-x64 src/index.ts",
@@ -9,7 +10,7 @@
 		"generate-schema": "deno run -A src/generate-schema.ts"
 	},
 	"lint": {
-		"include": ["src/"],
+		"include": ["src/", "tests/"],
 		"rules": {
 			"tags": ["recommended"],
 			"include": ["ban-untagged-todo"],
@@ -17,7 +18,7 @@
 		}
 	},
 	"fmt": {
-		"include": ["src/"],
+		"include": ["src/", "tests/"],
 		"useTabs": true,
 		"lineWidth": 120,
 		"indentWidth": 2,
