@@ -20,7 +20,7 @@ export class Config {
 			repoType: 'git',
 		},
 		build: {
-			id: env('RUNREAL_BUILD_ID') || ''
+			id: env('RUNREAL_BUILD_ID') || '',
 		},
 		buildkite: {
 			branch: env('BUILDKITE_BRANCH') || '',

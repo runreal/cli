@@ -19,7 +19,7 @@ Deno.test('Config.create should initialize with default values', async () => {
 			repoType: 'git',
 		},
 		build: {
-			id
+			id,
 		},
 		buildkite: {
 			branch: '',

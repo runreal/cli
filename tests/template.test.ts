@@ -48,7 +48,6 @@ Deno.test('getSubstitutions should correctly extract values from config', () => 
 	assertEquals(result, expected)
 })
 
-
 Deno.test('render should replace placeholders with correct values', () => {
 	const input = [
 		'${project.name} uses ${engine.path}',
@@ -68,7 +67,6 @@ Deno.test('render should replace placeholders with correct values', () => {
 	const result = render(input, cfg as RunrealConfig)
 	assertEquals(result, expected)
 })
-
 
 Deno.test('renderConfig should deeply replace all placeholders in config object', () => {
 	const cfg: Partial<RunrealConfig> = {
