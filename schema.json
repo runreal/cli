@@ -42,6 +42,10 @@
           "type": "string",
           "description": "Path to the project folder <RUNREAL_PROJECT_PATH>"
         },
+        "buildPath": {
+          "type": "string",
+          "description": "Path to the build folder <RUNREAL_BUILD_PATH>"
+        },
         "repoType": {
           "type": "string",
           "description": "git or perforce"
@@ -49,6 +53,7 @@
       },
       "required": [
         "path",
+        "buildPath",
         "repoType"
       ],
       "additionalProperties": false
@@ -56,34 +61,11 @@
     "build": {
       "type": "object",
       "properties": {
-        "path": {
-          "type": "string",
-          "description": "Path to the build folder <RUNREAL_BUILD_PATH>"
-        },
         "id": {
           "type": "string",
           "description": "Build id <RUNREAL_BUILD_ID>"
-        },
-        "branch": {
-          "type": "string",
-          "description": "Branch name"
-        },
-        "branchSafe": {
-          "type": "string",
-          "description": "Branch name safe for filenames"
-        },
-        "commit": {
-          "type": "string",
-          "description": "Commit hash"
-        },
-        "commitShort": {
-          "type": "string",
-          "description": "Short commit hash"
         }
       },
-      "required": [
-        "path"
-      ],
       "additionalProperties": false
     },
     "git": {
@@ -107,56 +89,48 @@
     "workflows": {
       "type": "array",
       "items": {
-        "anyOf": [
-          {
-            "not": {}
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Workflow name"
           },
-          {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Workflow name"
-              },
-              "steps": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "command": {
-                      "type": "string",
-                      "description": "Command to execute"
-                    },
-                    "args": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Command arguments"
-                    }
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "string",
+                  "description": "Command to execute"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
                   },
-                  "required": [
-                    "command"
-                  ],
-                  "additionalProperties": false
+                  "description": "Command arguments"
                 }
-              }
-            },
-            "required": [
-              "name",
-              "steps"
-            ],
-            "additionalProperties": false
+              },
+              "required": [
+                "command"
+              ],
+              "additionalProperties": false
+            }
           }
-        ]
+        },
+        "required": [
+          "name",
+          "steps"
+        ],
+        "additionalProperties": false
       }
     }
   },
   "required": [
     "engine",
     "project",
-    "build",
-    "workflows"
+    "build"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2019-09/schema#"
