@@ -53,9 +53,7 @@ export class Config {
 		'projectPath': 'project.path',
 		'buildPath': 'project.buildPath',
 		'buildId': 'build.id',
-		'gitDependenciesCachePath': 'git.dependenciesCachePath',
-		'gitMirrors': 'git.mirrors',
-		'gitMirrorsPath': 'git.mirrorsPath',
+		'gitDependenciesCachePath': 'engine.dependenciesCachePath'
 	}
 
 	private constructor() {}
@@ -132,8 +130,8 @@ export class Config {
 			config.engine.path = path.resolve(config.engine.path)
 		}
 
-		if (config.engine && config.engine.cachePath) {
-			config.engine.cachePath = path.resolve(config.engine.cachePath)
+		if (config.engine && config.engine.gitDependenciesCachePath) {
+			config.engine.gitDependenciesCachePath = path.resolve(config.engine.gitDependenciesCachePath)
 		}
 
 		if (config.project && config.project.path) {
@@ -142,14 +140,6 @@ export class Config {
 
 		if (config.project && config.project.buildPath) {
 			config.project.buildPath = path.resolve(config.project.buildPath)
-		}
-
-		if (config.git && config.git.dependenciesCachePath) {
-			config.git.dependenciesCachePath = path.resolve(config.git.dependenciesCachePath)
-		}
-
-		if (config.git && config.git.mirrorsPath) {
-			config.git.mirrorsPath = path.resolve(config.git.mirrorsPath)
 		}
 
 		return config
