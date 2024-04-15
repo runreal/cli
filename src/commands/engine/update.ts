@@ -2,12 +2,11 @@ import { Command, ValidationError } from '../../deps.ts'
 import { deleteEngineHooks, exec, isGitRepo, runEngineSetup } from '../../lib/utils.ts'
 import { config } from '../../lib/config.ts'
 import { CliOptions, GlobalOptions } from '../../lib/types.ts'
-import { Source } from '../../lib/source.ts'
 
 export type UpdateOptions = typeof update extends Command<any, any, infer Options, any, any> ? Options
 	: never
 
-export const update = new Command<GlobalOptions>()
+	export const update = new Command<GlobalOptions>()
 	.description('update engine to a specific checkout')
 	.env(
 		'RUNREAL_GIT_CLEAN_FLAGS=<flags:string>',
@@ -38,21 +37,45 @@ export const update = new Command<GlobalOptions>()
 			clean,
 			setup,
 			gitCleanFlags,
-			// gitDependenciesCachePath,
 			dryRun,
 		} = options as UpdateOptions
 		const cfg = config.get(options as CliOptions)
-
-		const source = Source(cfg.engine.path, cfg.engine.repoType)
+		const isRepo = await isGitRepo(cfg.engine.path)
+		if (!isRepo) {
+			throw new ValidationError(
+				`Engine path ${cfg.engine.path} is not a git repository`,
+			)
+		}
 		if (clean) {
-			source.clean()
+			const clean = await exec('git', [
+				'clean',
+				gitCleanFlags ? gitCleanFlags : '-fxd',
+			], { cwd: cfg.engine.path, dryRun })
 		}
 		// Prevent the default engine hooks from running
 		await deleteEngineHooks(cfg.engine.path)
 
-		source.sync()
+		const fetch = await exec('git', [
+			'fetch',
+			remote,
+			branch,
+		], { cwd: cfg.engine.path, dryRun })
+
+		const checkout = await exec('git', [
+			'checkout',
+			'--quiet',
+			'--force',
+			branch,
+		], { cwd: cfg.engine.path, dryRun })
+
+		const reset = await exec('git', [
+			'reset',
+			'--hard',
+			'FETCH_HEAD',
+		], { cwd: cfg.engine.path, dryRun })
 
 		if (setup) {
-			await runEngineSetup({ enginePath: cfg.engine.path, gitDependsCache: cfg.git?.dependenciesCachePath, dryRun })
+			await runEngineSetup({ enginePath: cfg.engine.path, gitDependsCache: cfg.engine.gitDependenciesCachePath, dryRun })
 		}
 	})
+
