@@ -12,17 +12,17 @@
           "type": "string",
           "description": "Path to the engine folder"
         },
-        "cachePath": {
-          "type": "string",
-          "description": "Path to the engine cache folder <RUNREAL_ENGINE_PATH>"
-        },
-        "source": {
-          "type": "string",
-          "description": "Source repository"
-        },
         "repoType": {
           "type": "string",
           "description": "git or perforce"
+        },
+        "gitSource": {
+          "type": "string",
+          "description": "git source repository"
+        },
+        "gitDependenciesCachePath": {
+          "type": "string",
+          "description": "Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>"
         }
       },
       "required": [
@@ -64,24 +64,6 @@
         "id": {
           "type": "string",
           "description": "Build id <RUNREAL_BUILD_ID>"
-        }
-      },
-      "additionalProperties": false
-    },
-    "git": {
-      "type": "object",
-      "properties": {
-        "dependenciesCachePath": {
-          "type": "string",
-          "description": "Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>"
-        },
-        "mirrors": {
-          "type": "boolean",
-          "description": "Use git mirrors"
-        },
-        "mirrorsPath": {
-          "type": "string",
-          "description": "Path to git mirrors folder <RUNREAL_GIT_MIRRORS_PATH>"
         }
       },
       "additionalProperties": false
