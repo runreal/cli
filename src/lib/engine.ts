@@ -182,6 +182,9 @@ export abstract class Engine {
 		const binaryGlob = path.join(config.get().project.path, '**/Binaries')
 		const intermediateGlob = path.join(config.get().project.path, '**/Intermediate')
 		const cwd = config.get().project?.path
+		console.log(config.get())
+		console.log('[runClean]', { binaryGlob, intermediateGlob, cwd })
+		return
 		const iterator = globber({
 			cwd,
 			include: [binaryGlob, intermediateGlob],

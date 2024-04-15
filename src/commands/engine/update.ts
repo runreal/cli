@@ -6,7 +6,7 @@ import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 export type UpdateOptions = typeof update extends Command<any, any, infer Options, any, any> ? Options
 	: never
 
-	export const update = new Command<GlobalOptions>()
+export const update = new Command<GlobalOptions>()
 	.description('update engine to a specific checkout')
 	.env(
 		'RUNREAL_GIT_CLEAN_FLAGS=<flags:string>',
@@ -75,7 +75,10 @@ export type UpdateOptions = typeof update extends Command<any, any, infer Option
 		], { cwd: cfg.engine.path, dryRun })
 
 		if (setup) {
-			await runEngineSetup({ enginePath: cfg.engine.path, gitDependsCache: cfg.engine.gitDependenciesCachePath, dryRun })
+			await runEngineSetup({
+				enginePath: cfg.engine.path,
+				gitDependsCache: cfg.engine.gitDependenciesCachePath,
+				dryRun,
+			})
 		}
 	})
-

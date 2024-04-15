@@ -53,7 +53,7 @@ export class Config {
 		'projectPath': 'project.path',
 		'buildPath': 'project.buildPath',
 		'buildId': 'build.id',
-		'gitDependenciesCachePath': 'engine.dependenciesCachePath'
+		'gitDependenciesCachePath': 'engine.dependenciesCachePath',
 	}
 
 	private constructor() {}
