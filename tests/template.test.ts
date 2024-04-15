@@ -15,20 +15,34 @@ Deno.test('template tests', () => {
 
 Deno.test('getSubstitutions should correctly extract values from config', () => {
 	const cfg: RunrealConfig = {
-		project: { name: 'Project', path: '/projects/project', repoType: 'git' },
+		project: { name: 'Project', path: '/projects/project', buildPath: '/output/path', repoType: 'git' },
 		engine: { path: '/engines/5.1', repoType: 'git' },
-		build: { id: '1234', path: '/builds/1234', branchSafe: 'main', commitShort: 'abcd' },
+		build: { id: '1234' },
 		buildkite: { buildNumber: '5678' },
+		metadata: {
+			safeRef: 'safeRef',
+			git: {
+				branch: 'longbranch',
+				branchSafe: 'safebranch',
+				commit: 'commit',
+				commitShort: 'shortcommit',
+			},
+			perforce: { changelist: 'cl', stream: 'stream' },
+		},
 	}
 	const expected = {
 		'engine.path': '/engines/5.1',
 		'project.path': '/projects/project',
 		'project.name': 'Project',
+		'project.buildPath': '/output/path',
+		'build.path': '/output/path',
 		'build.id': '1234',
-		'build.path': '/builds/1234',
-		'build.branch': 'main',
-		'build.commit': 'abcd',
 		'buildkite.buildNumber': '5678',
+		'metadata.safeRef': 'safeRef',
+		'metadata.git.branch': 'safebranch',
+		'metadata.git.commit': 'shortcommit',
+		'metadata.perforce.changelist': 'cl',
+		'metadata.perforce.stream': 'stream',
 	}
 	const result = getSubstitutions(cfg)
 	assertEquals(result, expected)
@@ -40,26 +54,25 @@ Deno.test('render should replace placeholders with correct values', () => {
 		'Build ID: ${build.id}',
 		'Non-existent: ${non.existent}',
 	]
-	const cfg: RunrealConfig = {
-		project: { name: 'Project', path: '/projects/project', repoType: 'git' },
+	const cfg: Partial<RunrealConfig> = {
+		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.1', repoType: 'git' },
-		build: { id: '1234', path: '/builds/1234' },
+		build: { id: '1234' },
 	}
 	const expected = [
 		'Project uses /engines/5.1',
 		'Build ID: 1234',
 		'Non-existent: ${non.existent}',
 	]
-	const result = render(input, cfg)
+	const result = render(input, cfg as RunrealConfig)
 	assertEquals(result, expected)
 })
 
 Deno.test('renderConfig should deeply replace all placeholders in config object', () => {
-	const cfg: RunrealConfig = {
-		project: { name: 'Project', path: '/projects/project', repoType: 'git' },
+	const cfg: Partial<RunrealConfig> = {
+		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.0', repoType: 'git' },
-		build: { id: '1234', path: '/builds/1234' },
-		metadata: { test: '${build.id}-${project.name}' },
+		build: { id: '1234' },
 		workflows: [
 			{
 				name: 'compile',
@@ -76,11 +89,10 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 			},
 		],
 	}
-	const expected: RunrealConfig = {
-		project: { name: 'Project', path: '/projects/project', repoType: 'git' },
+	const expected: Partial<RunrealConfig> = {
+		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.0', repoType: 'git' },
-		build: { id: '1234', path: '/builds/1234' },
-		metadata: { test: '1234-Project' },
+		build: { id: '1234' },
 		workflows: [
 			{
 				name: 'compile',
@@ -97,6 +109,6 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 			},
 		],
 	}
-	const result = renderConfig(cfg)
+	const result = renderConfig(cfg as RunrealConfig)
 	assertEquals(result, expected)
 })
