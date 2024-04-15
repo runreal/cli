@@ -8,7 +8,7 @@ export type InstallOptions = typeof install extends Command<any, any, infer Opti
 	: never
 
 export const install = new Command()
-	.description('install engine from a source repository')
+	.description('install engine from a git source repository')
 	.option('-b, --branch <branch:string>', 'git checkout (branch | tag)')
 	.option('-f, --force', 'force overwrite of destination', { default: false })
 	.option('-d, --dry-run', 'dry run', { default: false })
@@ -27,28 +27,20 @@ export const install = new Command()
 	.option('--build', 'build the engine after cloning', {
 		depends: ['setup'],
 	})
-	.group('Git Mirror Configuration')
-	.option('-m, --git-mirrors', 'use git mirrors', { default: false })
-	.env('RUNREAL_GIT_MIRRORS_PATH=<gitMirrorsPath:string>', 'Overide to git mirrors path', { prefix: 'RUNREAL_' })
-	.option('-p, --git-mirrors-path <gitMirrorsPath:file>', 'git mirrors path')
 	.arguments('[source:string] [destination:file]')
 	.action(async (
 		options,
 		engineSource,
-		destination,
-		...args
+		destination
 	) => {
 		const {
 			branch,
 			force,
 			dryRun,
-			setup,
-			// gitDependenciesCachePath,
-			// gitMirrors,
-			// gitMirrorsPath,
+			setup
 		} = options as InstallOptions
 		const cfg = config.get(options as CliOptions)
-		engineSource = engineSource || cfg.engine.source
+		engineSource = engineSource || cfg.engine.gitSource
 		destination = destination || cfg.engine.path
 
 		if (!engineSource) {
@@ -81,6 +73,6 @@ export const install = new Command()
 			dryRun,
 		})
 		if (setup) {
-			await runEngineSetup({ enginePath: clonedPath, gitDependsCache: cfg.git?.dependenciesCachePath, dryRun })
+			await runEngineSetup({ enginePath: clonedPath, gitDependsCache: cfg.engine.gitDependenciesCachePath, dryRun })
 		}
 	})
