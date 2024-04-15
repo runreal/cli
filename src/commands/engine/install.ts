@@ -1,14 +1,13 @@
 import { Command, ValidationError } from '../../deps.ts'
-import { runEngineSetup } from '../../lib/utils.ts'
+import { cloneRepo, runEngineSetup } from '../../lib/utils.ts'
 import { CliOptions } from '../../lib/types.ts'
 import { config } from '../../lib/config.ts'
-import { Source } from '../../lib/source.ts'
 
 export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
 	: never
 
-export const install = new Command()
-	.description('install engine from a git source repository')
+	export const install = new Command()
+	.description('install engine from a source repository')
 	.option('-b, --branch <branch:string>', 'git checkout (branch | tag)')
 	.option('-f, --force', 'force overwrite of destination', { default: false })
 	.option('-d, --dry-run', 'dry run', { default: false })
@@ -30,8 +29,9 @@ export const install = new Command()
 	.arguments('[source:string] [destination:file]')
 	.action(async (
 		options,
-		engineSource,
-		destination
+		source,
+		destination,
+		...args
 	) => {
 		const {
 			branch,
@@ -40,10 +40,10 @@ export const install = new Command()
 			setup
 		} = options as InstallOptions
 		const cfg = config.get(options as CliOptions)
-		engineSource = engineSource || cfg.engine.gitSource
+		source = source || cfg.engine.gitSource
 		destination = destination || cfg.engine.path
 
-		if (!engineSource) {
+		if (!source) {
 			throw new ValidationError('missing source')
 		}
 		if (!destination) {
@@ -65,14 +65,15 @@ export const install = new Command()
 				}
 			}
 		}
-		const source = Source(cfg.engine.path, cfg.engine.repoType)
-		const clonedPath = source.clone({
-			source: engineSource,
+		const clonedPath = await cloneRepo({
+			source,
 			destination,
 			branch,
+			useMirror: false,
 			dryRun,
 		})
 		if (setup) {
 			await runEngineSetup({ enginePath: clonedPath, gitDependsCache: cfg.engine.gitDependenciesCachePath, dryRun })
 		}
 	})
+

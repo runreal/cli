@@ -9,7 +9,7 @@ export const debugConfig = new Command<GlobalOptions>()
 	.option('-r, --render', 'Render the config with substitutions')
 	.description('debug config')
 	.action((options) => {
-		const { render } = options as DebugOptions & GlobalOptions
+		const { render } = options as DebugConfigOptions & GlobalOptions
 		const cfg = config.get(options as CliOptions)
 
 		if (render) {
