@@ -9,10 +9,14 @@ export const getSubstitutions = (cfg: RunrealConfig): Record<string, string | un
 	'engine.path': cfg.engine?.path,
 	'project.path': cfg.project?.path,
 	'project.name': cfg.project?.name,
+	'project.buildPath': cfg.project?.buildPath,
+	'build.path': cfg.project?.buildPath,
 	'build.id': cfg.build?.id,
-	'build.path': cfg.build?.path,
-	'build.branch': cfg.build?.branchSafe,
-	'build.commit': cfg.build?.commitShort,
+	'metadata.safeRef': cfg.metadata?.safeRef,
+	'metadata.git.branch': cfg.metadata?.git?.branchSafe,
+	'metadata.git.commit': cfg.metadata?.git?.commitShort,
+	'metadata.perforce.stream': cfg.metadata?.perforce?.stream,
+	'metadata.perforce.changelist': cfg.metadata?.perforce?.changelist,
 	'buildkite.buildNumber': cfg.buildkite?.buildNumber,
 })
 

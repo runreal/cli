@@ -2,7 +2,7 @@ import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../dep
 import { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { execSync } from '../lib/utils.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
-import { Source } from './source.ts'
+import { Git, Perforce, Source } from './source.ts'
 import { renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
@@ -16,15 +16,11 @@ export class Config {
 		project: {
 			name: '',
 			path: '',
+			buildPath: '',
 			repoType: 'git',
 		},
 		build: {
-			path: '',
-			id: env('RUNREAL_BUILD_ID') || '',
-			branch: '',
-			branchSafe: '',
-			commit: '',
-			commitShort: '',
+			id: env('RUNREAL_BUILD_ID') || ''
 		},
 		buildkite: {
 			branch: env('BUILDKITE_BRANCH') || '',
@@ -34,7 +30,17 @@ export class Config {
 			buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
 		},
 		metadata: {
-			test: env('RUNREAL_BUILD_ID') || '',
+			safeRef: '',
+			git: {
+				branch: '',
+				branchSafe: '',
+				commit: '',
+				commitShort: '',
+			},
+			perforce: {
+				changelist: '',
+				stream: '',
+			},
 		},
 		workflows: [],
 	}
@@ -43,7 +49,7 @@ export class Config {
 		'branch': 'engine.branch',
 		'cachePath': 'engine.cachePath',
 		'projectPath': 'project.path',
-		'buildPath': 'build.path',
+		'buildPath': 'project.buildPath',
 		'buildId': 'build.id',
 		'gitDependenciesCachePath': 'git.dependenciesCachePath',
 		'gitMirrors': 'git.mirrors',
@@ -80,17 +86,6 @@ export class Config {
 		if (!cfg) return
 		this.config = deepmerge(this.config, cfg)
 		return this.config
-	}
-
-	determineBuildId() {
-		const build = this.config.build
-		if (!build) return ulid()
-		if (!this.config.project?.path) return ulid()
-		if (!this.config.project?.repoType) return ulid()
-		const source = Source(this.config.project?.path, this.config.project?.repoType)
-		const safeRef = source.safeRef()
-		if (!safeRef) return ulid()
-		return safeRef
 	}
 
 	private async searchForConfigFile(): Promise<string | null> {
@@ -143,8 +138,8 @@ export class Config {
 			config.project.path = path.resolve(config.project.path)
 		}
 
-		if (config.build && config.build.path) {
-			config.build.path = path.resolve(config.build.path)
+		if (config.project && config.project.buildPath) {
+			config.project.buildPath = path.resolve(config.project.buildPath)
 		}
 
 		if (config.git && config.git.dependenciesCachePath) {
@@ -158,31 +153,91 @@ export class Config {
 		return config
 	}
 
-	private populateBuild(): RunrealConfig['build'] | null {
+	private getBuildMetadata(): RunrealConfig['metadata'] | null {
 		const cwd = this.config.project?.path
 		if (!cwd) return null
-		try {
-			let branch: string
-			// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
-			if (Deno.env.get('BUILDKITE_BRANCH')) {
-				branch = this.config.buildkite?.branch || ''
-			} else {
-				branch = execSync('git', ['branch', '--show-current'], { cwd, quiet: false }).output.trim()
-			}
-			const branchSafe = branch.replace(/[^a-z0-9]/gi, '-')
-			const commit = execSync('git', ['rev-parse', 'HEAD'], { cwd, quiet: false }).output.trim()
-			const commitShort = execSync('git', ['rev-parse', '--short', 'HEAD'], { quiet: false }).output.trim()
-
+		if (this.config.project?.repoType === 'git') {
+			const { safeRef, git } = this.getGitBuildMetadata(cwd)
 			return {
-				...this.config.build,
-				path: this.config.build?.path || '',
-				branch,
-				branchSafe,
-				commit,
-				commitShort,
+				safeRef,
+				git,
+			}
+		} else if (this.config.project?.repoType === 'perforce') {
+			const { safeRef, perforce } = this.getPerforceBuildMetadata(cwd)
+			return {
+				safeRef,
+				perforce,
+			}
+		}
+		return null
+	}
+
+	private getGitBuildMetadata(projectPath: string): RunrealConfig['metadata'] {
+		const cwd = projectPath
+		try {
+			const source = new Git(cwd)
+			const branch = source.branch()
+			const branchSafe = source.branchSafe()
+			const commit = source.commit()
+			const commitShort = source.commitShort()
+			const safeRef = source.safeRef()
+			return {
+				safeRef,
+				git: {
+					branch,
+					branchSafe,
+					commit,
+					commitShort,
+				},
 			}
 		} catch (e) {
-			return null
+			return {
+				safeRef: '',
+				git: {
+					branch: '',
+					branchSafe: '',
+					commit: '',
+					commitShort: '',
+				},
+			}
+		}
+	}
+
+	private getPerforceBuildMetadata(projectPath: string): RunrealConfig['metadata'] {
+		const cwd = projectPath
+		try {
+			const source = new Perforce(cwd)
+			const changelist = source.changelist()
+			const stream = source.stream()
+			const safeRef = source.safeRef()
+			return {
+				safeRef,
+				perforce: {
+					changelist,
+					stream,
+				},
+			}
+		} catch (e) {
+			return {
+				safeRef: '',
+				perforce: {
+					changelist: '',
+					stream: '',
+				},
+			}
+		}
+	}
+
+	getBuildId() {
+		if (this.config.build?.id) return this.config.build.id
+		if (!this.config.project?.path) return ulid()
+		if (!this.config.project?.repoType) return ulid()
+		try {
+			const source = Source(this.config.project.path, this.config.project.repoType)
+			const safeRef = source.safeRef()
+			return safeRef
+		} catch (e) {
+			return ulid()
 		}
 	}
 
@@ -192,10 +247,16 @@ export class Config {
 			const Merged = ConfigSchema.and(InternalSchema)
 			this.config = Merged.parse(this.config)
 
-			const bd = this.populateBuild()
-			if (bd) this.config.build = bd
-			if (!this.config.build?.id) {
-				this.config.build!.id = this.determineBuildId()
+			const metadata = this.getBuildMetadata()
+			this.config.metadata = {
+				...this.config.metadata,
+				...metadata,
+			}
+
+			const buildId = this.getBuildId()
+			this.config.build = {
+				...this.config.build,
+				id: buildId,
 			}
 		} catch (e) {
 			if (e instanceof z.ZodError) {

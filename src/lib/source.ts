@@ -86,14 +86,24 @@ export class Perforce extends Base {
 export class Git extends Base {
 	executable: string = 'git'
 	branch(): string {
+		// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
+		if (Deno.env.get('BUILDKITE_BRANCH')) {
+			return Deno.env.get('BUILDKITE_BRANCH') || ''
+		}
 		return execSync(this.executable, ['branch', '--show-current'], { cwd: this.cwd, quiet: true }).output.trim()
+	}
+	branchSafe(): string {
+		return this.branch().replace(/[^a-z0-9]/gi, '-')
 	}
 	commit(): string {
 		return execSync(this.executable, ['rev-parse', 'HEAD'], { cwd: this.cwd, quiet: true }).output.trim()
 	}
+	commitShort(): string {
+		return execSync(this.executable, ['rev-parse', '--short', 'HEAD'], { cwd: this.cwd, quiet: true }).output.trim()
+	}
 	ref(): string {
-		const branch = this.branch()
-		const commit = this.commit()
+		const branch = this.branchSafe()
+		const commit = this.commitShort()
 		const parts: string[] = []
 		if (branch) {
 			parts.push(branch)
