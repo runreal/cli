@@ -1,0 +1,46 @@
+name: "Generate Schema"
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  DENO_DIR: ~/.deno-cache
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        deno-version: [1.41.3]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Deno ${{ matrix.deno-version }}
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ matrix.deno-version }}
+      - name: Run generate-schema
+        run: deno task generate-schema
+      - name: Commit and push to pr
+        run: |
+          diff=$(git diff schema.json)
+          if [[ "${diff}" ]]; then
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+
+            git add schema.json
+            git commit -m 'chore(schema): generate'
+            git push
+            exit 0
+          fi
+
+          echo "skipping"
