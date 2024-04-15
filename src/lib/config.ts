@@ -7,43 +7,45 @@ import { renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
+const defaultConfig = (): Partial<RunrealConfig> => ({
+	engine: {
+		path: '',
+		repoType: 'git',
+	},
+	project: {
+		name: '',
+		path: '',
+		buildPath: '',
+		repoType: 'git',
+	},
+	build: {
+		id: env('RUNREAL_BUILD_ID') || '',
+	},
+	buildkite: {
+		branch: env('BUILDKITE_BRANCH') || '',
+		checkout: env('BUILDKITE_COMMIT') || '',
+		buildNumber: env('BUILDKITE_BUILD_NUMBER') || '0',
+		buildCheckoutPath: env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
+		buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
+	},
+	metadata: {
+		safeRef: '',
+		git: {
+			branch: '',
+			branchSafe: '',
+			commit: '',
+			commitShort: '',
+		},
+		perforce: {
+			changelist: '',
+			stream: '',
+		},
+	},
+	workflows: [],
+})
+
 export class Config {
-	private config: Partial<RunrealConfig> = {
-		engine: {
-			path: '',
-			repoType: 'git',
-		},
-		project: {
-			name: '',
-			path: '',
-			buildPath: '',
-			repoType: 'git',
-		},
-		build: {
-			id: env('RUNREAL_BUILD_ID') || '',
-		},
-		buildkite: {
-			branch: env('BUILDKITE_BRANCH') || '',
-			checkout: env('BUILDKITE_COMMIT') || '',
-			buildNumber: env('BUILDKITE_BUILD_NUMBER') || '0',
-			buildCheckoutPath: env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
-			buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
-		},
-		metadata: {
-			safeRef: '',
-			git: {
-				branch: '',
-				branchSafe: '',
-				commit: '',
-				commitShort: '',
-			},
-			perforce: {
-				changelist: '',
-				stream: '',
-			},
-		},
-		workflows: [],
-	}
+	private config: Partial<RunrealConfig> = defaultConfig()
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
 		'branch': 'engine.branch',
@@ -191,15 +193,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return {
-				safeRef: '',
-				git: {
-					branch: '',
-					branchSafe: '',
-					commit: '',
-					commitShort: '',
-				},
-			}
+			return defaultConfig().metadata!
 		}
 	}
 
@@ -218,13 +212,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return {
-				safeRef: '',
-				perforce: {
-					changelist: '',
-					stream: '',
-				},
-			}
+			return defaultConfig().metadata!
 		}
 	}
 
