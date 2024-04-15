@@ -6,7 +6,7 @@ import { config } from '../../lib/config.ts'
 export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
 	: never
 
-	export const install = new Command()
+export const install = new Command()
 	.description('install engine from a source repository')
 	.option('-b, --branch <branch:string>', 'git checkout (branch | tag)')
 	.option('-f, --force', 'force overwrite of destination', { default: false })
@@ -37,7 +37,7 @@ export type InstallOptions = typeof install extends Command<any, any, infer Opti
 			branch,
 			force,
 			dryRun,
-			setup
+			setup,
 		} = options as InstallOptions
 		const cfg = config.get(options as CliOptions)
 		source = source || cfg.engine.gitSource
@@ -76,4 +76,3 @@ export type InstallOptions = typeof install extends Command<any, any, infer Opti
 			await runEngineSetup({ enginePath: clonedPath, gitDependsCache: cfg.engine.gitDependenciesCachePath, dryRun })
 		}
 	})
-
