@@ -57,7 +57,7 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.release.outputs.tag_name }} ./build/runreal-win-x64.exe ./build/runreal-macos-arm ./build/runreal-linux-x64
+        run: gh release upload ${{ steps.release.outputs.tag_name }} ./build/runreal-win-x64.exe ./build/runreal-macos-arm ./build/runreal-linux-x64 schema.json
 
       - name: Cache Deno dependencies 
         if: ${{ steps.release.outputs.release_created }}
