@@ -27,12 +27,12 @@ export const ConfigSchema = z.object({
 	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),
 	engine: z.object({
 		path: z.string().describe('Path to the engine folder'),
-		cachePath: z
+		repoType: z.string().describe('git or perforce'),
+		gitSource: z.string().optional().describe('git source repository'),
+		gitDependenciesCachePath: z
 			.string()
 			.optional()
-			.describe('Path to the engine cache folder <RUNREAL_ENGINE_PATH>'),
-		source: z.string().optional().describe('Source repository'),
-		repoType: z.string().describe('git or perforce'),
+			.describe('Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>'),
 	}),
 	project: z.object({
 		name: z.string().optional().describe('Project name'),
@@ -43,15 +43,6 @@ export const ConfigSchema = z.object({
 	build: z.object({
 		id: z.string().optional().describe('Build id <RUNREAL_BUILD_ID>'),
 	}),
-	git: z.object({
-		dependenciesCachePath: z
-			.string()
-			.optional()
-			.describe('Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>'),
-		mirrors: z.boolean().optional().describe('Use git mirrors'),
-		mirrorsPath: z.string().optional().describe('Path to git mirrors folder <RUNREAL_GIT_MIRRORS_PATH>'),
-	})
-		.optional(),
 	workflows: z.array(
 		z.object({
 			name: z.string().describe('Workflow name'),

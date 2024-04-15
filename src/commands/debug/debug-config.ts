@@ -2,7 +2,7 @@ import { Command } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
 import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 
-export type DebugOptions = typeof debugConfig extends Command<any, any, infer Options, any, any> ? Options
+export type DebugConfigOptions = typeof debugConfig extends Command<any, any, infer Options, any, any> ? Options
 	: never
 
 export const debugConfig = new Command<GlobalOptions>()
