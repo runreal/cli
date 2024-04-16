@@ -12,7 +12,7 @@ export const uat = new Command<GlobalOptions>()
 	.arguments('<command> [args...]')
 	.stopEarly()
 	.action(async (options, command, ...args) => {
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.get(options as CliOptions)
+		const { engine: { path: enginePath }, project: { path: projectPath } } = config().get(options as CliOptions)
 		const engine = await createEngine(enginePath)
 		if (command !== 'run') {
 			args.unshift(command)

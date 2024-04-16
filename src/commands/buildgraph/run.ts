@@ -30,7 +30,7 @@ export const run = new Command<GlobalOptions>()
 	.arguments('<buildGraphScript:file> <buildGraphArgs...>')
 	.stopEarly()
 	.action(async (options, buildGraphScript: string, ...buildGraphArgs: Array<string>) => {
-		const { engine: { path: enginePath } } = config.get(options as CliOptions)
+		const { engine: { path: enginePath } } = config().get(options as CliOptions)
 		const engine = createEngine(enginePath)
 		const { success, code } = await engine.runBuildGraph(buildGraphScript, buildGraphArgs)
 		if (!success) {

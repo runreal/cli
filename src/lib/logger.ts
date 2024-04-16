@@ -1,5 +1,18 @@
 import { fmt } from '../deps.ts'
-import { createConfigDirSync, DefaultMap, getRandomInt } from './utils.ts'
+import { createConfigDirSync, getRandomInt } from './utils.ts'
+
+class DefaultMap<K, V> extends Map<K, V> {
+	constructor(private defaultFn: (key: K) => V, entries?: readonly (readonly [K, V])[] | null) {
+		super(entries)
+	}
+
+	get(key: K): V {
+		if (!super.has(key)) {
+			super.set(key, this.defaultFn(key))
+		}
+		return super.get(key)!
+	}
+}
 
 export enum LogLevel {
 	DEBUG = 'DEBUG',

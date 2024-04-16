@@ -39,7 +39,7 @@ export const update = new Command<GlobalOptions>()
 			gitCleanFlags,
 			dryRun,
 		} = options as UpdateOptions
-		const cfg = config.get(options as CliOptions)
+		const cfg = config().get(options as CliOptions)
 		const isRepo = await isGitRepo(cfg.engine.path)
 		if (!isRepo) {
 			throw new ValidationError(

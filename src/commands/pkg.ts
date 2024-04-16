@@ -58,7 +58,7 @@ export const pkg = new Command<GlobalOptions>()
 	.option('--profile <profile:string>', 'Build profile', { default: 'client', required: true })
 	.action(async (options) => {
 		const { platform, configuration, dryRun, profile, archiveDirectory, zip } = options as PkgOptions
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.get(options as CliOptions)
+		const { engine: { path: enginePath }, project: { path: projectPath } } = config().get(options as CliOptions)
 
 		const literal = pkg.getLiteralArgs().map((arg) => arg.toLowerCase())
 		const profileArgs = profiles[profile as keyof typeof profiles] || []

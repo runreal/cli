@@ -16,7 +16,7 @@ export const setup = new Command<GlobalOptions>()
 	)
 	.action(async (options, ...args) => {
 		const { gitdepends, gitdependscache } = options as SetupOptions
-		const { engine: { path: enginePath } } = config.get(options as CliOptions)
+		const { engine: { path: enginePath } } = config().get(options as CliOptions)
 		if (gitdepends) {
 			await runEngineSetup({ enginePath, gitDependsCache: gitdependscache })
 		}

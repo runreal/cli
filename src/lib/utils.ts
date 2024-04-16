@@ -346,17 +346,4 @@ export const randomBuildkiteEmoji = () => {
 	return emojis[Math.floor(Math.random() * emojis.length)]
 }
 
-export class DefaultMap<K, V> extends Map<K, V> {
-	constructor(private defaultFn: (key: K) => V, entries?: readonly (readonly [K, V])[] | null) {
-		super(entries)
-	}
-
-	get(key: K): V {
-		if (!super.has(key)) {
-			super.set(key, this.defaultFn(key))
-		}
-		return super.get(key)!
-	}
-}
-
 export const getRandomInt = (max: number) => Math.floor(Math.random() * max)

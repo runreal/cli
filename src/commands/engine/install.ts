@@ -39,7 +39,7 @@ export const install = new Command()
 			dryRun,
 			setup,
 		} = options as InstallOptions
-		const cfg = config.get(options as CliOptions)
+		const cfg = config().get(options as CliOptions)
 		source = source || cfg.engine.gitSource
 		destination = destination || cfg.engine.path
 

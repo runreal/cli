@@ -10,10 +10,10 @@ export const debugConfig = new Command<GlobalOptions>()
 	.description('debug config')
 	.action((options) => {
 		const { render } = options as DebugConfigOptions & GlobalOptions
-		const cfg = config.get(options as CliOptions)
+		const cfg = config().get(options as CliOptions)
 
 		if (render) {
-			const rendered = config.renderConfig(cfg)
+			const rendered = config().renderConfig(cfg)
 			console.dir(rendered, { depth: null })
 			return
 		}

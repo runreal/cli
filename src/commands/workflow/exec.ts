@@ -51,7 +51,7 @@ export const exec = new Command<GlobalOptions>()
 	.arguments('<workflow>')
 	.action(async (options, workflow) => {
 		const { dryRun, mode } = options as ExecOptions
-		const cfg = config.get(options as CliOptions) as any
+		const cfg = config().get(options as CliOptions) as any
 
 		const run = cfg.workflows.find((w: any) => w.name === workflow)
 		if (!run) {

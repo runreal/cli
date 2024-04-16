@@ -25,7 +25,7 @@ export const build = new Command<GlobalOptions>()
 	.arguments('<target:string>')
 	.action(async (options: unknown, target = EngineTarget.Editor) => {
 		const { platform, configuration, dryRun } = options as BuildOptions
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.get(options as CliOptions)
+		const { engine: { path: enginePath }, project: { path: projectPath } } = config().get(options as CliOptions)
 
 		const engine = createEngine(enginePath)
 		const validTargets = await engine.parseEngineTargets()

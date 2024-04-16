@@ -4,6 +4,7 @@ import { execSync } from '../lib/utils.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
+import { logger } from './logger.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
@@ -58,13 +59,30 @@ export class Config {
 
 	private constructor() {}
 
-	static async create(): Promise<Config> {
+	static init(configFileName?: string) {
 		const instance = new Config()
-		const configPath = await instance.searchForConfigFile()
-		if (configPath) {
-			await instance.mergeConfig(configPath)
+		if (configFileName) {
+			const cwd = Deno.cwd()
+			const configPath = path.join(cwd, configFileName)
+
+			try {
+				const fileInfo = Deno.statSync(configPath)
+				if (fileInfo.isFile) {
+					dotenv.loadSync({ export: true })
+
+					if (configPath) {
+						const data = Deno.readTextFileSync(path.resolve(configPath)) as string
+						const parsed = parse(data) as unknown
+						const cfg = parsed as RunrealConfig
+						instance.config = deepmerge(instance.config, cfg)
+						return instance
+					}
+					return instance
+				}
+			} catch (e) {
+				logger.error(`Error reading config file ${configPath}`)
+			}
 		}
-		dotenv.loadSync({ export: true })
 		return instance
 	}
 
@@ -79,34 +97,6 @@ export class Config {
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
 		const rendered = renderConfig(cfg)
     return normalizePaths(rendered)
-	}
-
-	async mergeConfig(configPath: string) {
-		const cfg = await this.readConfigFile(configPath)
-		if (!cfg) return
-		this.config = deepmerge(this.config, cfg)
-		return this.config
-	}
-
-	private async searchForConfigFile(): Promise<string | null> {
-		const cwd = Deno.cwd()
-		const configPath = path.join(cwd, 'runreal.config.json')
-		try {
-			const fileInfo = await Deno.stat(configPath)
-			if (fileInfo.isFile) {
-				return configPath
-			}
-		} catch (e) { /* pass */ }
-		return null
-	}
-
-	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
-		try {
-			const data = await Deno.readTextFile(path.resolve(configPath)) as string
-			const parsed = parse(data) as unknown
-			return parsed as RunrealConfig
-		} catch (e) { /* pass */ }
-		return null
 	}
 
 	private mergeWithCliOptions(cliOptions: CliOptions) {
@@ -248,4 +238,10 @@ export class Config {
 	}
 }
 
-export const config = await Config.create()
+let _config: Config | null = null
+export const config = (configPath?: string, force?: boolean) => {
+	if (!_config || force) {
+		_config = Config.init(configPath)
+	}
+	return _config
+}

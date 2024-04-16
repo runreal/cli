@@ -1,6 +1,5 @@
 import { Command, EnumType, ulid } from './deps.ts'
 
-import { config } from './lib/config.ts'
 import { logger, LogLevel } from './lib/logger.ts'
 
 export const cmd = new Command()
@@ -13,11 +12,7 @@ export const cmd = new Command()
 		default: LogLevel.DEBUG,
 		action: ({ logLevel }) => logger.setLogLevel(logLevel),
 	})
-	.globalOption('-c, --config-path <configPath:string>', 'Path to config file', {
-		action: async ({ configPath }) => {
-			if (configPath) { const cfg = await config.mergeConfig(configPath) }
-		},
-	})
+	.globalOption('-c, --config-path <configPath:string>', 'Path to config file', { default: 'runreal.config.json' })
 	.globalEnv('RUNREAL_ENGINE_PATH=<enginePath:string>', 'Overide path to engine folder', { prefix: 'RUNREAL_' })
 	.globalOption('--engine-path <enginePath:string>', 'Path to engine folder')
 	.globalEnv('RUNREAL_PROJECT_PATH=<projectPath:string>', 'Overide path to project folder', { prefix: 'RUNREAL_' })

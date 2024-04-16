@@ -179,9 +179,9 @@ export abstract class Engine {
 		dryRun?: boolean
 	}) {
 		console.log('[runClean]', { dryRun })
-		const binaryGlob = path.join(config.get().project.path, '**/Binaries')
-		const intermediateGlob = path.join(config.get().project.path, '**/Intermediate')
-		const cwd = config.get().project?.path
+		const binaryGlob = path.join(config().get().project.path, '**/Binaries')
+		const intermediateGlob = path.join(config().get().project.path, '**/Intermediate')
+		const cwd = config().get().project?.path
 		const iterator = globber({
 			cwd,
 			include: [binaryGlob, intermediateGlob],
