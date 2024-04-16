@@ -1,4 +1,5 @@
 import { RunrealConfig } from './types.ts'
+import { path } from '../deps.ts'
 
 /**
  * Get the substitutions object with values from the config.
@@ -25,6 +26,8 @@ export const getSubstitutions = (cfg: RunrealConfig): Record<string, string | un
  */
 const placeholderRegex = /\$\{([^}]+)\}/g
 
+const pathRegex = /\$path\(([^)]+)\)/g
+
 /**
  * Replace all ${placeholders} in the items with values from the substitutions object.
  * If a placeholder is not found in the substitutions object, it will be kept as is.
@@ -34,11 +37,21 @@ const placeholderRegex = /\$\{([^}]+)\}/g
  */
 export function render(input: string[], cfg: RunrealConfig): string[] {
 	const substitutions: Record<string, string | undefined> = getSubstitutions(cfg)
-	return input.map((arg) =>
-		arg.replace(placeholderRegex, (_, key: string) => {
-			return key in substitutions ? substitutions[key] || key : _
+	return input.map((arg) => subReplace(placeholderRegex, arg, substitutions))
+}
+
+const subReplace = (regex: RegExp, item: string, substitutions: Record<string, string | undefined>) => {
+	return item.replace(regex, (_, key: string) => {
+		return key in substitutions ? substitutions[key] || key : _
+	})
+}
+
+export function normalizePaths(item: any): any {
+	const re = (_: any, str: string) =>
+		str.replace(pathRegex, (_: any, ...matches: any[]): string => {
+			return path.normalize(matches[0]).split(/\/|\\/).join('/')
 		})
-	)
+	return renderItems(item, {}, re)
 }
 
 /**
@@ -48,18 +61,22 @@ export function render(input: string[], cfg: RunrealConfig): string[] {
  * @param {Record<string, string | undefined>} substitutions
  * @returns {any} the rendered items
  */
-function renderItems(item: any, substitutions: Record<string, string | undefined>): any {
+function renderItems(
+	item: any,
+	substitutions: Record<string, string | undefined>,
+	replace: (...a: any) => string,
+): any {
 	if (typeof item === 'string') {
 		// Replace placeholders in strings
-		return item.replace(/\$\{([^}]+)\}/g, (_, key: string) => substitutions[key] || _)
+		return replace(placeholderRegex, item, substitutions)
 	} else if (Array.isArray(item)) {
 		// Recursively process each item in an array
-		return item.map((subItem) => renderItems(subItem, substitutions))
+		return item.map((subItem) => renderItems(subItem, substitutions, replace))
 	} else if (typeof item === 'object' && item !== null) {
 		// Recursively process each property in an object
 		const result: Record<string, any> = {}
 		for (const key of Object.keys(item)) {
-			result[key] = renderItems(item[key], substitutions)
+			result[key] = renderItems(item[key], substitutions, replace)
 		}
 		return result
 	}
@@ -74,5 +91,5 @@ function renderItems(item: any, substitutions: Record<string, string | undefined
  */
 export function renderConfig(cfg: RunrealConfig) {
 	const substitutions: Record<string, string | undefined> = getSubstitutions(cfg)
-	return renderItems(cfg, substitutions) as RunrealConfig
+	return renderItems(cfg, substitutions, subReplace) as RunrealConfig
 }

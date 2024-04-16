@@ -3,7 +3,7 @@ import { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { execSync } from '../lib/utils.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
-import { renderConfig } from './template.ts'
+import { normalizePaths, renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
@@ -78,7 +78,7 @@ export class Config {
 
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
 		const rendered = renderConfig(cfg)
-		return rendered
+    return normalizePaths(rendered)
 	}
 
 	async mergeConfig(configPath: string) {
