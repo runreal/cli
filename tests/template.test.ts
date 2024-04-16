@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std/assert/mod.ts'
-import { getSubstitutions, render, renderConfig } from '../src/lib/template.ts'
+import { getSubstitutions, normalizePaths, render, renderConfig } from '../src/lib/template.ts'
 import { RunrealConfig } from '../src/lib/types.ts'
 
 Deno.test('template tests', () => {
@@ -111,4 +111,31 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 	}
 	const result = renderConfig(cfg as RunrealConfig)
 	assertEquals(result, expected)
+})
+
+Deno.test('replace paths in template', () => {
+	const cfg: Partial<RunrealConfig> = {
+		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
+		engine: { path: '/engines/5.0', repoType: 'git' },
+		build: { id: '1234' },
+		workflows: [
+			{
+				name: 'compile',
+				steps: [
+					{
+						command: 'build',
+						args: [
+							'$path(${project.path}\\Build\\Build.xml)',
+							'-set:BuildId=${build.id}',
+							'-set:ProjectName=${project.name}',
+						],
+					},
+				],
+			},
+		],
+	}
+
+	const result = normalizePaths(renderConfig(cfg as RunrealConfig))
+
+	assertEquals(result.workflows[0].steps[0].args[0], '/projects/project/Build/Build.xml')
 })
