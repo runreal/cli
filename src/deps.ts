@@ -1,4 +1,4 @@
-export * as path from 'https://deno.land/std@0.204.0/path/mod.ts'
+export * as path from 'https://deno.land/std@0.222.1/path/mod.ts'
 export { mergeReadableStreams } from 'https://deno.land/std@0.204.0/streams/merge_readable_streams.ts'
 export * as fmt from 'https://deno.land/std@0.204.0/fmt/colors.ts'
 export * as dotenv from 'https://deno.land/std@0.204.0/dotenv/mod.ts'
