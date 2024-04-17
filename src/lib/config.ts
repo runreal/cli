@@ -78,7 +78,7 @@ export class Config {
 
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
 		const rendered = renderConfig(cfg)
-    return normalizePaths(rendered)
+		return normalizePaths(rendered)
 	}
 
 	async mergeConfig(configPath: string) {
