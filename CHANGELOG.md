@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/runreal/cli/compare/v1.2.1...v1.2.2) (2024-05-08)
+
+
+### Bug Fixes
+
+* remove param in constructor ([f058999](https://github.com/runreal/cli/commit/f058999ac37d197523dcad877530d6577db8dae3))
+
 ## [1.2.1](https://github.com/runreal/cli/compare/v1.2.0...v1.2.1) (2024-05-08)
 
 
