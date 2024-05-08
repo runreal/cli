@@ -66,6 +66,9 @@ export class Perforce extends Base {
 		return parts.join('/')
 	}
 	safeRef(): string {
+		return this.changelist()
+	}
+	safeFullRef(): string {
 		return this.ref().split('//').filter(Boolean).join('-').replace(/\//g, '-').toLowerCase()
 	}
 	clone({
