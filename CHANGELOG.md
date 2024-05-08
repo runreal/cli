@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/runreal/cli/compare/v1.2.0...v1.2.1) (2024-05-08)
+
+
+### Bug Fixes
+
+* p4 incorrect cl ref for current workspace ([30928bb](https://github.com/runreal/cli/commit/30928bbd840a6b457fc2a43ec1850454baccda58))
+
 ## [1.2.0](https://github.com/runreal/cli/compare/v1.1.2...v1.2.0) (2024-04-17)
 
 
