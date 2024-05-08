@@ -27,7 +27,7 @@ abstract class Base {
 export class Perforce extends Base {
 	executable: string = 'p4'
 	clientName: string
-	constructor(cwd: string, clientName: string) {
+	constructor(cwd: string) {
 		super(cwd)
 		this.clientName = this.getClientName()
 	}
