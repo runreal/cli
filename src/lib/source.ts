@@ -26,6 +26,14 @@ abstract class Base {
 
 export class Perforce extends Base {
 	executable: string = 'p4'
+	clientName: string
+	constructor(cwd: string, clientName: string) {
+		super(cwd)
+		this.clientName = this.getClientName()
+	}
+	getClientName(): string {
+		return execSync(this.executable, ['-F', '%client%', 'info'], { cwd: this.cwd, quiet: true }).output.trim()
+	}
 	stream(): string {
 		return execSync(this.executable, [
 			'-F',
@@ -41,6 +49,8 @@ export class Perforce extends Base {
 			'%change%',
 			'changes',
 			'-m1',
+			// This is required to get the latest CL on the current client and not the remote server
+			`@${this.clientName}`,
 		], { cwd: this.cwd, quiet: true }).output.trim().replace('Change ', '')
 	}
 	ref(): string {
