@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/runreal/cli/compare/v1.2.2...v1.2.3) (2024-05-08)
+
+
+### Bug Fixes
+
+* simplify p4 build id ([ed6cbd6](https://github.com/runreal/cli/commit/ed6cbd6b3b12e0215ff7a0c390389be24eff0510))
+
 ## [1.2.2](https://github.com/runreal/cli/compare/v1.2.1...v1.2.2) (2024-05-08)
 
 
