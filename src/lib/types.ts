@@ -43,3 +43,15 @@ export interface GitIgnoreFiles {
 	files: string[]
 	dirs: string[]
 }
+
+export interface ScriptContext {
+	env: string
+
+	lib: {
+		uploadArtifact: () => Promise<void>
+	}
+}
+
+export interface Script {
+	main: (ctx: ScriptContext) => Promise<void>
+}
