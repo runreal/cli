@@ -1,4 +1,4 @@
-import { Command, z } from '../deps.ts'
+import { $, Command, path, z } from '../deps.ts'
 import { cmd } from '../cmd.ts'
 
 import { DebugConfigOptions } from '../commands/debug/debug-config.ts'
@@ -46,9 +46,10 @@ export interface GitIgnoreFiles {
 
 export interface ScriptContext {
 	env: string
-
+	config: RunrealConfig
 	lib: {
-		uploadArtifact: () => Promise<void>
+		$: typeof $
+		path: typeof path
 	}
 }
 

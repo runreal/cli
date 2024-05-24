@@ -16,3 +16,4 @@ export { ulid }
 export { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 export { globber } from 'https://deno.land/x/globber@0.1.0/mod.ts'
 export { zodToJsonSchema } from 'npm:zod-to-json-schema'
+export { $ } from 'https://deno.land/x/dax@0.39.2/mod.ts'
