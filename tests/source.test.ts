@@ -1,4 +1,5 @@
 import { assertEquals } from 'https://deno.land/std/assert/mod.ts'
+import { returnsNext, stub } from 'https://deno.land/std/testing/mock.ts'
 import { Perforce, Source } from '../src/lib/source.ts'
 
 Deno.test('source git', () => {
@@ -13,25 +14,14 @@ Deno.test('source git', () => {
 })
 
 Deno.test('source perforce - safeRef test', () => {
-	const psource = Source('cwd', 'perforce')
-	assertEquals(psource.executable, 'p4')
+	using _clientStub = stub(Perforce.prototype, 'getClientName', returnsNext(['pclient', 'sclient']))
+	using _changeStub = stub(Perforce.prototype, 'changelist', returnsNext(['5034', '5035', '5036']))
+	using _streamStub = stub(Perforce.prototype, 'stream', returnsNext(['//Stream/Main', '//Stream/Main2']))
 
-	psource.ref = () => 'main/1'
-	assertEquals(psource.safeRef(), 'main-1')
+	const psource = new Perforce('cwd')
+	assertEquals(psource.safeRef(), '5034')
+	assertEquals(psource.safeFullRef(), 'stream-main-5035')
 
-	psource.ref = () => 'main//1'
-	assertEquals(psource.safeRef(), 'main-1')
-
-	psource.ref = () => '//main//1'
-	assertEquals(psource.safeRef(), 'main-1')
-
-	psource.ref = () => '//Main//1'
-	assertEquals(psource.safeRef(), 'main-1')
-
-	const psource2 = new Perforce('cwd')
-	assertEquals(psource2.executable, 'p4')
-
-	psource2.stream = () => '//Stream/Main'
-	psource2.changelist = () => '50'
-	assertEquals(psource2.safeRef(), 'stream-main-50')
+	const psource2 = Source('cwd', 'perforce')
+	assertEquals(psource2.safeRef(), '5036')
 })

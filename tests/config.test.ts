@@ -29,6 +29,7 @@ Deno.test('Config.create should initialize with default values', async () => {
 			buildPipelineSlug: '',
 		},
 		metadata: {
+			ts: config.get().metadata.ts,
 			safeRef: '',
 			git: {
 				branch: '',
