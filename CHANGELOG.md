@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/runreal/cli/compare/v1.2.3...v1.3.0) (2024-05-28)
+
+
+### Features
+
+* add date metadata to schema and template ([506390f](https://github.com/runreal/cli/commit/506390f9e5e7d63db54980b596583867ae8e0348))
+
 ## [1.2.3](https://github.com/runreal/cli/compare/v1.2.2...v1.2.3) (2024-05-08)
 
 
