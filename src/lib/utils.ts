@@ -360,3 +360,18 @@ export class DefaultMap<K, V> extends Map<K, V> {
 }
 
 export const getRandomInt = (max: number) => Math.floor(Math.random() * max)
+
+/**
+ * Format a timestamp string to a human-readable date string.
+ * @param {string} ISO timestamp string
+ * @param {Intl.LocalesArgument} locale
+ * @param {Intl.DateTimeFormatOptions} options
+ * @returns {string} the formatted date string
+ */
+export function formatIsoTimestamp(
+	ts: string,
+	locale: Intl.LocalesArgument = 'en-CA',
+	options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric' },
+): string {
+	return new Intl.DateTimeFormat(locale, options).format(new Date(ts))
+}

@@ -9,6 +9,7 @@ export const InternalSchema = z.object({
 		buildPipelineSlug: z.string().describe('Buildkite pipeline slug').optional(),
 	}).optional(),
 	metadata: z.object({
+		ts: z.string().describe('Timestamp'),
 		safeRef: z.string().describe('Safe reference for file outputs or build ids').optional(),
 		git: z.object({
 			branch: z.string().describe('Branch name'),
