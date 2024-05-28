@@ -29,6 +29,7 @@ const defaultConfig = (): Partial<RunrealConfig> => ({
 		buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
 	},
 	metadata: {
+		ts: new Date().toISOString(),
 		safeRef: '',
 		git: {
 			branch: '',
@@ -145,7 +146,7 @@ export class Config {
 		return config
 	}
 
-	private getBuildMetadata(): RunrealConfig['metadata'] | null {
+	private getBuildMetadata(): Partial<RunrealConfig['metadata']> | null {
 		const cwd = this.config.project?.path
 		if (!cwd) return null
 		if (this.config.project?.repoType === 'git') {
@@ -164,7 +165,7 @@ export class Config {
 		return null
 	}
 
-	private getGitBuildMetadata(projectPath: string): RunrealConfig['metadata'] {
+	private getGitBuildMetadata(projectPath: string): Partial<RunrealConfig['metadata']> {
 		const cwd = projectPath
 		try {
 			const source = new Git(cwd)
@@ -187,7 +188,7 @@ export class Config {
 		}
 	}
 
-	private getPerforceBuildMetadata(projectPath: string): RunrealConfig['metadata'] {
+	private getPerforceBuildMetadata(projectPath: string): Partial<RunrealConfig['metadata']> {
 		const cwd = projectPath
 		try {
 			const source = new Perforce(cwd)
@@ -229,6 +230,7 @@ export class Config {
 			this.config.metadata = {
 				...this.config.metadata,
 				...metadata,
+				ts: new Date().toISOString(),
 			}
 
 			const buildId = this.getBuildId()
