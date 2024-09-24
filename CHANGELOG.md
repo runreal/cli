@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/runreal/cli/compare/v1.3.0...v1.3.1) (2024-09-24)
+
+
+### Bug Fixes
+
+* use draft 07 schema ([#38](https://github.com/runreal/cli/issues/38)) ([e6c87be](https://github.com/runreal/cli/commit/e6c87beb7858fadb4f46036e3cf80238032c74e3))
+
 ## [1.3.0](https://github.com/runreal/cli/compare/v1.2.3...v1.3.0) (2024-05-28)
 
 
