@@ -1,10 +1,10 @@
-export * as path from '@std/path'
-export { mergeReadableStreams } from '@std/streams'
+export * as path from 'jsr:@std/path'
+export { mergeReadableStreams } from 'jsr:@std/streams'
 
-export * as dotenv from '@std/dotenv'
-export * as fmt from '@std/fmt/colors'
+export * as dotenv from 'jsr:@std/dotenv'
+export * as fmt from 'jsr:@std/fmt/colors'
 
-export { parse } from '@std/jsonc'
+export { parse } from 'jsr:@std/jsonc'
 // Maybe use npm specifier
 
 export { xml2js } from 'https://deno.land/x/xml2js@1.0.0/mod.ts'
