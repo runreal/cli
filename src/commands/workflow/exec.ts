@@ -24,7 +24,10 @@ async function executeCommand(step: { command: string; args: string[] }) {
 			await execCmd(baseCmd, [...step.command.split(' ').slice(1), ...step.args])
 		}
 	} catch (e) {
+		if (e instanceof Error) {
+
 		console.log(`[error] failed to exec :runreal ${step.command} ${step.args.join(' ')}: => ${e.message}`)
+		}
 		throw e
 	}
 }
@@ -46,11 +49,11 @@ async function buildkiteExecutor(steps: { command: string; args: string[] }[]) {
 export const exec = new Command<GlobalOptions>()
 	.option('-d, --dry-run', 'Dry run')
 	.type('mode', new EnumType(Mode))
-	.option('-m, --mode <mode:mode>', 'Execution mode', { default: Mode.Local })
+	.option('-m, --mode <mode:mode>', 'Execution mode')
 	.description('run')
 	.arguments('<workflow>')
 	.action(async (options, workflow) => {
-		const { dryRun, mode } = options as ExecOptions
+		const { dryRun, mode } = options
 		const cfg = config.get(options as CliOptions) as any
 
 		const run = cfg.workflows.find((w: any) => w.name === workflow)

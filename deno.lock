@@ -21,6 +21,7 @@
     "jsr:@std/streams@^1.0.7": "1.0.7",
     "jsr:@std/testing@^1.0.3": "1.0.3",
     "jsr:@std/text@~1.0.7": "1.0.8",
+    "npm:xml2js@*": "0.6.2",
     "npm:xml2js@~0.6.2": "0.6.2",
     "npm:zod-to-json-schema@*": "3.23.3_zod@3.23.8"
   },

@@ -7,7 +7,7 @@ export * as fmt from "@std/fmt/colors";
 export { parse } from "@std/jsonc";
 // Maybe use npm specifier
 
-export { xml2js } from 'xml2js'
+export { xml2js } from 'https://deno.land/x/xml2js@1.0.0/mod.ts'
 export { Command, EnumType, ValidationError } from '@cliffy/command'
 export { deepmerge } from '@rebeccastevens/deepmerge'
 export { readNdjson } from 'https://deno.land/x/ndjson@1.1.0/mod.ts'
