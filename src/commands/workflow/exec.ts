@@ -48,7 +48,7 @@ async function buildkiteExecutor(steps: { command: string; args: string[] }[]) {
 export const exec = new Command<GlobalOptions>()
 	.option('-d, --dry-run', 'Dry run')
 	.type('mode', new EnumType(Mode))
-	.option('-m, --mode <mode:mode>', 'Execution mode')
+	.option('-m, --mode <mode:mode>', 'Execution mode', { default: Mode.Local })
 	.description('run')
 	.arguments('<workflow>')
 	.action(async (options, workflow) => {
