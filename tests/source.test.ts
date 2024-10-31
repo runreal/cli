@@ -1,5 +1,5 @@
-import { assertEquals } from 'https://deno.land/std/assert/mod.ts'
-import { returnsNext, stub } from 'https://deno.land/std/testing/mock.ts'
+import { assertEquals } from '@std/assert'
+import { returnsNext, stub } from '@std/testing/mock'
 import { Perforce, Source } from '../src/lib/source.ts'
 
 Deno.test('source git', () => {

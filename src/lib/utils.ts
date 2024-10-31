@@ -1,4 +1,4 @@
-import { mergeReadableStreams, path, xml2js } from '../deps.ts'
+import {  xml2js, mergeReadableStreams, path } from '../deps.ts'
 import { createEngine, EngineConfiguration, EnginePlatform, EngineTarget } from './engine.ts'
 import { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 
@@ -351,7 +351,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 		super(entries)
 	}
 
-	get(key: K): V {
+	override get(key: K): V {
 		if (!super.has(key)) {
 			super.set(key, this.defaultFn(key))
 		}

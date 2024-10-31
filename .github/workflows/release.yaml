@@ -15,10 +15,10 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
-        deno-version: [1.42.1]
+        deno-version: [2.0.4]
 
     steps:
       - uses: google-github-actions/release-please-action@v3
@@ -34,13 +34,13 @@ jobs:
 
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
-      
+
       - name: Setup Deno ${{ matrix.deno-version }}
         if: ${{ steps.release.outputs.release_created }}
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ matrix.deno-version }}
-          
+
       - name: Deno Compile [windows]
         if: ${{ steps.release.outputs.release_created }}
         run: deno task compile-win
@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ steps.release.outputs.tag_name }} ./build/runreal-win-x64.exe ./build/runreal-macos-arm ./build/runreal-linux-x64 schema.json
 
-      - name: Cache Deno dependencies 
+      - name: Cache Deno dependencies
         if: ${{ steps.release.outputs.release_created }}
         uses: actions/cache@v3
         with:
