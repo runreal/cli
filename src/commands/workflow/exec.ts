@@ -48,14 +48,18 @@ async function buildkiteExecutor(steps: { command: string; args: string[] }[]) {
 export const exec = new Command<GlobalOptions>()
 	.option('-d, --dry-run', 'Dry run')
 	.type('mode', new EnumType(Mode))
-	.option('-m, --mode <mode:mode>', 'Execution mode')
+	.option('-m, --mode <mode:mode>', 'Execution mode', { default: Mode.Local })
 	.description('run')
 	.arguments('<workflow>')
 	.action(async (options, workflow) => {
 		const { dryRun, mode } = options
-		const cfg = config.get(options as CliOptions) as any
+		const cfg = config.get(options as CliOptions)
 
-		const run = cfg.workflows.find((w: any) => w.name === workflow)
+		if (!cfg.workflows) {
+			throw new ValidationError('No workflows defined in config')
+		}
+
+		const run = cfg.workflows.find((w) => w.id === workflow || w.name === workflow)
 		if (!run) {
 			throw new ValidationError(`Workflow ${workflow} not found`)
 		}
