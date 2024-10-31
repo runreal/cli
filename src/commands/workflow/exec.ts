@@ -25,8 +25,7 @@ async function executeCommand(step: { command: string; args: string[] }) {
 		}
 	} catch (e) {
 		if (e instanceof Error) {
-
-		console.log(`[error] failed to exec :runreal ${step.command} ${step.args.join(' ')}: => ${e.message}`)
+			console.log(`[error] failed to exec :runreal ${step.command} ${step.args.join(' ')}: => ${e.message}`)
 		}
 		throw e
 	}
