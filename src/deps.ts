@@ -9,7 +9,7 @@ export { parse } from '@std/jsonc'
 
 export { xml2js } from 'https://deno.land/x/xml2js@1.0.0/mod.ts'
 export { Command, EnumType, ValidationError } from '@cliffy/command'
-export { deepmerge } from '@rebeccastevens/deepmerge'
+export { deepmerge } from 'jsr:@rebeccastevens/deepmerge'
 export { readNdjson } from 'https://deno.land/x/ndjson@1.1.0/mod.ts'
 
 import { monotonicFactory } from 'https://deno.land/x/ulid@v0.3.0/mod.ts'
