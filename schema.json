@@ -73,6 +73,11 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-]*$",
+            "description": "Workflow id"
+          },
           "name": {
             "type": "string",
             "description": "Workflow name"

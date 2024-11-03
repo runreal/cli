@@ -88,6 +88,7 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 		workflows: [
 			{
+				id: 'compile',
 				name: 'compile',
 				steps: [
 					{
@@ -109,6 +110,7 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 		workflows: [
 			{
+				id: 'compile',
 				name: 'compile',
 				steps: [
 					{
@@ -135,6 +137,7 @@ Deno.test('replace paths in template', () => {
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 		workflows: [
 			{
+				id: 'compile',
 				name: 'compile',
 				steps: [
 					{
