@@ -65,7 +65,7 @@ export class Perforce extends Base {
 		}
 		return parts.join('/')
 	}
-	safeRef(): string {
+	override safeRef(): string {
 		return this.changelist()
 	}
 	safeFullRef(): string {

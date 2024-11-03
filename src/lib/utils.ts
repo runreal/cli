@@ -351,7 +351,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 		super(entries)
 	}
 
-	get(key: K): V {
+	override get(key: K): V {
 		if (!super.has(key)) {
 			super.set(key, this.defaultFn(key))
 		}

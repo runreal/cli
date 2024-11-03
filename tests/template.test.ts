@@ -1,4 +1,4 @@
-import { assertEquals } from 'https://deno.land/std/assert/mod.ts'
+import { assertEquals } from '@std/assert'
 import { getSubstitutions, normalizePaths, render, renderConfig } from '../src/lib/template.ts'
 import { RunrealConfig } from '../src/lib/types.ts'
 
