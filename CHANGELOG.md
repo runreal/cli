@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0](https://github.com/runreal/cli/compare/v1.3.0...v1.4.0) (2024-11-04)
+
+
+### Features
+
+* [RUN-130] Update to Deno 2 ([#39](https://github.com/runreal/cli/issues/39)) ([a4930f7](https://github.com/runreal/cli/commit/a4930f76cdf0effcf2b8441112fc347197bc5631))
+* [RUN-131] add workflow ID support ([#40](https://github.com/runreal/cli/issues/40)) ([0978ce1](https://github.com/runreal/cli/commit/0978ce10ef923e58a1a4d5052628dcbc4f289c76))
+
+
+### Bug Fixes
+
+* [RUN-84] Error code when running command  ([#41](https://github.com/runreal/cli/issues/41)) ([b26b808](https://github.com/runreal/cli/commit/b26b80856c1a0b7db1392794a6327813bba9ae55))
+* use draft 07 schema ([#38](https://github.com/runreal/cli/issues/38)) ([e6c87be](https://github.com/runreal/cli/commit/e6c87beb7858fadb4f46036e3cf80238032c74e3))
+
 ## [1.3.0](https://github.com/runreal/cli/compare/v1.2.3...v1.3.0) (2024-05-28)
 
 
