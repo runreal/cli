@@ -11,6 +11,7 @@
 	},
 	"workflows": [
 		{
+			"id": "compile-client",
 			"name": "compile client",
 			"steps": [
 				{
@@ -27,6 +28,7 @@
 			]
 		},
 		{
+			"id": "compile-server",
 			"name": "compile server",
 			"steps": [
 				{
@@ -43,6 +45,7 @@
 			]
 		},
 		{
+			"id": "cook-all",
 			"name": "cook all",
 			"steps": [
 				{
@@ -59,6 +62,7 @@
 			]
 		},
 		{
+			"id": "package-client",
 			"name": "package client",
 			"steps": [
 				{
@@ -79,6 +83,7 @@
 			]
 		},
 		{
+			"id": "package-server",
 			"name": "package server",
 			"steps": [
 				{
