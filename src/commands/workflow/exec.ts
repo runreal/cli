@@ -21,7 +21,10 @@ async function executeCommand(step: { command: string; args: string[] }) {
 			await cmd.parse([...baseCmd, ...step.args])
 		} else {
 			const baseCmd = step.command.split(' ').shift() || ''
-			await execCmd(baseCmd, [...step.command.split(' ').slice(1), ...step.args])
+			const { success, code } = await execCmd(baseCmd, [...step.command.split(' ').slice(1), ...step.args])
+			if (!success) {
+				throw new Error(`Command failed with code ${code}`)
+			}
 		}
 	} catch (e) {
 		if (e instanceof Error) {
