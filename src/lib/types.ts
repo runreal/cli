@@ -1,11 +1,11 @@
-import { Command, z } from '../deps.ts'
-import { cmd } from '../cmd.ts'
+import type { $, Command, path, z } from '../deps.ts'
+import type { cmd } from '../cmd.ts'
 
-import { DebugConfigOptions } from '../commands/debug/debug-config.ts'
-import { SetupOptions } from '../commands/engine/setup.ts'
-import { InstallOptions } from '../commands/engine/install.ts'
-import { UpdateOptions } from '../commands/engine/update.ts'
-import { ConfigSchema, InternalSchema } from './schema.ts'
+import type { DebugConfigOptions } from '../commands/debug/debug-config.ts'
+import type { SetupOptions } from '../commands/engine/setup.ts'
+import type { InstallOptions } from '../commands/engine/install.ts'
+import type { UpdateOptions } from '../commands/engine/update.ts'
+import type { ConfigSchema, InternalSchema } from './schema.ts'
 
 export type GlobalOptions = typeof cmd extends
 	Command<void, void, void, [], infer Options extends Record<string, unknown>> ? Options
@@ -42,4 +42,17 @@ export interface UeDepsManifest {
 export interface GitIgnoreFiles {
 	files: string[]
 	dirs: string[]
+}
+
+export interface ScriptContext {
+	env: string
+	config: RunrealConfig
+	lib: {
+		$: typeof $
+		path: typeof path
+	}
+}
+
+export interface Script {
+	main: (ctx: ScriptContext) => Promise<void>
 }

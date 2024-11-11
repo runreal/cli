@@ -1,6 +1,8 @@
 export * as path from 'jsr:@std/path'
 export { mergeReadableStreams } from 'jsr:@std/streams'
 
+export { $ } from 'jsr:@david/dax@0.42.0'
+
 export * as dotenv from 'jsr:@std/dotenv'
 export * as fmt from 'jsr:@std/fmt/colors'
 

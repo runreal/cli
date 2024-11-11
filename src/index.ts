@@ -11,6 +11,7 @@ import { buildgraph } from './commands/buildgraph/index.ts'
 import { workflow } from './commands/workflow/index.ts'
 import { clean } from './commands/clean.ts'
 import { cmd } from './cmd.ts'
+import { script } from './commands/script.ts'
 
 await cmd
 	.name('runreal')
@@ -26,4 +27,5 @@ await cmd
 	.command('pkg', pkg)
 	.command('buildgraph', buildgraph)
 	.command('workflow', workflow)
+	.command('script', script)
 	.parse(Deno.args)
