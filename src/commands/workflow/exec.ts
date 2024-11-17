@@ -1,12 +1,9 @@
 import { Command, EnumType, ValidationError } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
 import { cmd } from '../../cmd.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { exec as execCmd, randomBuildkiteEmoji } from '../../lib/utils.ts'
-import { getSubstitutions, render } from '../../lib/template.ts'
-
-export type ExecOptions = typeof exec extends Command<any, any, infer Options, any, any> ? Options
-	: never
+import { render } from '../../lib/template.ts'
 
 enum Mode {
 	Local = 'local',

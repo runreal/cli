@@ -2,10 +2,7 @@ import { Command } from '../deps.ts'
 import { createEngine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile } from '../lib/utils.ts'
 import { config } from '../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../lib/types.ts'
-
-export type UatOptions = typeof uat extends Command<any, any, infer Options, any, any> ? Options
-	: never
+import type { CliOptions, GlobalOptions } from '../lib/types.ts'
 
 export const uat = new Command<GlobalOptions>()
 	.description('uat')

@@ -1,10 +1,8 @@
 import { Command, ValidationError } from '../../deps.ts'
 import { cloneRepo, runEngineSetup } from '../../lib/utils.ts'
-import { CliOptions } from '../../lib/types.ts'
+import type { CliOptions } from '../../lib/types.ts'
 import { config } from '../../lib/config.ts'
-
-export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
-	: never
+import { cmd } from '../../cmd.ts'
 
 export const install = new Command()
 	.description('install engine from a source repository')
@@ -38,36 +36,37 @@ export const install = new Command()
 			force,
 			dryRun,
 			setup,
-		} = options as InstallOptions
+		} = options
 		const cfg = config.get(options as CliOptions)
-		source = source || cfg.engine.gitSource
-		destination = destination || cfg.engine.path
 
-		if (!source) {
+		const newSource = source || cfg.engine.gitSource
+		const newDestination = destination || cfg.engine.path
+
+		if (!newSource) {
 			throw new ValidationError('missing source')
 		}
-		if (!destination) {
+		if (!newDestination) {
 			throw new ValidationError('missing destination')
 		}
 		try {
-			await Deno.mkdir(destination)
+			await Deno.mkdir(newDestination)
 		} catch (e) {
 			if (e instanceof Deno.errors.AlreadyExists) {
 				if (force && !dryRun) {
-					console.log(`Deleting ${destination}`)
-					await Deno.remove(destination, { recursive: true })
+					console.log(`Deleting ${newDestination}`)
+					await Deno.remove(newDestination, { recursive: true })
 				} else {
 					// Exit with a message instead of error so we can chain this install command
 					console.log(
-						`Destination ${destination} already exists, use --force to overwrite.`,
+						`Destination ${newDestination} already exists, use --force to overwrite.`,
 					)
 					return
 				}
 			}
 		}
 		const clonedPath = await cloneRepo({
-			source,
-			destination,
+			source: newSource,
+			destination: newDestination,
 			branch,
 			useMirror: false,
 			dryRun,

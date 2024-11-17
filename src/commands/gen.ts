@@ -2,10 +2,6 @@ import { Command } from '../deps.ts'
 import { createEngine, Engine } from '../lib/engine.ts'
 import { exec, findProjectFile } from '../lib/utils.ts'
 
-export type GenOptions = typeof gen extends Command<void, void, infer Options extends Record<string, unknown>, [], void>
-	? Options
-	: never
-
 export const gen = new Command()
 	.description('generate')
 	.option('-p, --project-path <project-path:file>', 'Path to project folder', {

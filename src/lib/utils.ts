@@ -1,6 +1,6 @@
 import { mergeReadableStreams, path, xml2js } from '../deps.ts'
-import { createEngine, EngineConfiguration, EnginePlatform, EngineTarget } from './engine.ts'
-import { GitIgnoreFiles, UeDepsManifest } from './types.ts'
+import { createEngine } from './engine.ts'
+import type { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 
 export async function exec(
 	cmd: string,
@@ -92,12 +92,10 @@ export async function getHomeDir(): Promise<string> {
 
 		if (homeDir) {
 			return homeDir
-		} else {
-			throw new Error('Could not determine the home directory.')
 		}
-	} else {
-		throw new Error('Permission denied: Cannot access environment variables.')
+		throw new Error('Could not determine the home directory.')
 	}
+	throw new Error('Permission denied: Cannot access environment variables.')
 }
 
 export function getHomeDirSync(): string {
@@ -108,12 +106,10 @@ export function getHomeDirSync(): string {
 
 		if (homeDir) {
 			return homeDir
-		} else {
-			throw new Error('Could not determine the home directory.')
 		}
-	} else {
-		throw new Error('Permission denied: Cannot access environment variables.')
+		throw new Error('Could not determine the home directory.')
 	}
+	throw new Error('Permission denied: Cannot access environment variables.')
 }
 
 export async function createConfigDir(): Promise<string> {
@@ -139,9 +135,8 @@ export async function readConfigFile(): Promise<Record<string, string>> {
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			return {}
-		} else {
-			throw error
 		}
+		throw error
 	}
 }
 

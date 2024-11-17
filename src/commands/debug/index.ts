@@ -1,5 +1,5 @@
 import { Command } from '../../deps.ts'
-import { GlobalOptions } from '../../lib/types.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
 
 import { debugConfig } from './debug-config.ts'
 

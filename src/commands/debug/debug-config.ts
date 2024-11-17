@@ -1,15 +1,13 @@
+import { cmd } from '../../cmd.ts'
 import { Command } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
-
-export type DebugConfigOptions = typeof debugConfig extends Command<any, any, infer Options, any, any> ? Options
-	: never
+import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
 
 export const debugConfig = new Command<GlobalOptions>()
-	.option('-r, --render', 'Render the config with substitutions')
 	.description('debug config')
+	.option('-r, --render', 'Render the config with substitutions')
 	.action((options) => {
-		const { render } = options as DebugConfigOptions & GlobalOptions
+		const { render } = options
 		const cfg = config.get(options as CliOptions)
 
 		if (render) {

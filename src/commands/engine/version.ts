@@ -1,11 +1,9 @@
 import { Command } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import type { GlobalOptions, CliOptions } from '../../lib/types.ts'
 import { createEngine } from '../../lib/engine.ts'
 import { logger } from '../../lib/logger.ts'
-
-export type VersionOptions = typeof version extends Command<any, any, infer Options, any, any> ? Options
-	: never
+import { cmd } from '../../cmd.ts'
 
 export const version = new Command<GlobalOptions>()
 	.description('print the engine version')

@@ -3,15 +3,13 @@ import { Command, EnumType, ValidationError } from '../deps.ts'
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile, getProjectName } from '../lib/utils.ts'
 import { config } from '../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../lib/types.ts'
+import type { CliOptions, GlobalOptions } from '../lib/types.ts'
 
 const TargetError = (target: string, targets: string[]) => {
 	return new ValidationError(`Invalid Target: ${target}
 Valid Targets: ${targets.join(', ')}
 	`)
 }
-export type BuildOptions = typeof build extends Command<any, any, infer Options, any, any> ? Options
-	: never
 
 export const build = new Command<GlobalOptions>()
 	.description('build')
@@ -23,8 +21,8 @@ export const build = new Command<GlobalOptions>()
 	})
 	.option('-d, --dry-run', 'Dry run')
 	.arguments('<target:string>')
-	.action(async (options: unknown, target = EngineTarget.Editor) => {
-		const { platform, configuration, dryRun } = options as BuildOptions
+	.action(async (options, target = EngineTarget.Editor) => {
+		const { platform, configuration, dryRun } = options
 		const { engine: { path: enginePath }, project: { path: projectPath } } = config.get(options as CliOptions)
 
 		const engine = createEngine(enginePath)

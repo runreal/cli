@@ -1,10 +1,8 @@
+import { cmd } from '../cmd.ts'
 import { Command, ValidationError } from '../deps.ts'
 import { createEngine } from '../lib/engine.ts'
-import { GlobalOptions } from '../lib/types.ts'
+import type { GlobalOptions } from '../lib/types.ts'
 import { findProjectFile, getProjectName, writeConfigFile } from '../lib/utils.ts'
-
-export type InitOptions = typeof init extends Command<any, any, infer Options, any, any> ? Options
-	: never
 
 export const init = new Command<GlobalOptions>()
 	.description('init')

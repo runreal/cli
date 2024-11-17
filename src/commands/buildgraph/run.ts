@@ -1,10 +1,8 @@
+import { cmd } from '../../cmd.ts'
 import { Command, path, readNdjson } from '../../deps.ts'
 import { config } from '../../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { createEngine } from '../../lib/engine.ts'
-
-export type RunOptions = typeof run extends Command<any, any, infer Options, any, any> ? Options
-	: never
+import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
 
 interface AutomationToolLogs {
 	time: string

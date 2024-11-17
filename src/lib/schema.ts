@@ -46,7 +46,7 @@ export const ConfigSchema = z.object({
 	}),
 	workflows: z.array(
 		z.object({
-			id: z.string().regex(new RegExp('^[a-zA-Z0-9][a-zA-Z0-9\\-]*$')).optional().describe('Workflow id'),
+			id: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9\-]*$/).optional().describe('Workflow id'),
 			name: z.string().describe('Workflow name'),
 			steps: z.array(
 				z.object({

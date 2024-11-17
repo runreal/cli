@@ -1,6 +1,5 @@
 import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
-import { CliOptions, RunrealConfig } from '../lib/types.ts'
-import { execSync } from '../lib/utils.ts'
+import type { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
@@ -103,7 +102,7 @@ export class Config {
 
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
-			const data = await Deno.readTextFile(path.resolve(configPath)) as string
+			const data = await Deno.readTextFile(path.resolve(configPath))
 			const parsed = parse(data) as unknown
 			return parsed as RunrealConfig
 		} catch (e) { /* pass */ }
@@ -119,6 +118,7 @@ export class Config {
 				if (!picked[section as keyof RunrealConfig]) {
 					picked[section as keyof RunrealConfig] = {} as any
 				}
+
 				;(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
 			}
 		}
@@ -127,19 +127,19 @@ export class Config {
 	}
 
 	private resolvePaths(config: Partial<RunrealConfig>) {
-		if (config.engine && config.engine.path) {
+		if (config.engine?.path) {
 			config.engine.path = path.resolve(config.engine.path)
 		}
 
-		if (config.engine && config.engine.gitDependenciesCachePath) {
+		if (config.engine?.gitDependenciesCachePath) {
 			config.engine.gitDependenciesCachePath = path.resolve(config.engine.gitDependenciesCachePath)
 		}
 
-		if (config.project && config.project.path) {
+		if (config.project?.path) {
 			config.project.path = path.resolve(config.project.path)
 		}
 
-		if (config.project && config.project.buildPath) {
+		if (config.project?.buildPath) {
 			config.project.buildPath = path.resolve(config.project.buildPath)
 		}
 
@@ -155,7 +155,8 @@ export class Config {
 				safeRef,
 				git,
 			}
-		} else if (this.config.project?.repoType === 'perforce') {
+		}
+		if (this.config.project?.repoType === 'perforce') {
 			const { safeRef, perforce } = this.getPerforceBuildMetadata(cwd)
 			return {
 				safeRef,
@@ -241,9 +242,9 @@ export class Config {
 		} catch (e) {
 			if (e instanceof z.ZodError) {
 				const errors = e.errors.map((err) => {
-					return '  config.' + err.path.join('.') + ' is ' + err.message
+					return `  config.${err.path.join('.')} is ${err.message}`
 				})
-				throw new ValidationError('Invalid config: \n' + errors.join('\n'))
+				throw new ValidationError(`Invalid config: \n${errors.join('\n')}`)
 			}
 			throw new ValidationError('Invalid config')
 		}

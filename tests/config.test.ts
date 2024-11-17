@@ -1,8 +1,8 @@
 import { assert, assertEquals } from '@std/assert'
 import { Config } from '../src/lib/config.ts'
 import { path, ulid } from '../src/deps.ts'
-import { CliOptions } from '../src/lib/types.ts'
 import { FakeTime } from '@std/testing/time'
+import type { CliOptions } from '../src/lib/types.ts'
 
 Deno.test('Config.create should initialize with default values', async () => {
 	using time = new FakeTime()
