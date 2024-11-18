@@ -101,6 +101,16 @@
 					]
 				}
 			]
+		},
+		{
+			"id": "script",
+			"name": "script",
+			"steps": [
+				{
+					"command": "runreal script",
+					"args": ["./tests/fixtures/hello-world.ts"]
+				}
+			]
 		}
 	]
 }

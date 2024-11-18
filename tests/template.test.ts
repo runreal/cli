@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert'
 import { getSubstitutions, normalizePaths, render, renderConfig } from '../src/lib/template.ts'
-import { RunrealConfig } from '../src/lib/types.ts'
+import type { RunrealConfig } from '../src/lib/types.ts'
 
 Deno.test('template tests', () => {
 	const tmpl =
