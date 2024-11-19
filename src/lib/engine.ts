@@ -164,7 +164,7 @@ export abstract class Engine {
 		const args = ['-Mode=QueryTargets', `-Project=${projectFile}`]
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(projectPath + '\\Intermediate\\TargetInfo.json')
+			const targetInfoJson = path.resolve(`${projectPath}\\Intermediate\\TargetInfo.json`)
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
@@ -179,9 +179,9 @@ export abstract class Engine {
 		dryRun?: boolean
 	}) {
 		console.log('[runClean]', { dryRun })
-		const binaryGlob = path.join(config.get().project.path, '**/Binaries')
-		const intermediateGlob = path.join(config.get().project.path, '**/Intermediate')
-		const cwd = config.get().project?.path
+		const binaryGlob = path.join(config.getConfig().project.path, '**/Binaries')
+		const intermediateGlob = path.join(config.getConfig().project.path, '**/Intermediate')
+		const cwd = config.getConfig().project?.path
 		const iterator = globber({
 			cwd,
 			include: [binaryGlob, intermediateGlob],
@@ -264,7 +264,7 @@ class WindowsEngine extends Engine {
 		const args = ['-Mode=QueryTargets']
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(this.enginePath + '\\Engine\\Intermediate\\TargetInfo.json')
+			const targetInfoJson = path.resolve(`${this.enginePath}\\Engine\\Intermediate\\TargetInfo.json`)
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
@@ -327,7 +327,7 @@ class MacosEngine extends Engine {
 		const args = ['-Mode=QueryTargets']
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(this.enginePath + '/Engine/Intermediate/TargetInfo.json')
+			const targetInfoJson = path.resolve(`${this.enginePath}/Engine/Intermediate/TargetInfo.json`)
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
@@ -390,7 +390,7 @@ class LinuxEngine extends Engine {
 		const args = ['-Mode=QueryTargets']
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(this.enginePath + '/Engine/Intermediate/TargetInfo.json')
+			const targetInfoJson = path.resolve(`${this.enginePath}/Engine/Intermediate/TargetInfo.json`)
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets

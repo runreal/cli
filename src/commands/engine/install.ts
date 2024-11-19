@@ -1,7 +1,7 @@
 import { Command, ValidationError } from '../../deps.ts'
 import { cloneRepo, runEngineSetup } from '../../lib/utils.ts'
-import { CliOptions } from '../../lib/types.ts'
-import { config } from '../../lib/config.ts'
+import type { CliOptions } from '../../lib/types.ts'
+import { Config } from '../../lib/config.ts'
 
 export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
 	: never
@@ -39,7 +39,8 @@ export const install = new Command()
 			dryRun,
 			setup,
 		} = options as InstallOptions
-		const cfg = config.get(options as CliOptions)
+
+		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options as CliOptions })
 		source = source || cfg.engine.gitSource
 		destination = destination || cfg.engine.path
 

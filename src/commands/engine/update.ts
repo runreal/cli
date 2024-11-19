@@ -1,7 +1,7 @@
 import { Command, ValidationError } from '../../deps.ts'
 import { deleteEngineHooks, exec, isGitRepo, runEngineSetup } from '../../lib/utils.ts'
-import { config } from '../../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import { Config } from '../../lib/config.ts'
+import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
 
 export type UpdateOptions = typeof update extends Command<any, any, infer Options, any, any> ? Options
 	: never
@@ -39,7 +39,9 @@ export const update = new Command<GlobalOptions>()
 			gitCleanFlags,
 			dryRun,
 		} = options as UpdateOptions
-		const cfg = config.get(options as CliOptions)
+
+
+		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options as CliOptions })
 		const isRepo = await isGitRepo(cfg.engine.path)
 		if (!isRepo) {
 			throw new ValidationError(

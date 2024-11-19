@@ -1,21 +1,23 @@
 import { Command, EnumType, ulid } from './deps.ts'
 
-import { config } from './lib/config.ts'
+import { Config } from './lib/config.ts'
 import { logger, LogLevel } from './lib/logger.ts'
+
+const LogLevelType = new EnumType(LogLevel)
 
 export const cmd = new Command()
 	.globalOption('--session-id <sessionId:string>', 'Session Id', {
 		default: ulid() as string,
 		// action: ({ sessionId }) => logger.setSessionId(sessionId),
 	})
-	.globalType('log-level', new EnumType(LogLevel))
+	.globalType('log-level', LogLevelType)
 	.globalOption('--log-level <level:log-level>', 'Log level', {
-		default: LogLevel.DEBUG,
+		default: LogLevelType.values().at(LogLevelType.values().indexOf(LogLevel.DEBUG)),
 		action: ({ logLevel }) => logger.setLogLevel(logLevel),
 	})
 	.globalOption('-c, --config-path <configPath:string>', 'Path to config file', {
 		action: async ({ configPath }) => {
-			if (configPath) { const cfg = await config.mergeConfig(configPath) }
+		 	await Config.getInstance().loadConfig({ path: configPath })
 		},
 	})
 	.globalEnv('RUNREAL_ENGINE_PATH=<enginePath:string>', 'Overide path to engine folder', { prefix: 'RUNREAL_' })

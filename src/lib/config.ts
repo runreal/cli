@@ -1,13 +1,12 @@
 import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
-import { CliOptions, RunrealConfig } from '../lib/types.ts'
-import { execSync } from '../lib/utils.ts'
+import type { CliOptions, RunrealConfig } from '../lib/types.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
-const defaultConfig = (): Partial<RunrealConfig> => ({
+const defaultConfig = (): RunrealConfig => ({
 	engine: {
 		path: '',
 		repoType: 'git',
@@ -46,7 +45,10 @@ const defaultConfig = (): Partial<RunrealConfig> => ({
 })
 
 export class Config {
-	private config: Partial<RunrealConfig> = defaultConfig()
+	private config: RunrealConfig = defaultConfig()
+
+	private static configSingleton = new Config()
+
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
 		'branch': 'engine.branch',
@@ -59,22 +61,32 @@ export class Config {
 
 	private constructor() {}
 
-	static async create(): Promise<Config> {
-		const instance = new Config()
-		const configPath = await instance.searchForConfigFile()
+	async loadConfig(opts?: { path?: string }): Promise<RunrealConfig> {
+		const instance = Config.configSingleton
+		let configPath = opts?.path
+		if (!configPath) {
+			configPath = await instance.searchForConfigFile()
+		}
 		if (configPath) {
 			await instance.mergeConfig(configPath)
 		}
 		dotenv.loadSync({ export: true })
-		return instance
+		return instance.getConfig()
 	}
 
-	get(options?: CliOptions): RunrealConfig {
-		if (options) {
-			this.mergeWithCliOptions(options)
-		}
+	getConfig(): RunrealConfig {
+		return this.config
+	}
+
+
+	static getInstance(): Config {
+		return Config.configSingleton
+	}
+
+	mergeConfigCLIConfig({cliOptions}: {cliOptions: CliOptions}): RunrealConfig {
+		config.mergeWithCliOptions(cliOptions)
 		this.validateConfig()
-		return this.config as RunrealConfig
+		return config.getConfig()
 	}
 
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
@@ -86,10 +98,9 @@ export class Config {
 		const cfg = await this.readConfigFile(configPath)
 		if (!cfg) return
 		this.config = deepmerge(this.config, cfg)
-		return this.config
 	}
 
-	private async searchForConfigFile(): Promise<string | null> {
+	private async searchForConfigFile(): Promise<string | undefined> {
 		const cwd = Deno.cwd()
 		const configPath = path.join(cwd, 'runreal.config.json')
 		try {
@@ -98,14 +109,14 @@ export class Config {
 				return configPath
 			}
 		} catch (e) { /* pass */ }
-		return null
+		return undefined
 	}
 
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
-			const data = await Deno.readTextFile(path.resolve(configPath)) as string
-			const parsed = parse(data) as unknown
-			return parsed as RunrealConfig
+			const data = await Deno.readTextFile(path.resolve(configPath))
+			const parsed = ConfigSchema.parse((JSON.parse(data)))
+			return parsed
 		} catch (e) { /* pass */ }
 		return null
 	}
@@ -119,31 +130,28 @@ export class Config {
 				if (!picked[section as keyof RunrealConfig]) {
 					picked[section as keyof RunrealConfig] = {} as any
 				}
-				;(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
+				(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
 			}
 		}
-
 		this.config = deepmerge(this.config, picked)
 	}
 
-	private resolvePaths(config: Partial<RunrealConfig>) {
-		if (config.engine && config.engine.path) {
+	private resolvePaths(config: RunrealConfig) {
+		if (config.engine?.path) {
 			config.engine.path = path.resolve(config.engine.path)
 		}
 
-		if (config.engine && config.engine.gitDependenciesCachePath) {
+		if (config.engine?.gitDependenciesCachePath) {
 			config.engine.gitDependenciesCachePath = path.resolve(config.engine.gitDependenciesCachePath)
 		}
 
-		if (config.project && config.project.path) {
+		if (config.project?.path) {
 			config.project.path = path.resolve(config.project.path)
 		}
 
-		if (config.project && config.project.buildPath) {
+		if (config.project?.buildPath) {
 			config.project.buildPath = path.resolve(config.project.buildPath)
 		}
-
-		return config
 	}
 
 	private getBuildMetadata(): Partial<RunrealConfig['metadata']> | null {
@@ -155,7 +163,8 @@ export class Config {
 				safeRef,
 				git,
 			}
-		} else if (this.config.project?.repoType === 'perforce') {
+		}
+		if (this.config.project?.repoType === 'perforce') {
 			const { safeRef, perforce } = this.getPerforceBuildMetadata(cwd)
 			return {
 				safeRef,
@@ -184,7 +193,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return defaultConfig().metadata!
+			return defaultConfig().metadata
 		}
 	}
 
@@ -203,7 +212,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return defaultConfig().metadata!
+			return defaultConfig().metadata
 		}
 	}
 
@@ -221,7 +230,7 @@ export class Config {
 	}
 
 	private validateConfig() {
-		this.config = this.resolvePaths(this.config)
+		this.resolvePaths(this.config)
 		try {
 			const Merged = ConfigSchema.and(InternalSchema)
 			this.config = Merged.parse(this.config)
@@ -241,13 +250,13 @@ export class Config {
 		} catch (e) {
 			if (e instanceof z.ZodError) {
 				const errors = e.errors.map((err) => {
-					return '  config.' + err.path.join('.') + ' is ' + err.message
+					return `  config.${err.path.join('.')} is ${err.message}`
 				})
-				throw new ValidationError('Invalid config: \n' + errors.join('\n'))
+				throw new ValidationError(`Invalid config: \n${errors.join('\n')}`)
 			}
 			throw new ValidationError('Invalid config')
 		}
 	}
 }
 
-export const config = await Config.create()
+export const config = Config.getInstance()
