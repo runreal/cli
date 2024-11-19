@@ -17,7 +17,7 @@ export const cmd = new Command()
 	})
 	.globalOption('-c, --config-path <configPath:string>', 'Path to config file', {
 		action: async ({ configPath }) => {
-		 	await Config.getInstance().loadConfig({ path: configPath })
+			await Config.getInstance().loadConfig({ path: configPath })
 		},
 	})
 	.globalEnv('RUNREAL_ENGINE_PATH=<enginePath:string>', 'Overide path to engine folder', { prefix: 'RUNREAL_' })

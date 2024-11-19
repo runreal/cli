@@ -1,5 +1,5 @@
 import { Command } from '../../deps.ts'
-import { Config, config } from '../../lib/config.ts'
+import { Config } from '../../lib/config.ts'
 import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
 
 export type DebugConfigOptions = typeof debugConfig extends Command<any, any, infer Options, any, any> ? Options
@@ -10,7 +10,8 @@ export const debugConfig = new Command<GlobalOptions>()
 	.description('debug config')
 	.action((options) => {
 		const { render } = options as DebugConfigOptions & GlobalOptions
-		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options  as CliOptions})
+		const config = Config.getInstance()
+		const cfg = config.mergeConfigCLIConfig({ cliOptions: options as CliOptions })
 
 		if (render) {
 			const rendered = config.renderConfig(cfg)

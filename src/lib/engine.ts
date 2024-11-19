@@ -1,6 +1,6 @@
 import { globber, path } from '../deps.ts'
 import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
-import { config } from './config.ts'
+import { Config } from './config.ts'
 
 interface EngineVersionData {
 	MajorVersion: number
@@ -179,6 +179,7 @@ export abstract class Engine {
 		dryRun?: boolean
 	}) {
 		console.log('[runClean]', { dryRun })
+		const config = Config.getInstance()
 		const binaryGlob = path.join(config.getConfig().project.path, '**/Binaries')
 		const intermediateGlob = path.join(config.getConfig().project.path, '**/Intermediate')
 		const cwd = config.getConfig().project?.path

@@ -59,34 +59,37 @@ export class Config {
 		'gitDependenciesCachePath': 'engine.dependenciesCachePath',
 	}
 
-	private constructor() {}
+	private constructor() {
+		this.loadEnvConfig()
+	}
+
+	private loadEnvConfig() {
+		const env = dotenv.loadSync({ export: true })
+	}
 
 	async loadConfig(opts?: { path?: string }): Promise<RunrealConfig> {
-		const instance = Config.configSingleton
 		let configPath = opts?.path
 		if (!configPath) {
-			configPath = await instance.searchForConfigFile()
+			configPath = await this.searchForConfigFile()
 		}
 		if (configPath) {
-			await instance.mergeConfig(configPath)
+			await this.mergeConfig(configPath)
 		}
-		dotenv.loadSync({ export: true })
-		return instance.getConfig()
+		return this.getConfig()
 	}
 
 	getConfig(): RunrealConfig {
 		return this.config
 	}
 
-
 	static getInstance(): Config {
 		return Config.configSingleton
 	}
 
-	mergeConfigCLIConfig({cliOptions}: {cliOptions: CliOptions}): RunrealConfig {
-		config.mergeWithCliOptions(cliOptions)
+	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): RunrealConfig {
+		this.mergeWithCliOptions(cliOptions)
 		this.validateConfig()
-		return config.getConfig()
+		return this.getConfig()
 	}
 
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
@@ -115,7 +118,7 @@ export class Config {
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
-			const parsed = ConfigSchema.parse((JSON.parse(data)))
+			const parsed = ConfigSchema.parse(JSON.parse(data))
 			return parsed
 		} catch (e) { /* pass */ }
 		return null
@@ -130,7 +133,7 @@ export class Config {
 				if (!picked[section as keyof RunrealConfig]) {
 					picked[section as keyof RunrealConfig] = {} as any
 				}
-				(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
+				;(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
 			}
 		}
 		this.config = deepmerge(this.config, picked)
@@ -258,5 +261,3 @@ export class Config {
 		}
 	}
 }
-
-export const config = Config.getInstance()

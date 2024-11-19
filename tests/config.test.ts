@@ -58,7 +58,7 @@ Deno.test('Config.create should load environment variables', async () => {
 })
 
 Deno.test('Config.get should apply CLI options', async () => {
-	const config =  await Config.getInstance()
+	const config = await Config.getInstance()
 	const id = ulid()
 	config.getBuildId = () => id
 	const enginePath = path.normalize('/path/to/engine')
@@ -67,7 +67,7 @@ Deno.test('Config.get should apply CLI options', async () => {
 		enginePath: enginePath as any,
 		projectPath: projectPath as any,
 	}
-	const result = config.mergeConfigCLIConfig({cliOptions})
+	const result = config.mergeConfigCLIConfig({ cliOptions })
 	assert(result.engine.path.includes(enginePath))
 	assert(result.project.path.includes(projectPath))
 })
@@ -83,7 +83,7 @@ Deno.test('Config.get with path', async () => {
 		enginePath: enginePath as any,
 		projectPath: projectPath as any,
 	}
-	const result = config.mergeConfigCLIConfig({cliOptions})
+	const result = config.mergeConfigCLIConfig({ cliOptions })
 	assert(result.engine.path.includes(enginePath))
 	assert(result.project.path.includes(projectPath))
 })

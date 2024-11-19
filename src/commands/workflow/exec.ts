@@ -1,7 +1,7 @@
 import { Command, EnumType, ValidationError } from '../../deps.ts'
-import { config } from '../../lib/config.ts'
+import { Config } from '../../lib/config.ts'
 import { cmd } from '../../cmd.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
 import { exec as execCmd, randomBuildkiteEmoji } from '../../lib/utils.ts'
 import { getSubstitutions, render } from '../../lib/template.ts'
 
@@ -56,7 +56,8 @@ export const exec = new Command<GlobalOptions>()
 	.arguments('<workflow>')
 	.action(async (options, workflow) => {
 		const { dryRun, mode } = options
-		const cfg = config.get(options as CliOptions)
+		const config = Config.getInstance()
+		const cfg = config.mergeConfigCLIConfig({ cliOptions: options as CliOptions })
 
 		if (!cfg.workflows) {
 			throw new ValidationError('No workflows defined in config')
@@ -75,9 +76,10 @@ export const exec = new Command<GlobalOptions>()
 		}
 
 		if (dryRun) {
-			steps.forEach((step) => {
+			for (const step of steps) {
 				console.log(`[workflow] exec => ${step.command} ${step.args.join(' ')}`)
-			})
+			}
+
 			return
 		}
 

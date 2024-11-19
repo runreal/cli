@@ -40,7 +40,6 @@ export const update = new Command<GlobalOptions>()
 			dryRun,
 		} = options as UpdateOptions
 
-
 		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options as CliOptions })
 		const isRepo = await isGitRepo(cfg.engine.path)
 		if (!isRepo) {

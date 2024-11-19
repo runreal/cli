@@ -24,11 +24,11 @@ export const build = new Command<GlobalOptions>()
 	.option('-d, --dry-run', 'Dry run')
 	.arguments('<target:string>')
 	.action(async (options, target = EngineTarget.Editor) => {
-
-
 		const { platform, configuration, dryRun } = options as BuildOptions
 		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({  cliOptions: options as CliOptions})
+		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
+			cliOptions: options as CliOptions,
+		})
 
 		const engine = createEngine(enginePath)
 		const validTargets = await engine.parseEngineTargets()

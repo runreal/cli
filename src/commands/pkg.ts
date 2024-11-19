@@ -2,7 +2,7 @@ import { Command, EnumType, ValidationError } from '../deps.ts'
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile } from '../lib/utils.ts'
 import { Config } from '../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../lib/types.ts'
+import type { CliOptions, GlobalOptions } from '../lib/types.ts'
 
 const defaultBCRArgs = [
 	'-build',
@@ -59,7 +59,9 @@ export const pkg = new Command<GlobalOptions>()
 	.action(async (options) => {
 		const { platform, configuration, dryRun, profile, archiveDirectory, zip } = options as PkgOptions
 		const cfg = await Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = cfg.mergeConfigCLIConfig({ config: cfg, cliOptions: options })
+		const { engine: { path: enginePath }, project: { path: projectPath } } = cfg.mergeConfigCLIConfig({
+			cliOptions: options as CliOptions,
+		})
 
 		const literal = pkg.getLiteralArgs().map((arg) => arg.toLowerCase())
 		const profileArgs = profiles[profile as keyof typeof profiles] || []
