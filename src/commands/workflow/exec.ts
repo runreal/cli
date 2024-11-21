@@ -1,11 +1,12 @@
 import { Command, EnumType, ValidationError } from '../../deps.ts'
 import { Config } from '../../lib/config.ts'
 import { cmd } from '../../cmd.ts'
-import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
 import { exec as execCmd, randomBuildkiteEmoji } from '../../lib/utils.ts'
-import { getSubstitutions, render } from '../../lib/template.ts'
+import { render } from '../../lib/template.ts'
 
-export type ExecOptions = typeof exec extends Command<any, any, infer Options, any, any> ? Options
+export type ExecOptions = typeof exec extends Command<void, void, infer Options, infer Argument, GlobalOptions>
+	? Options
 	: never
 
 enum Mode {
@@ -57,7 +58,7 @@ export const exec = new Command<GlobalOptions>()
 	.action(async (options, workflow) => {
 		const { dryRun, mode } = options
 		const config = Config.getInstance()
-		const cfg = config.mergeConfigCLIConfig({ cliOptions: options as CliOptions })
+		const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
 
 		if (!cfg.workflows) {
 			throw new ValidationError('No workflows defined in config')

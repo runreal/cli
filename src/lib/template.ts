@@ -1,4 +1,4 @@
-import { RunrealConfig } from './types.ts'
+import type { RunrealConfig } from './types.ts'
 import { path } from '../deps.ts'
 import { formatIsoTimestamp } from './utils.ts'
 
@@ -72,10 +72,12 @@ function renderItems(
 	if (typeof item === 'string') {
 		// Replace placeholders in strings
 		return replace(placeholderRegex, item, substitutions)
-	} else if (Array.isArray(item)) {
+	}
+	if (Array.isArray(item)) {
 		// Recursively process each item in an array
 		return item.map((subItem) => renderItems(subItem, substitutions, replace))
-	} else if (typeof item === 'object' && item !== null) {
+	}
+	if (typeof item === 'object' && item !== null) {
 		// Recursively process each property in an object
 		const result: Record<string, any> = {}
 		for (const key of Object.keys(item)) {

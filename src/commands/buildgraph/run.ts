@@ -1,9 +1,9 @@
 import { Command, path, readNdjson } from '../../deps.ts'
 import { Config } from '../../lib/config.ts'
-import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
 import { createEngine } from '../../lib/engine.ts'
 
-export type RunOptions = typeof run extends Command<any, any, infer Options, any, any> ? Options
+export type RunOptions = typeof run extends Command<void, void, infer Options, infer Argument, GlobalOptions> ? Options
 	: never
 
 interface AutomationToolLogs {
@@ -31,7 +31,7 @@ export const run = new Command<GlobalOptions>()
 	.stopEarly()
 	.action(async (options, buildGraphScript: string, ...buildGraphArgs: Array<string>) => {
 		const config = Config.getInstance()
-		const { engine: { path: enginePath } } = config.mergeConfigCLIConfig({ cliOptions: options as CliOptions })
+		const { engine: { path: enginePath } } = config.mergeConfigCLIConfig({ cliOptions: options })
 		const engine = createEngine(enginePath)
 		const { success, code } = await engine.runBuildGraph(buildGraphScript, buildGraphArgs)
 		if (!success) {

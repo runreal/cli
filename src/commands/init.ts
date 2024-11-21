@@ -3,7 +3,7 @@ import { createEngine } from '../lib/engine.ts'
 import type { GlobalOptions } from '../lib/types.ts'
 import { findProjectFile, getProjectName, writeConfigFile } from '../lib/utils.ts'
 
-export type InitOptions = typeof init extends Command<any, any, infer Options, any, any> ? Options
+export type InitOptions = typeof init extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
 
 export const init = new Command<GlobalOptions>()

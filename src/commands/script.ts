@@ -1,5 +1,5 @@
 import { $, Command, path } from '../deps.ts'
-import type { CliOptions, GlobalOptions, Script, ScriptContext } from '../lib/types.ts'
+import type { GlobalOptions, Script, ScriptContext } from '../lib/types.ts'
 import { logger } from '../lib/logger.ts'
 
 import * as esbuild from 'https://deno.land/x/esbuild@v0.24.0/mod.js'
@@ -19,7 +19,7 @@ export const script = new Command<GlobalOptions>()
 		try {
 			const current = Deno.cwd()
 			const file = `${current}/${args[0]}`
-			const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options as CliOptions })
+			const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
 			const context: ScriptContext = {
 				env: 'dev',
 				config: cfg,

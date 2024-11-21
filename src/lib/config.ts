@@ -1,11 +1,12 @@
 import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
 import type { CliOptions, RunrealConfig, UserRunrealConfig } from '../lib/types.ts'
-import { ConfigSchema, InternalSchema, RunrealConfigSchema, UserRunrealConfigSchema } from '../lib/schema.ts'
+import { RunrealConfigSchema, UserRunrealConfigSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
-import { run } from '../commands/buildgraph/run.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
+
+dotenv.loadSync({ export: true })
 
 const defaultConfig = (): RunrealConfig => ({
 	engine: {
@@ -49,7 +50,6 @@ export class Config {
 	private config: RunrealConfig = defaultConfig()
 
 	private static configSingleton = new Config()
-	private isLoaded = false
 
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
@@ -64,10 +64,10 @@ export class Config {
 	private constructor() {}
 
 	static async create(opts?: { path?: string }): Promise<Config> {
-		if (!Config.configSingleton.isLoaded) {
-			await Config.configSingleton.loadConfig({ path: opts?.path })
-		}
-		Config.configSingleton.isLoaded = true
+		console.log(Config.configSingleton.config)
+
+		await Config.configSingleton.loadConfig({ path: opts?.path })
+		console.log(Config.configSingleton.config.build.id)
 		return Config.configSingleton
 	}
 
@@ -79,8 +79,7 @@ export class Config {
 		if (configPath) {
 			await this.mergeConfig(configPath)
 		}
-		dotenv.loadSync({ export: true })
-
+		this.validateConfig()
 		return this.getConfig()
 	}
 
@@ -245,8 +244,7 @@ export class Config {
 	private validateConfig() {
 		this.resolvePaths(this.config)
 		try {
-			const Merged = ConfigSchema.and(InternalSchema)
-			this.config = Merged.parse(this.config)
+			this.config = RunrealConfigSchema.parse(this.config)
 
 			const metadata = this.getBuildMetadata()
 			this.config.metadata = {

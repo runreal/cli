@@ -1,5 +1,5 @@
 import { Command } from '../deps.ts'
-import { createEngine, Engine } from '../lib/engine.ts'
+import { createEngine } from '../lib/engine.ts'
 import { exec, findProjectFile } from '../lib/utils.ts'
 
 export type GenOptions = typeof gen extends Command<void, void, infer Options extends Record<string, unknown>, [], void>

@@ -1,9 +1,9 @@
 import { Command } from '../../deps.ts'
 import { Config } from '../../lib/config.ts'
-import type { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
 import { runEngineSetup } from '../../lib/utils.ts'
 
-export type SetupOptions = typeof setup extends Command<any, any, infer Options, any, any> ? Options
+export type SetupOptions = typeof setup extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
 
 export const setup = new Command<GlobalOptions>()
@@ -17,7 +17,7 @@ export const setup = new Command<GlobalOptions>()
 	.action(async (options, ...args) => {
 		const { gitdepends, gitdependscache } = options as SetupOptions
 		const { engine: { path: enginePath } } = Config.getInstance().mergeConfigCLIConfig({
-			cliOptions: options as CliOptions,
+			cliOptions: options,
 		})
 		if (gitdepends) {
 			await runEngineSetup({ enginePath, gitDependsCache: gitdependscache })

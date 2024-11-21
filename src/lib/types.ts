@@ -6,18 +6,20 @@ import type { SetupOptions } from '../commands/engine/setup.ts'
 import type { InstallOptions } from '../commands/engine/install.ts'
 import type { UpdateOptions } from '../commands/engine/update.ts'
 import type { ConfigSchema, InternalSchema, UserRunrealConfigSchema } from './schema.ts'
+import type { Type } from '@cliffy/command'
 
-export type GlobalOptions = typeof cmd extends
-	Command<void, void, void, [], infer Options extends Record<string, unknown>> ? Options
+export type GlobalOptions = typeof cmd extends Command<void, void, void, [], infer Options> ? Options
 	: never
 
-export type CliOptions = Partial<
+type allOptions = Partial<
 	& GlobalOptions
 	& DebugConfigOptions
 	& SetupOptions
 	& InstallOptions
 	& UpdateOptions
 >
+
+export type CliOptions = { [K in keyof allOptions]: Type.infer<allOptions[K]> }
 
 type InternalRunrealConfig = z.infer<typeof InternalSchema>
 export type RunrealConfig = z.infer<typeof ConfigSchema> & InternalRunrealConfig

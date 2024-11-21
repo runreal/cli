@@ -2,7 +2,7 @@ import { Command, EnumType, ValidationError } from '../deps.ts'
 
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile, getProjectName } from '../lib/utils.ts'
-import type { CliOptions, GlobalOptions } from '../lib/types.ts'
+import type { GlobalOptions } from '../lib/types.ts'
 import { Config } from '../lib/config.ts'
 
 const TargetError = (target: string, targets: string[]) => {
@@ -10,7 +10,8 @@ const TargetError = (target: string, targets: string[]) => {
 Valid Targets: ${targets.join(', ')}
 	`)
 }
-export type BuildOptions = typeof build extends Command<any, any, infer Options, any, any> ? Options
+export type BuildOptions = typeof build extends Command<void, void, infer Options, infer Argument, GlobalOptions>
+	? Options
 	: never
 
 export const build = new Command<GlobalOptions>()
@@ -27,7 +28,7 @@ export const build = new Command<GlobalOptions>()
 		const { platform, configuration, dryRun } = options as BuildOptions
 		const config = Config.getInstance()
 		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options as CliOptions,
+			cliOptions: options,
 		})
 
 		const engine = createEngine(enginePath)
