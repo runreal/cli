@@ -1,8 +1,9 @@
 import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
-import type { CliOptions, RunrealConfig } from '../lib/types.ts'
-import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
+import type { CliOptions, RunrealConfig, UserRunrealConfig } from '../lib/types.ts'
+import { ConfigSchema, InternalSchema, RunrealConfigSchema, UserRunrealConfigSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
+import { run } from '../commands/buildgraph/run.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
@@ -48,6 +49,7 @@ export class Config {
 	private config: RunrealConfig = defaultConfig()
 
 	private static configSingleton = new Config()
+	private isLoaded = false
 
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
@@ -59,12 +61,14 @@ export class Config {
 		'gitDependenciesCachePath': 'engine.dependenciesCachePath',
 	}
 
-	private constructor() {
-		this.loadEnvConfig()
-	}
+	private constructor() {}
 
-	private loadEnvConfig() {
-		const env = dotenv.loadSync({ export: true })
+	static async create(opts?: { path?: string }): Promise<Config> {
+		if (!Config.configSingleton.isLoaded) {
+			await Config.configSingleton.loadConfig({ path: opts?.path })
+		}
+		Config.configSingleton.isLoaded = true
+		return Config.configSingleton
 	}
 
 	async loadConfig(opts?: { path?: string }): Promise<RunrealConfig> {
@@ -75,6 +79,8 @@ export class Config {
 		if (configPath) {
 			await this.mergeConfig(configPath)
 		}
+		dotenv.loadSync({ export: true })
+
 		return this.getConfig()
 	}
 
@@ -100,7 +106,9 @@ export class Config {
 	async mergeConfig(configPath: string) {
 		const cfg = await this.readConfigFile(configPath)
 		if (!cfg) return
-		this.config = deepmerge(this.config, cfg)
+		const mergeConfig = deepmerge(this.config, cfg)
+		const newConfig = RunrealConfigSchema.parse(mergeConfig)
+		this.config = newConfig
 	}
 
 	private async searchForConfigFile(): Promise<string | undefined> {
@@ -115,12 +123,14 @@ export class Config {
 		return undefined
 	}
 
-	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
+	private async readConfigFile(configPath: string): Promise<Partial<UserRunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
-			const parsed = ConfigSchema.parse(JSON.parse(data))
+			const parsed = UserRunrealConfigSchema.parse(JSON.parse(data))
 			return parsed
-		} catch (e) { /* pass */ }
+		} catch (e) {
+			/* pass */
+		}
 		return null
 	}
 

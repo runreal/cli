@@ -57,3 +57,8 @@ export const ConfigSchema = z.object({
 		}),
 	).optional(),
 })
+
+export const RunrealConfigSchema = ConfigSchema.merge(InternalSchema)
+
+// Depraecated 😭
+export const UserRunrealConfigSchema = ConfigSchema.deepPartial()

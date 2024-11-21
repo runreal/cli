@@ -15,11 +15,7 @@ export const cmd = new Command()
 		default: LogLevelType.values().at(LogLevelType.values().indexOf(LogLevel.DEBUG)),
 		action: ({ logLevel }) => logger.setLogLevel(logLevel),
 	})
-	.globalOption('-c, --config-path <configPath:string>', 'Path to config file', {
-		action: async ({ configPath }) => {
-			await Config.getInstance().loadConfig({ path: configPath })
-		},
-	})
+	.globalOption('-c, --config-path <configPath:string>', 'Path to config file')
 	.globalEnv('RUNREAL_ENGINE_PATH=<enginePath:string>', 'Overide path to engine folder', { prefix: 'RUNREAL_' })
 	.globalOption('--engine-path <enginePath:string>', 'Path to engine folder')
 	.globalEnv('RUNREAL_PROJECT_PATH=<projectPath:string>', 'Overide path to project folder', { prefix: 'RUNREAL_' })
@@ -28,3 +24,7 @@ export const cmd = new Command()
 	.globalOption('--build-id <buildId:string>', 'Overide build ID')
 	.globalEnv('RUNREAL_BUILD_PATH=<buildPath:string>', 'Overide path to build output folder', { prefix: 'RUNREAL_' })
 	.globalOption('--build-path <buildPath:string>', 'Path to save build outputs')
+	.globalAction(async (options) => {
+		// We load the config here so that the singleton should be instantiated before any command is run
+		await Config.create({ path: options.configPath })
+	})
