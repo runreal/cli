@@ -8,6 +8,9 @@ import { version } from './version.ts'
 
 export const engine = new Command<GlobalOptions>()
 	.description('engine')
+	.action((function () {
+		this.showHelp()
+	}))
 	.command('install', install)
 	.command('update', update)
 	.command('setup', setup)
