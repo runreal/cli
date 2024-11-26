@@ -67,7 +67,7 @@ export const pkg = new Command<GlobalOptions>()
 		const profileArgs = profiles[profile as keyof typeof profiles] || []
 		const bcrArgs = Array.from(new Set([...profileArgs, ...literal]))
 
-		const engine = await createEngine(enginePath)
+		const engine = createEngine(enginePath)
 		const projectFile = await findProjectFile(projectPath).catch(() => null)
 		if (projectFile) {
 			bcrArgs.push(`-project=${projectFile}`)

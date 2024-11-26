@@ -22,7 +22,7 @@ export const gen = new Command()
 			...args: string[]
 		) => {
 			const projectFile = await findProjectFile(projectPath)
-			const engine = await createEngine(enginePath)
+			const engine = createEngine(enginePath)
 
 			if (dryRun) {
 				console.log(`[gen] enginePath: ${enginePath}`)

@@ -16,7 +16,7 @@ export const uat = new Command<GlobalOptions>()
 		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
 			cliOptions: options,
 		})
-		const engine = await createEngine(enginePath)
+		const engine = createEngine(enginePath)
 		if (command !== 'run') {
 			args.unshift(command)
 			const projectFile = await findProjectFile(projectPath).catch(() => null)

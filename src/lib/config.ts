@@ -64,10 +64,7 @@ export class Config {
 	private constructor() {}
 
 	static async create(opts?: { path?: string }): Promise<Config> {
-		console.log(Config.configSingleton.config)
-
 		await Config.configSingleton.loadConfig({ path: opts?.path })
-		console.log(Config.configSingleton.config.build.id)
 		return Config.configSingleton
 	}
 

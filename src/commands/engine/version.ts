@@ -10,13 +10,12 @@ export type VersionOptions = typeof version extends Command<void, void, infer Op
 export const version = new Command<GlobalOptions>()
 	.description('print the engine version')
 	.action(
-		async (options, ..._args) => {
+		(options, ..._args) => {
 			logger.setContext(version.getName())
 			const config = Config.getInstance()
 			const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
-			console.log(cfg)
-			const engine = await createEngine(cfg.engine.path)
-			const engineVersion = await engine.getEngineVersion('full')
+			const engine = createEngine(cfg.engine.path)
+			const engineVersion = engine.getEngineVersion('full')
 			logger.info(engineVersion)
 		},
 	)
