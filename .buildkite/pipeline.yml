@@ -2,7 +2,7 @@ common:
   - deno_matrix: &deno_matrix
       matrix:
         # - "ubuntu"
-        - "ubuntu-2.0.4"
+        - "ubuntu-2.1.1"
       plugins:
         - docker#v5.10.0:
             image: "denoland/deno:{{matrix}}"
