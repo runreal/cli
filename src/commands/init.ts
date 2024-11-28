@@ -1,9 +1,9 @@
 import { Command, ValidationError } from '../deps.ts'
 import { createEngine } from '../lib/engine.ts'
-import { GlobalOptions } from '../lib/types.ts'
+import type { GlobalOptions } from '../lib/types.ts'
 import { findProjectFile, getProjectName, writeConfigFile } from '../lib/utils.ts'
 
-export type InitOptions = typeof init extends Command<any, any, infer Options, any, any> ? Options
+export type InitOptions = typeof init extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
 
 export const init = new Command<GlobalOptions>()
@@ -17,8 +17,8 @@ export const init = new Command<GlobalOptions>()
 		}
 		const projectFile = await findProjectFile(projectPath)
 		const projectName = await getProjectName(projectPath)
-		const engine = await createEngine(enginePath)
-		const engineVersion = await engine.getEngineVersion()
+		const engine = createEngine(enginePath)
+		const engineVersion = engine.getEngineVersion()
 		console.log(`[init] enginePath: ${enginePath}`)
 		console.log(`[init] engineVersion: ${engineVersion}`)
 		console.log(`[init] projectPath: ${projectPath}`)
