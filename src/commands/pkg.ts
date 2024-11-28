@@ -1,8 +1,8 @@
 import { Command, EnumType, ValidationError } from '../deps.ts'
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile } from '../lib/utils.ts'
-import { config } from '../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../lib/types.ts'
+import { Config } from '../lib/config.ts'
+import type { CliOptions, GlobalOptions } from '../lib/types.ts'
 
 const defaultBCRArgs = [
 	'-build',
@@ -41,7 +41,7 @@ const profiles = {
 	'server': serverBCRArgs,
 }
 
-export type PkgOptions = typeof pkg extends Command<any, any, infer Options, any, any> ? Options
+export type PkgOptions = typeof pkg extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
 
 export const pkg = new Command<GlobalOptions>()
@@ -58,13 +58,16 @@ export const pkg = new Command<GlobalOptions>()
 	.option('--profile <profile:string>', 'Build profile', { default: 'client', required: true })
 	.action(async (options) => {
 		const { platform, configuration, dryRun, profile, archiveDirectory, zip } = options as PkgOptions
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.get(options as CliOptions)
+		const cfg = await Config.getInstance()
+		const { engine: { path: enginePath }, project: { path: projectPath } } = cfg.mergeConfigCLIConfig({
+			cliOptions: options,
+		})
 
 		const literal = pkg.getLiteralArgs().map((arg) => arg.toLowerCase())
 		const profileArgs = profiles[profile as keyof typeof profiles] || []
 		const bcrArgs = Array.from(new Set([...profileArgs, ...literal]))
 
-		const engine = await createEngine(enginePath)
+		const engine = createEngine(enginePath)
 		const projectFile = await findProjectFile(projectPath).catch(() => null)
 		if (projectFile) {
 			bcrArgs.push(`-project=${projectFile}`)
@@ -79,13 +82,13 @@ export const pkg = new Command<GlobalOptions>()
 			bcrArgs.push(`-clientconfig=${configuration}`)
 		}
 		if (archiveDirectory) {
-			bcrArgs.push(`-archive`)
+			bcrArgs.push('-archive')
 			bcrArgs.push(`-archiveDirectory=${archiveDirectory}`)
-			bcrArgs.push(`-archivemetadata`)
+			bcrArgs.push('-archivemetadata')
 		}
 		if (dryRun) {
 			console.log(`[package] package ${profile} ${configuration} ${platform}`)
-			console.log(`[package] BCR args:`)
+			console.log('[package] BCR args:')
 			console.log(bcrArgs)
 			return
 		}
@@ -101,7 +104,7 @@ export const pkg = new Command<GlobalOptions>()
 			const zipArgs = [
 				`-add=${expectedArchivePath}`,
 				`-archive=${expectedArchivePath}.zip`,
-				`-compression=5`,
+				'-compression=5',
 			]
 			await engine.runUAT(['ZipUtils', ...zipArgs])
 		}

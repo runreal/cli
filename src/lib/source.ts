@@ -25,7 +25,7 @@ abstract class Base {
 }
 
 export class Perforce extends Base {
-	executable: string = 'p4'
+	executable = 'p4'
 	clientName: string
 	constructor(cwd: string) {
 		super(cwd)
@@ -86,7 +86,8 @@ export class Perforce extends Base {
 		return destination
 	}
 	postClone(): void {
-		return this.sync()
+		this.sync()
+		return
 	}
 	sync(): void {
 		execSync(this.executable, ['sync'], { cwd: this.cwd, quiet: false })
@@ -97,7 +98,7 @@ export class Perforce extends Base {
 }
 
 export class Git extends Base {
-	executable: string = 'git'
+	executable = 'git'
 	branch(): string {
 		// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
 		if (Deno.env.get('BUILDKITE_BRANCH')) {

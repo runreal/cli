@@ -1,13 +1,14 @@
 import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
-import { CliOptions, RunrealConfig } from '../lib/types.ts'
-import { execSync } from '../lib/utils.ts'
-import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
+import type { CliOptions, RunrealConfig, UserRunrealConfig } from '../lib/types.ts'
+import { RunrealConfigSchema, UserRunrealConfigSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
 
 const env = (key: string) => Deno.env.get(key) || ''
 
-const defaultConfig = (): Partial<RunrealConfig> => ({
+dotenv.loadSync({ export: true })
+
+const defaultConfig = (): RunrealConfig => ({
 	engine: {
 		path: '',
 		repoType: 'git',
@@ -46,7 +47,10 @@ const defaultConfig = (): Partial<RunrealConfig> => ({
 })
 
 export class Config {
-	private config: Partial<RunrealConfig> = defaultConfig()
+	private config: RunrealConfig = defaultConfig()
+
+	private static configSingleton = new Config()
+
 	private cliOptionToConfigMap = {
 		'enginePath': 'engine.path',
 		'branch': 'engine.branch',
@@ -59,22 +63,35 @@ export class Config {
 
 	private constructor() {}
 
-	static async create(): Promise<Config> {
-		const instance = new Config()
-		const configPath = await instance.searchForConfigFile()
-		if (configPath) {
-			await instance.mergeConfig(configPath)
-		}
-		dotenv.loadSync({ export: true })
-		return instance
+	static async create(opts?: { path?: string }): Promise<Config> {
+		await Config.configSingleton.loadConfig({ path: opts?.path })
+		return Config.configSingleton
 	}
 
-	get(options?: CliOptions): RunrealConfig {
-		if (options) {
-			this.mergeWithCliOptions(options)
+	async loadConfig(opts?: { path?: string }): Promise<RunrealConfig> {
+		let configPath = opts?.path
+		if (!configPath) {
+			configPath = await this.searchForConfigFile()
+		}
+		if (configPath) {
+			await this.mergeConfig(configPath)
 		}
 		this.validateConfig()
-		return this.config as RunrealConfig
+		return this.getConfig()
+	}
+
+	getConfig(): RunrealConfig {
+		return this.config
+	}
+
+	static getInstance(): Config {
+		return Config.configSingleton
+	}
+
+	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): RunrealConfig {
+		this.mergeWithCliOptions(cliOptions)
+		this.validateConfig()
+		return this.getConfig()
 	}
 
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
@@ -85,11 +102,12 @@ export class Config {
 	async mergeConfig(configPath: string) {
 		const cfg = await this.readConfigFile(configPath)
 		if (!cfg) return
-		this.config = deepmerge(this.config, cfg)
-		return this.config
+		const mergeConfig = deepmerge(this.config, cfg)
+		const newConfig = RunrealConfigSchema.parse(mergeConfig)
+		this.config = newConfig
 	}
 
-	private async searchForConfigFile(): Promise<string | null> {
+	private async searchForConfigFile(): Promise<string | undefined> {
 		const cwd = Deno.cwd()
 		const configPath = path.join(cwd, 'runreal.config.json')
 		try {
@@ -98,15 +116,17 @@ export class Config {
 				return configPath
 			}
 		} catch (e) { /* pass */ }
-		return null
+		return undefined
 	}
 
-	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
+	private async readConfigFile(configPath: string): Promise<Partial<UserRunrealConfig> | null> {
 		try {
-			const data = await Deno.readTextFile(path.resolve(configPath)) as string
-			const parsed = parse(data) as unknown
-			return parsed as RunrealConfig
-		} catch (e) { /* pass */ }
+			const data = await Deno.readTextFile(path.resolve(configPath))
+			const parsed = UserRunrealConfigSchema.parse(JSON.parse(data))
+			return parsed
+		} catch (e) {
+			/* pass */
+		}
 		return null
 	}
 
@@ -122,28 +142,25 @@ export class Config {
 				;(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
 			}
 		}
-
 		this.config = deepmerge(this.config, picked)
 	}
 
-	private resolvePaths(config: Partial<RunrealConfig>) {
-		if (config.engine && config.engine.path) {
+	private resolvePaths(config: RunrealConfig) {
+		if (config.engine?.path) {
 			config.engine.path = path.resolve(config.engine.path)
 		}
 
-		if (config.engine && config.engine.gitDependenciesCachePath) {
+		if (config.engine?.gitDependenciesCachePath) {
 			config.engine.gitDependenciesCachePath = path.resolve(config.engine.gitDependenciesCachePath)
 		}
 
-		if (config.project && config.project.path) {
+		if (config.project?.path) {
 			config.project.path = path.resolve(config.project.path)
 		}
 
-		if (config.project && config.project.buildPath) {
+		if (config.project?.buildPath) {
 			config.project.buildPath = path.resolve(config.project.buildPath)
 		}
-
-		return config
 	}
 
 	private getBuildMetadata(): Partial<RunrealConfig['metadata']> | null {
@@ -155,7 +172,8 @@ export class Config {
 				safeRef,
 				git,
 			}
-		} else if (this.config.project?.repoType === 'perforce') {
+		}
+		if (this.config.project?.repoType === 'perforce') {
 			const { safeRef, perforce } = this.getPerforceBuildMetadata(cwd)
 			return {
 				safeRef,
@@ -184,7 +202,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return defaultConfig().metadata!
+			return defaultConfig().metadata
 		}
 	}
 
@@ -203,7 +221,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return defaultConfig().metadata!
+			return defaultConfig().metadata
 		}
 	}
 
@@ -221,10 +239,9 @@ export class Config {
 	}
 
 	private validateConfig() {
-		this.config = this.resolvePaths(this.config)
+		this.resolvePaths(this.config)
 		try {
-			const Merged = ConfigSchema.and(InternalSchema)
-			this.config = Merged.parse(this.config)
+			this.config = RunrealConfigSchema.parse(this.config)
 
 			const metadata = this.getBuildMetadata()
 			this.config.metadata = {
@@ -241,13 +258,11 @@ export class Config {
 		} catch (e) {
 			if (e instanceof z.ZodError) {
 				const errors = e.errors.map((err) => {
-					return '  config.' + err.path.join('.') + ' is ' + err.message
+					return `  config.${err.path.join('.')} is ${err.message}`
 				})
-				throw new ValidationError('Invalid config: \n' + errors.join('\n'))
+				throw new ValidationError(`Invalid config: \n${errors.join('\n')}`)
 			}
 			throw new ValidationError('Invalid config')
 		}
 	}
 }
-
-export const config = await Config.create()

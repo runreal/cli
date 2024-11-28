@@ -1,12 +1,13 @@
 import { Command, ValidationError } from '../../deps.ts'
 import { cloneRepo, runEngineSetup } from '../../lib/utils.ts'
-import { CliOptions } from '../../lib/types.ts'
-import { config } from '../../lib/config.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
+import { Config } from '../../lib/config.ts'
 
-export type InstallOptions = typeof install extends Command<any, any, infer Options, any, any> ? Options
+export type InstallOptions = typeof install extends Command<void, void, infer Options, infer Argument, GlobalOptions>
+	? Options
 	: never
 
-export const install = new Command()
+export const install = new Command<GlobalOptions>()
 	.description('install engine from a source repository')
 	.option('-b, --branch <branch:string>', 'git checkout (branch | tag)')
 	.option('-f, --force', 'force overwrite of destination', { default: false })
@@ -39,7 +40,8 @@ export const install = new Command()
 			dryRun,
 			setup,
 		} = options as InstallOptions
-		const cfg = config.get(options as CliOptions)
+
+		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
 		source = source || cfg.engine.gitSource
 		destination = destination || cfg.engine.path
 

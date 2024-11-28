@@ -17,6 +17,9 @@ await cmd
 	.name('runreal')
 	.version(VERSION)
 	.description('the Unreal Engine runner')
+	.action(function () {
+		this.showHelp()
+	})
 	.command('init', init)
 	.command('debug', debug)
 	.command('clean', clean)

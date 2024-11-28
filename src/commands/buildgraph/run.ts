@@ -1,9 +1,9 @@
 import { Command, path, readNdjson } from '../../deps.ts'
-import { config } from '../../lib/config.ts'
-import { CliOptions, GlobalOptions } from '../../lib/types.ts'
+import { Config } from '../../lib/config.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
 import { createEngine } from '../../lib/engine.ts'
 
-export type RunOptions = typeof run extends Command<any, any, infer Options, any, any> ? Options
+export type RunOptions = typeof run extends Command<void, void, infer Options, infer Argument, GlobalOptions> ? Options
 	: never
 
 interface AutomationToolLogs {
@@ -30,12 +30,16 @@ export const run = new Command<GlobalOptions>()
 	.arguments('<buildGraphScript:file> <buildGraphArgs...>')
 	.stopEarly()
 	.action(async (options, buildGraphScript: string, ...buildGraphArgs: Array<string>) => {
-		const { engine: { path: enginePath } } = config.get(options as CliOptions)
+		const config = Config.getInstance()
+		const { engine: { path: enginePath } } = config.mergeConfigCLIConfig({ cliOptions: options })
 		const engine = createEngine(enginePath)
 		const { success, code } = await engine.runBuildGraph(buildGraphScript, buildGraphArgs)
 		if (!success) {
 			const logs = await getAutomationToolLogs(enginePath)
-			logs.filter(({ level }) => level === 'Error').forEach(({ message }) => console.log(`[BUILDGRAPH RUN] ${message}`))
+
+			for (const message of logs.filter(({ level }) => level === 'Error')) {
+				console.log(`[BUILDGRAPH RUN] ${message}`)
+			}
 			Deno.exit(code)
 		}
 	})
