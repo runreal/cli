@@ -2,6 +2,7 @@ import { Command } from '../../deps.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 
 import { debugConfig } from './debug-config.ts'
+import { debugBuildId } from './debug-buildId.ts'
 
 export const debug = new Command<GlobalOptions>()
 	.description('debug')
@@ -9,3 +10,4 @@ export const debug = new Command<GlobalOptions>()
 		this.showHelp()
 	}))
 	.command('config', debugConfig)
+	.command('buildId', debugBuildId)

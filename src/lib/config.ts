@@ -76,7 +76,6 @@ export class Config {
 		if (configPath) {
 			await this.mergeConfig(configPath)
 		}
-		this.validateConfig()
 		return this.getConfig()
 	}
 
@@ -226,9 +225,15 @@ export class Config {
 	}
 
 	getBuildId() {
-		if (this.config.build?.id) return this.config.build.id
-		if (!this.config.project?.path) return ulid()
-		if (!this.config.project?.repoType) return ulid()
+		if (this.config.build?.id) {
+			return this.config.build.id
+		}
+		if (!this.config.project?.path) {
+			return ulid()
+		}
+		if (!this.config.project?.repoType) {
+			return ulid()
+		}
 		try {
 			const source = Source(this.config.project.path, this.config.project.repoType)
 			const safeRef = source.safeRef()
