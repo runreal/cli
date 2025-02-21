@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/runreal/cli/compare/v1.4.0...v1.4.1) (2025-02-21)
+
+
+### Bug Fixes
+
+* allow specifying build timestamp ([7bee7aa](https://github.com/runreal/cli/commit/7bee7aae4731888eca809e43b1d5d849d04b71a2))
+* race condition in buildId cfg ([75ce663](https://github.com/runreal/cli/commit/75ce663818acb4aec5d2679919426811112b2d0f))
+
 ## [1.4.0](https://github.com/runreal/cli/compare/v1.3.0...v1.4.0) (2024-11-28)
 
 
