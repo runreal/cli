@@ -24,6 +24,8 @@ export const cmd = new Command()
 	.globalOption('--build-id <buildId:string>', 'Overide build ID')
 	.globalEnv('RUNREAL_BUILD_PATH=<buildPath:string>', 'Overide path to build output folder', { prefix: 'RUNREAL_' })
 	.globalOption('--build-path <buildPath:string>', 'Path to save build outputs')
+	.globalEnv('RUNREAL_BUILD_TS=<buildTs:string>', 'Overide build timestamp', { prefix: 'RUNREAL_' })
+	.globalOption('--build-ts <buildTs:string>', 'Overide build timestamp')
 	.globalAction(async (options) => {
 		// We load the config here so that the singleton should be instantiated before any command is run
 		await Config.create({ path: options.configPath })

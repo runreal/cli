@@ -30,7 +30,7 @@ const defaultConfig = (): RunrealConfig => ({
 		buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
 	},
 	metadata: {
-		ts: new Date().toISOString(),
+		ts: env('RUNREAL_BUILD_TS') || new Date().toISOString(),
 		safeRef: '',
 		git: {
 			branch: '',
@@ -252,7 +252,7 @@ export class Config {
 			this.config.metadata = {
 				...this.config.metadata,
 				...metadata,
-				ts: new Date().toISOString(),
+				ts: env('RUNREAL_BUILD_TS') || new Date().toISOString(),
 			}
 
 			const buildId = this.getBuildId()
