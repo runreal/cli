@@ -6,8 +6,8 @@ import { debugBuildId } from './debug-buildId.ts'
 
 export const debug = new Command<GlobalOptions>()
 	.description('debug')
-	.action((function () {
+	.action(function () {
 		this.showHelp()
-	}))
+	})
 	.command('config', debugConfig)
 	.command('buildId', debugBuildId)
