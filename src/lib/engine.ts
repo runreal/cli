@@ -415,3 +415,37 @@ export function createEngine(enginePath: string): Engine {
 			throw new Error(`Unsupported platform: ${Deno.build.os}`)
 	}
 }
+
+/**
+ * Get the platform-specific path to the Unreal Editor executable
+ */
+export function getEditorPath(enginePath: string, platform: EnginePlatform): string {
+	switch (platform) {
+		case EnginePlatform.Windows:
+			return path.join(
+				enginePath,
+				'Engine',
+				'Binaries',
+				'Win64',
+				'UnrealEditor.exe'
+			)
+		case EnginePlatform.Mac:
+			return path.join(
+				enginePath,
+				'Engine',
+				'Binaries',
+				'Mac',
+				'UnrealEditor'
+			)
+		case EnginePlatform.Linux:
+			return path.join(
+				enginePath,
+				'Engine',
+				'Binaries',
+				'Linux',
+				'UnrealEditor'
+			)
+		default:
+			throw new Error(`Unsupported platform: ${platform}`)
+	}
+} 

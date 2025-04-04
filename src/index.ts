@@ -13,6 +13,7 @@ import { clean } from './commands/clean.ts'
 import { cmd } from './cmd.ts'
 import { script } from './commands/script.ts'
 import { asset } from './commands/asset.ts'
+import { runpython } from './commands/runpython.ts'
 
 await cmd
 	.name('runreal')
@@ -33,4 +34,5 @@ await cmd
 	.command('workflow', workflow)
 	.command('script', script)
 	.command('asset', asset)
+	.command('runpython', runpython)
 	.parse(Deno.args)
