@@ -58,7 +58,7 @@ export const pkg = new Command<GlobalOptions>()
 	.option('--profile <profile:string>', 'Build profile', { default: 'client', required: true })
 	.action(async (options) => {
 		const { platform, configuration, dryRun, profile, archiveDirectory, zip } = options as PkgOptions
-		const cfg = await Config.getInstance()
+		const cfg = Config.getInstance()
 		const { engine: { path: enginePath }, project: { path: projectPath } } = cfg.mergeConfigCLIConfig({
 			cliOptions: options,
 		})

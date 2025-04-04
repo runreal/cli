@@ -49,10 +49,10 @@ class Logger {
 		this.logLevel = level
 	}
 
-	private formatMessage(level: LogLevel, message: any) {
+	private formatMessage(level: LogLevel, message: string) {
 		const timestamp = new Date().toISOString()
 		const messageStr = typeof message === 'object' ? `\n${Deno.inspect(message, { colors: true })}` : message
-		let levelStr
+		let levelStr: string
 		switch (level) {
 			case LogLevel.INFO:
 				levelStr = fmt.bold(fmt.green(level))
@@ -93,21 +93,21 @@ class Logger {
 		return level >= this.logLevel
 	}
 
-	info(message: any) {
+	info(message: string) {
 		if (!this.shouldLog(LogLevel.INFO)) return
 		const formatted = this.formatMessage(LogLevel.INFO, message)
 		console.log(formatted)
 		this.writeToFile(formatted)
 	}
 
-	error(message: any) {
+	error(message: string) {
 		if (!this.shouldLog(LogLevel.ERROR)) return
 		const formatted = this.formatMessage(LogLevel.ERROR, message)
 		console.error(formatted)
 		this.writeToFile(formatted)
 	}
 
-	debug(message: any) {
+	debug(message: string) {
 		if (!this.shouldLog(LogLevel.DEBUG)) return
 		const formatted = this.formatMessage(LogLevel.DEBUG, message)
 		console.log(formatted)
