@@ -23,7 +23,7 @@ const blueprint = new Command<GlobalOptions>().description('Visualize your bluep
 			const decoder = new TextDecoder('utf-8')
 			const bluePrint = decoder.decode(data)
 			if (!options.local) {
-			// Send bluePrint to the server
+				// Send bluePrint to the server
 
 				const res = await fetch(url, {
 					method: 'POST',
@@ -73,6 +73,6 @@ const blueprint = new Command<GlobalOptions>().description('Visualize your bluep
 		},
 	)
 
-export const asset = new Command<GlobalOptions>().description("View uasset").action(function () {
-		this.showHelp()
-	}).command('blueprint', blueprint)
+export const asset = new Command<GlobalOptions>().description('View uasset').action(function () {
+	this.showHelp()
+}).command('blueprint', blueprint)
