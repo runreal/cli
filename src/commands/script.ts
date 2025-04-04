@@ -4,7 +4,7 @@ import { logger } from '../lib/logger.ts'
 
 import * as esbuild from 'https://deno.land/x/esbuild@v0.24.0/mod.js'
 
-import { denoPlugins } from 'jsr:@luca/esbuild-deno-loader@0.11.0'
+import { denoPlugins } from 'jsr:@luca/esbuild-deno-loader@0.11.1'
 import { Config } from '../lib/config.ts'
 
 export const script = new Command<GlobalOptions>()
@@ -42,7 +42,7 @@ export const script = new Command<GlobalOptions>()
 
 			const script = (await import(builtOutput)) as Script
 			await script.main(context)
-		} catch (e) {
+		} catch (e: any) {
 			logger.error(e)
 			Deno.exit(1)
 		}
