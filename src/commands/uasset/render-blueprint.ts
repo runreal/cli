@@ -5,7 +5,7 @@ import { generateBlueprintHtml } from '../../lib/utils.ts'
 const url = Deno.env.get('RENDER_URL') || 'http://localhost:8787'
 
 export const renderBlueprint = new Command<GlobalOptions>()
-    .description('Render your blueprint')
+	.description('Render your blueprint')
 	.option(
 		'-b, --blueprint <file:string>',
 		'Path to the input file',

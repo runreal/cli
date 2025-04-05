@@ -427,7 +427,7 @@ export function getEditorPath(enginePath: string, platform: EnginePlatform): str
 				'Engine',
 				'Binaries',
 				'Win64',
-				'UnrealEditor.exe'
+				'UnrealEditor.exe',
 			)
 		case EnginePlatform.Mac:
 			return path.join(
@@ -435,7 +435,7 @@ export function getEditorPath(enginePath: string, platform: EnginePlatform): str
 				'Engine',
 				'Binaries',
 				'Mac',
-				'UnrealEditor'
+				'UnrealEditor',
 			)
 		case EnginePlatform.Linux:
 			return path.join(
@@ -443,9 +443,9 @@ export function getEditorPath(enginePath: string, platform: EnginePlatform): str
 				'Engine',
 				'Binaries',
 				'Linux',
-				'UnrealEditor'
+				'UnrealEditor',
 			)
 		default:
 			throw new Error(`Unsupported platform: ${platform}`)
 	}
-} 
+}
