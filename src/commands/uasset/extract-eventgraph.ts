@@ -2,6 +2,7 @@ import { Command } from '../../deps.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { generateBlueprintHtml } from '../../lib/utils.ts'
 import { logger } from '../../lib/logger.ts'
+import * as path from 'jsr:@std/path'
 
 export type ExtractEventGraphOptions = typeof extractEventGraph extends
 	Command<void, void, infer Options extends Record<string, unknown>, [], GlobalOptions> ? Options
@@ -82,21 +83,18 @@ function findEventGraph(fileContent: string): string | null {
 export const extractEventGraph = new Command<GlobalOptions>()
 	.description('extract event graph from exported uasset')
 	.option('-i, --input <file:string>', 'Path to the exported uasset file', { required: true })
-    .option('-o, --output <file:string>', 'Output file path extracted event graph', { required: false })
     .option('-r, --render', 'Save the output as rendered html', { default: false })
 	.action((options) => {
         try {
             const data = Deno.readTextFileSync(options.input);
             const eventGraph = findEventGraph(data);
             if (eventGraph) {
-                if (options.output) {
-                    if (options.render) {
-                        const html = generateBlueprintHtml(eventGraph)
-                        Deno.writeTextFileSync(options.output, html)
-                    } else {
-                        Deno.writeTextFileSync(options.output, eventGraph);
-                    }
-                    logger.info(`EventGraph extracted to ${options.output}`);
+                if (options.render) {
+                    const html = generateBlueprintHtml(eventGraph)
+                    const basename = path.basename(options.input, path.extname(options.input))
+                    const basepath = path.dirname(options.input)
+                    Deno.writeTextFileSync(`${basepath}/${basename}.html`, html)
+                    logger.info(`EventGraph extracted to ${basename}.html`);
                 } else {
                     logger.info(eventGraph);
                 }
