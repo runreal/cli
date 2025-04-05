@@ -3,6 +3,7 @@ import type { GlobalOptions } from '../../lib/types.ts'
 import { generateBlueprintHtml } from '../../lib/utils.ts'
 import { logger } from '../../lib/logger.ts'
 import * as path from 'jsr:@std/path'
+import * as fs from 'jsr:@std/fs'
 
 export type ExtractEventGraphOptions = typeof extractEventGraph extends
 	Command<void, void, infer Options extends Record<string, unknown>, [], GlobalOptions> ? Options
@@ -82,29 +83,40 @@ function findEventGraph(fileContent: string): string | null {
 	return nodeCount > 0 ? eventGraphNodes.join('\n') : null
 }
 
+async function extractEventGraphFromFile(filePath: string, render: boolean) {
+	const data = await Deno.readTextFile(filePath)
+	const eventGraph = findEventGraph(data)
+	if (eventGraph) {
+		if (render) {
+			const html = generateBlueprintHtml(eventGraph)
+			const basename = path.basename(filePath, path.extname(filePath))
+			const basepath = path.dirname(filePath)
+			await Deno.writeTextFile(`${basepath}/${basename}.html`, html)
+		} else {
+			logger.info(eventGraph)
+		}
+	}
+}
+
 export const extractEventGraph = new Command<GlobalOptions>()
 	.description('extract event graph from exported uasset')
-	.option('-i, --input <file:string>', 'Path to the exported uasset file', { required: true })
+	.option('-i, --input <file:string>', 'Path to the exported uasset file or directory containing exported uassets', {
+		required: true,
+	})
 	.option('-r, --render', 'Save the output as rendered html', { default: false })
-	.action((options) => {
+	.action(async (options) => {
 		try {
-			const data = Deno.readTextFileSync(options.input)
-			const eventGraph = findEventGraph(data)
-			if (eventGraph) {
-				if (options.render) {
-					const html = generateBlueprintHtml(eventGraph)
-					const basename = path.basename(options.input, path.extname(options.input))
-					const basepath = path.dirname(options.input)
-					Deno.writeTextFileSync(`${basepath}/${basename}.html`, html)
-					logger.info(`EventGraph extracted to ${basename}.html`)
-				} else {
-					logger.info(eventGraph)
+			const isDirectory = await fs.exists(options.input, { isDirectory: true })
+			if (isDirectory) {
+				const files = await Deno.readDir(options.input)
+				for await (const file of files) {
+					if (file.isFile) {
+						await extractEventGraphFromFile(path.join(options.input, file.name), options.render)
+					}
 				}
 			} else {
-				logger.error('No EventGraph found in the file')
-				Deno.exit(1)
+				await extractEventGraphFromFile(options.input, options.render)
 			}
-			return
 		} catch (error: unknown) {
 			logger.error(`Error parsing blueprint: ${error instanceof Error ? error.message : String(error)}`)
 			Deno.exit(1)
