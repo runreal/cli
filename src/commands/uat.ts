@@ -1,4 +1,4 @@
-import { Command } from '../deps.ts'
+import { Command } from '@cliffy/command'
 import { createEngine } from '../lib/engine.ts'
 import { findProjectFile } from '../lib/utils.ts'
 import { Config } from '../lib/config.ts'

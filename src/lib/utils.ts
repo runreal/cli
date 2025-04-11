@@ -1,4 +1,6 @@
-import { mergeReadableStreams, path, xml2js } from '../deps.ts'
+import { mergeReadableStreams } from '@std/streams'
+import * as path from '@std/path'
+import { xml2js } from 'xml2js'
 import { createEngine } from './engine.ts'
 import type { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 

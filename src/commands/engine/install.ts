@@ -1,4 +1,4 @@
-import { Command, ValidationError } from '../../deps.ts'
+import { Command, ValidationError } from '@cliffy/command'
 import { cloneRepo, runEngineSetup } from '../../lib/utils.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { Config } from '../../lib/config.ts'

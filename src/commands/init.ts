@@ -1,4 +1,4 @@
-import { Command, ValidationError } from '../deps.ts'
+import { Command, ValidationError } from '@cliffy/command'
 import { createEngine } from '../lib/engine.ts'
 import type { GlobalOptions } from '../lib/types.ts'
 import { findProjectFile, getProjectName, writeConfigFile } from '../lib/utils.ts'

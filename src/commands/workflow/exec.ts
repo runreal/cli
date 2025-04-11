@@ -1,4 +1,4 @@
-import { Command, EnumType, ValidationError } from '../../deps.ts'
+import { Command, EnumType, ValidationError } from '@cliffy/command'
 import { Config } from '../../lib/config.ts'
 import { cmd } from '../../cmd.ts'
 import type { GlobalOptions } from '../../lib/types.ts'

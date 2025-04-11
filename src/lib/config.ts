@@ -1,4 +1,10 @@
-import { deepmerge, dotenv, parse, path, ulid, ValidationError, z } from '../deps.ts'
+import * as path from '@std/path'
+import * as dotenv from '@std/dotenv'
+import { z } from 'zod'
+import { ValidationError } from '@cliffy/command'
+import { deepmerge } from '@rebeccastevens/deepmerge'
+
+import { ulid } from './ulid.ts'
 import type { CliOptions, RunrealConfig, UserRunrealConfig } from '../lib/types.ts'
 import { RunrealConfigSchema, UserRunrealConfigSchema } from '../lib/schema.ts'
 import { Git, Perforce, Source } from './source.ts'

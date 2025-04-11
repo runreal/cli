@@ -1,5 +1,5 @@
 import { Engine } from '../lib/engine.ts'
-import { Command } from '../deps.ts'
+import { Command } from '@cliffy/command'
 
 export const clean = new Command()
 	.option('--dry-run', 'Dry run', { default: false })
