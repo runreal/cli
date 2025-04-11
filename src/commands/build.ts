@@ -1,4 +1,4 @@
-import { Command, EnumType, ValidationError } from '../deps.ts'
+import { Command, EnumType, ValidationError } from '@cliffy/command'
 
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile, getProjectName } from '../lib/utils.ts'

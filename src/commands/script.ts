@@ -1,4 +1,6 @@
-import { $, Command, path } from '../deps.ts'
+import { Command } from '@cliffy/command'
+import { $ } from '@david/dax'
+import * as path from '@std/path'
 import type { GlobalOptions, Script, ScriptContext } from '../lib/types.ts'
 import { logger } from '../lib/logger.ts'
 

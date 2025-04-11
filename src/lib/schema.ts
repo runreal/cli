@@ -1,4 +1,4 @@
-import { z } from '../deps.ts'
+import { z } from 'zod'
 
 export const InternalSchema = z.object({
 	buildkite: z.object({
@@ -30,6 +30,7 @@ export const ConfigSchema = z.object({
 		path: z.string().describe('Path to the engine folder'),
 		repoType: z.string().describe('git or perforce'),
 		gitSource: z.string().optional().describe('git source repository'),
+		gitBranch: z.string().optional().describe('git branch to checkout').default('main'),
 		gitDependenciesCachePath: z
 			.string()
 			.optional()

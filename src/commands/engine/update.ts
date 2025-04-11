@@ -1,4 +1,4 @@
-import { Command, ValidationError } from '../../deps.ts'
+import { Command, ValidationError } from '@cliffy/command'
 import { deleteEngineHooks, exec, isGitRepo, runEngineSetup } from '../../lib/utils.ts'
 import { Config } from '../../lib/config.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
@@ -16,7 +16,6 @@ export const update = new Command<GlobalOptions>()
 	.option(
 		'-b, --branch <checkout:string>',
 		'git checkout (branch | tag | commit)',
-		{ default: 'main' },
 	)
 	.option('-r, --remote <remote:string>', 'git remote', { default: 'origin' })
 	.option('-c, --clean', 'if we should run a git clean before updating', {
@@ -41,6 +40,8 @@ export const update = new Command<GlobalOptions>()
 		} = options as UpdateOptions
 
 		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
+		const branchArg = branch || cfg.engine.gitBranch
+
 		const isRepo = await isGitRepo(cfg.engine.path)
 		if (!isRepo) {
 			throw new ValidationError(
@@ -48,7 +49,7 @@ export const update = new Command<GlobalOptions>()
 			)
 		}
 		if (clean) {
-			const clean = await exec('git', [
+			const _clean = await exec('git', [
 				'clean',
 				gitCleanFlags ? gitCleanFlags : '-fxd',
 			], { cwd: cfg.engine.path, dryRun })
@@ -56,20 +57,20 @@ export const update = new Command<GlobalOptions>()
 		// Prevent the default engine hooks from running
 		await deleteEngineHooks(cfg.engine.path)
 
-		const fetch = await exec('git', [
+		const _fetch = await exec('git', [
 			'fetch',
 			remote,
-			branch,
+			branchArg,
 		], { cwd: cfg.engine.path, dryRun })
 
-		const checkout = await exec('git', [
+		const _checkout = await exec('git', [
 			'checkout',
 			'--quiet',
 			'--force',
-			branch,
+			branchArg,
 		], { cwd: cfg.engine.path, dryRun })
 
-		const reset = await exec('git', [
+		const _reset = await exec('git', [
 			'reset',
 			'--hard',
 			'FETCH_HEAD',

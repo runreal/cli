@@ -7,7 +7,7 @@ Deno.test('template tests', () => {
 		'{"name": "${project.name}", "engine": "${engine.path}\\BuildGraph\\Build.xml", "project": "${project.path}"}'
 	const cfg = {
 		project: { name: 'Deno' },
-		engine: { path: 'C:\\Program Files\\V8' },
+		engine: { path: 'C:\\Program Files\\V8', repoType: 'git', gitBranch: 'main' },
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 	} as RunrealConfig
 
@@ -20,7 +20,7 @@ Deno.test('template tests', () => {
 Deno.test('getSubstitutions should correctly extract values from config', () => {
 	const cfg: RunrealConfig = {
 		project: { name: 'Project', path: '/projects/project', buildPath: '/output/path', repoType: 'git' },
-		engine: { path: '/engines/5.1', repoType: 'git' },
+		engine: { path: '/engines/5.1', repoType: 'git', gitBranch: 'main' },
 		build: { id: '1234' },
 		buildkite: { buildNumber: '5678' },
 		metadata: {
@@ -65,7 +65,7 @@ Deno.test('render should replace placeholders with correct values', () => {
 	]
 	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.1', repoType: 'git' },
+		engine: { path: '/engines/5.1', repoType: 'git', gitBranch: 'main' },
 		build: { id: '1234' },
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 	}
@@ -83,7 +83,7 @@ Deno.test('render should replace placeholders with correct values', () => {
 Deno.test('renderConfig should deeply replace all placeholders in config object', () => {
 	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.0', repoType: 'git' },
+		engine: { path: '/engines/5.0', repoType: 'git', gitBranch: 'main' },
 		build: { id: '1234' },
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 		workflows: [
@@ -105,7 +105,7 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 	}
 	const expected: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.0', repoType: 'git' },
+		engine: { path: '/engines/5.0', repoType: 'git', gitBranch: 'main' },
 		build: { id: '1234' },
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 		workflows: [
@@ -132,7 +132,7 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 Deno.test('replace paths in template', () => {
 	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.0', repoType: 'git' },
+		engine: { path: '/engines/5.0', repoType: 'git', gitBranch: 'main' },
 		build: { id: '1234' },
 		metadata: { ts: '2024-02-29T12:34:56Z' },
 		workflows: [

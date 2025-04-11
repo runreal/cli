@@ -1,4 +1,4 @@
-import { fmt } from '../deps.ts'
+import * as fmt from '@std/fmt/colors'
 import { createConfigDirSync, DefaultMap, getRandomInt } from './utils.ts'
 
 export enum LogLevel {

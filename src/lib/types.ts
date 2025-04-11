@@ -1,4 +1,7 @@
-import type { $, Command, path, z } from '../deps.ts'
+import { Command } from '@cliffy/command'
+import * as path from '@std/path'
+import { $ } from '@david/dax'
+import type { z } from 'zod'
 import type { cmd } from '../cmd.ts'
 
 import type { DebugConfigOptions } from '../commands/debug/debug-config.ts'

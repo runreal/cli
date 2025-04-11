@@ -20,6 +20,11 @@
           "type": "string",
           "description": "git source repository"
         },
+        "gitBranch": {
+          "type": "string",
+          "description": "git branch to checkout",
+          "default": "main"
+        },
         "gitDependenciesCachePath": {
           "type": "string",
           "description": "Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>"

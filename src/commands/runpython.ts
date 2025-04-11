@@ -1,10 +1,10 @@
-import { Command } from '../deps.ts'
-import { createEngine } from '../lib/engine.ts'
+import { Command } from '@cliffy/command'
+import * as path from '@std/path'
 import { findProjectFile } from '../lib/utils.ts'
 import { Config } from '../lib/config.ts'
 import { logger } from '../lib/logger.ts'
 import type { GlobalOptions } from '../lib/types.ts'
-import { path } from '../deps.ts'
+
 import { exec } from '../lib/utils.ts'
 import { Engine, getEditorPath } from '../lib/engine.ts'
 

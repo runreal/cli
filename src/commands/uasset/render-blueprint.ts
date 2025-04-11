@@ -1,4 +1,4 @@
-import { Command } from '../../deps.ts'
+import { Command } from '@cliffy/command'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { generateBlueprintHtml } from '../../lib/utils.ts'
 
