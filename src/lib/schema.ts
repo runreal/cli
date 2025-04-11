@@ -30,6 +30,7 @@ export const ConfigSchema = z.object({
 		path: z.string().describe('Path to the engine folder'),
 		repoType: z.string().describe('git or perforce'),
 		gitSource: z.string().optional().describe('git source repository'),
+		gitBranch: z.string().optional().describe('git branch to checkout'),
 		gitDependenciesCachePath: z
 			.string()
 			.optional()
