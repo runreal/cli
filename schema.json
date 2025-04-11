@@ -22,7 +22,8 @@
         },
         "gitBranch": {
           "type": "string",
-          "description": "git branch to checkout"
+          "description": "git branch to checkout",
+          "default": "main"
         },
         "gitDependenciesCachePath": {
           "type": "string",
