@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.0](https://github.com/runreal/cli/compare/v1.4.1...v1.5.0) (2025-04-11)
+
+
+### Features
+
+* generate a markdown report with buildgraph errors ([#56](https://github.com/runreal/cli/issues/56)) ([6e10941](https://github.com/runreal/cli/commit/6e109418451c426b09892a9b2a8f4462499ae6b0))
+* uasset utils and runpython helper ([#53](https://github.com/runreal/cli/issues/53)) ([8860b78](https://github.com/runreal/cli/commit/8860b78726372ad401d0107cebd7e0ea889f195a))
+* update deno version ([#51](https://github.com/runreal/cli/issues/51)) ([5b1a952](https://github.com/runreal/cli/commit/5b1a9524de17b9ae5c21a9feb6dd2d633f4a4c04))
+
+
+### Bug Fixes
+
+* default val workaround, fix tests ([f42cc90](https://github.com/runreal/cli/commit/f42cc9083531e5ae2d970315eb579b9f25e67a9d))
+* git engine update ([#55](https://github.com/runreal/cli/issues/55)) ([ee5a886](https://github.com/runreal/cli/commit/ee5a886f14653d8267a27187e242f03bdf14ddfb))
+
 ## [1.4.1](https://github.com/runreal/cli/compare/v1.4.0...v1.4.1) (2025-02-21)
 
 
