@@ -1,5 +1,5 @@
-import { Command, EnumType, ulid } from './deps.ts'
-
+import { Command, EnumType } from '@cliffy/command'
+import { ulid } from './lib/ulid.ts'
 import { Config } from './lib/config.ts'
 import { logger, LogLevel } from './lib/logger.ts'
 

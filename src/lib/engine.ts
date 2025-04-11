@@ -1,4 +1,5 @@
-import { globber, path } from '../deps.ts'
+import * as path from '@std/path'
+import { globber } from 'globber'
 import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
 import { Config } from './config.ts'
 

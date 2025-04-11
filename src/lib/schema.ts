@@ -1,4 +1,4 @@
-import { z } from '../deps.ts'
+import { z } from 'zod'
 
 export const InternalSchema = z.object({
 	buildkite: z.object({

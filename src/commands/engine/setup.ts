@@ -1,4 +1,4 @@
-import { Command } from '../../deps.ts'
+import { Command } from '@cliffy/command'
 import { Config } from '../../lib/config.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { runEngineSetup } from '../../lib/utils.ts'
