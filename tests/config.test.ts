@@ -14,6 +14,7 @@ Deno.test('Config.create should initialize with default values', async () => {
 		engine: {
 			path: '',
 			repoType: 'git',
+			gitBranch: 'main',
 		},
 		project: {
 			name: '',

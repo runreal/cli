@@ -12,6 +12,7 @@ const defaultConfig = (): RunrealConfig => ({
 	engine: {
 		path: '',
 		repoType: 'git',
+		gitBranch: 'main',
 	},
 	project: {
 		name: '',
