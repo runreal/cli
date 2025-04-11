@@ -43,6 +43,17 @@ steps:
           - "deno task compile-linux"
         <<: *deno_matrix
 
+  - group: ":cityscape: acme corp"
+    key: "acme-corp"
+    steps:
+      - trigger: "runreal-acme"
+        label: ":cityscape: acme build"
+        build:
+          message: ":test_tube: test runreal/cli ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+          env:
+            RUNREAL_FROM_SOURCE: true
+            RUNREAL_FROM_REF: $BUILDKITE_COMMIT
+
   # - group: ":godmode: test minimal project"
   #   key: "minimal"
   #   steps:
