@@ -12,6 +12,8 @@ import { workflow } from './commands/workflow/index.ts'
 import { clean } from './commands/clean.ts'
 import { cmd } from './cmd.ts'
 import { script } from './commands/script.ts'
+import { runpython } from './commands/runpython.ts'
+import { uasset } from './commands/uasset/index.ts'
 
 await cmd
 	.name('runreal')
@@ -31,4 +33,6 @@ await cmd
 	.command('buildgraph', buildgraph)
 	.command('workflow', workflow)
 	.command('script', script)
+	.command('runpython', runpython)
+	.command('uasset', uasset)
 	.parse(Deno.args)

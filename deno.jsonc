@@ -38,6 +38,7 @@
 		"@std/path": "jsr:@std/path@^1.0.8",
 		"@std/streams": "jsr:@std/streams@^1.0.9",
 		"@std/testing": "jsr:@std/testing@^1.0.5",
+		"ueblueprint":"npm:ueblueprint@2.0.0",
 		"zod": "npm:zod@3.23.8",
 		"zod-to-json-schema": "npm:zod-to-json-schema@3.23.5",
 		"ndjson": "https://deno.land/x/ndjson@1.1.0/mod.ts",

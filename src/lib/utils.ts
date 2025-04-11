@@ -374,3 +374,37 @@ export function formatIsoTimestamp(
 ): string {
 	return new Intl.DateTimeFormat(locale, options).format(new Date(ts))
 }
+
+export const generateBlueprintHtml = (blueprint: string) => {
+	const html = `
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+	<meta charset="utf-8" />
+	<title>UE Blueprint</title>
+	<link rel="stylesheet" href="https://barsdeveloper.github.io/ueblueprint/dist/css/ueb-style.min.css">
+	<style>
+	body {
+		margin: 0;
+		padding: 0;
+		--ueb-height: 100vh;
+	}
+	</style>
+	</head>
+
+	<body>
+	<script type="module">
+	import { Blueprint } from "https://barsdeveloper.github.io/ueblueprint/dist/ueblueprint.js"
+	</script>
+	<code>
+	<ueb-blueprint>
+		<template>
+${blueprint}
+		</template>
+	</ueb-blueprint>
+	</code>
+	</body>
+	</html>
+`
+	return html
+}
