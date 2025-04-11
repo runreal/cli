@@ -249,7 +249,7 @@ export const runEngineSetup = async (
 
 	const deps = await exec(engine.getGitDependencesBin(), args, { cwd: enginePath, dryRun })
 
-	await exec(engine.getGenerateScript(), [])
+	await exec(engine.getGenerateScript(), [], { dryRun })
 }
 
 export const deleteEngineHooks = async (enginePath: string) => {
