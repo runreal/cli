@@ -21,7 +21,7 @@ jobs:
         deno-version: [2.2.8]
 
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.GH_RUNREAL_TOKEN }}
@@ -58,10 +58,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ steps.release.outputs.tag_name }} ./build/runreal-win-x64.exe ./build/runreal-macos-arm ./build/runreal-linux-x64 schema.json
-
-      - name: Cache Deno dependencies
-        if: ${{ steps.release.outputs.release_created }}
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.DENO_DIR }}
-          key: ${{ hashFiles('deno.lock') }}
