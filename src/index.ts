@@ -14,6 +14,7 @@ import { cmd } from './cmd.ts'
 import { script } from './commands/script.ts'
 import { runpython } from './commands/runpython.ts'
 import { uasset } from './commands/uasset/index.ts'
+import { auth } from './commands/auth.ts'
 
 await cmd
 	.name('runreal')
@@ -33,6 +34,7 @@ await cmd
 	.command('buildgraph', buildgraph)
 	.command('workflow', workflow)
 	.command('script', script)
+	.command('auth', auth)
 	.command('runpython', runpython)
 	.command('uasset', uasset)
 	.parse(Deno.args)

@@ -61,5 +61,6 @@ export const ConfigSchema = z.object({
 
 export const RunrealConfigSchema = ConfigSchema.merge(InternalSchema)
 
-// Depraecated 😭
-export const UserRunrealConfigSchema = ConfigSchema.deepPartial()
+export const UserRunrealConfigSchema = z.object({
+	accessToken: z.string().optional().describe('RUNREAL access token'),
+})
