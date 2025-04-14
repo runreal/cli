@@ -118,7 +118,7 @@ function parseBlueprint(fileContent: string) {
 				const arrayMatch = key.match(/([^\(]+)\((\d+)\)/)
 				if (arrayMatch) {
 					const arrayName = arrayMatch[1]
-					const arrayIndex = parseInt(arrayMatch[2])
+					const arrayIndex = Number.parseInt(arrayMatch[2])
 
 					if (!currentObject.properties[arrayName]) {
 						currentObject.properties[arrayName] = []

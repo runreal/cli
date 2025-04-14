@@ -2,8 +2,8 @@ import { Command } from '@cliffy/command'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { generateBlueprintHtml } from '../../lib/utils.ts'
 import { logger } from '../../lib/logger.ts'
-import * as path from 'jsr:@std/path'
-import * as fs from 'jsr:@std/fs'
+import * as path from '@std/path'
+import * as fs from '@std/fs'
 
 export type ExtractEventGraphOptions = typeof extractEventGraph extends
 	Command<void, void, infer Options extends Record<string, unknown>, [], GlobalOptions> ? Options
@@ -66,7 +66,7 @@ function findEventGraph(fileContent: string): string | null {
 		if (
 			insideEventGraph && insideBeginObjectBlock && !line.startsWith('Begin Object') && !line.startsWith('End Object')
 		) {
-			eventGraphNodes.push('   ' + line)
+			eventGraphNodes.push(`   ${line}`)
 			continue
 		}
 
@@ -108,7 +108,7 @@ export const extractEventGraph = new Command<GlobalOptions>()
 		try {
 			const isDirectory = await fs.exists(options.input, { isDirectory: true })
 			if (isDirectory) {
-				const files = await Deno.readDir(options.input)
+				const files = Deno.readDir(options.input)
 				for await (const file of files) {
 					if (file.isFile) {
 						await extractEventGraphFromFile(path.join(options.input, file.name), options.render)

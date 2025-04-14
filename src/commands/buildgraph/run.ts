@@ -62,17 +62,17 @@ function generateMarkdownReport(logs: AutomationToolLogs[]): string {
 		for (const log of groupLogs) {
 			markdown += `#### Error: ${log.message}\n`
 
-			if (log.properties && log.properties.file) {
+			if (log.properties?.file) {
 				const file = log.properties.file.$text
 				const line = log.properties.line?.$text || log.line
 				markdown += `- **File**: ${file}${line ? `:${line}` : ''}\n`
 			}
 
-			if (log.properties && log.properties.code) {
+			if (log.properties?.code) {
 				markdown += `- **Code**: ${log.properties.code.$text}\n`
 			}
 
-			if (log.properties && log.properties.severity) {
+			if (log.properties?.severity) {
 				markdown += `- **Severity**: ${log.properties.severity.$text}\n`
 			}
 

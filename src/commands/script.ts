@@ -4,9 +4,9 @@ import * as path from '@std/path'
 import type { GlobalOptions, Script, ScriptContext } from '../lib/types.ts'
 import { logger } from '../lib/logger.ts'
 
-import * as esbuild from 'https://deno.land/x/esbuild@v0.24.0/mod.js'
+import * as esbuild from 'esbuild'
 
-import { denoPlugins } from 'jsr:@luca/esbuild-deno-loader@0.11.1'
+import { denoPlugins } from '@luca/esbuild-deno-loader'
 import { Config } from '../lib/config.ts'
 
 export const script = new Command<GlobalOptions>()
