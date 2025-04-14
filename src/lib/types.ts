@@ -1,4 +1,4 @@
-import type  { Command } from '@cliffy/command'
+import type { Command } from '@cliffy/command'
 import type * as path from '@std/path'
 import type { $ } from '@david/dax'
 import type { z } from 'zod'

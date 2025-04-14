@@ -100,7 +100,7 @@ function parseBlueprint(fileContent: string) {
 				let complexValue = value
 				while (!complexValue.endsWith(')') && i < lines.length - 1) {
 					i++
-					complexValue += ' ' + lines[i].trim()
+					complexValue += `  ${lines[i].trim()}`
 				}
 				currentObject.properties[key] = parseComplexProperty(complexValue)
 			} else if (value.startsWith('(')) {
