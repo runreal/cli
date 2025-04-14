@@ -2,7 +2,7 @@ import { Command, EnumType, ValidationError } from '@cliffy/command'
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
 import { findProjectFile } from '../lib/utils.ts'
 import { Config } from '../lib/config.ts'
-import type { CliOptions, GlobalOptions } from '../lib/types.ts'
+import type { GlobalOptions } from '../lib/types.ts'
 
 const defaultBCRArgs = [
 	'-build',
