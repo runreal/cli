@@ -1,13 +1,13 @@
-import { UserRunrealConfigSchema } from './schema.ts'
-import { UserRunrealConfig } from './types.ts'
+import { UserRunrealPreferencesSchema } from './schema.ts'
+import { UserRunrealPreferences } from './types.ts'
 
 const homeDir = Deno.env.get('HOME')
 const preferencesPath = `${homeDir}/.runreal/`
 const preferencesFile = 'preferences.json'
 const preferencesFullPath = `${preferencesPath}${preferencesFile}`
 
-const get = async (): Promise<UserRunrealConfig> => {
-	let prefs: UserRunrealConfig = {}
+const get = async (): Promise<UserRunrealPreferences> => {
+	let prefs: UserRunrealPreferences = {}
 	try {
 		const fileInfo = await Deno.stat(preferencesFullPath)
 		if (!fileInfo.isFile) {
@@ -16,7 +16,7 @@ const get = async (): Promise<UserRunrealConfig> => {
 		const file = await Deno.readTextFile(preferencesFullPath)
 		const parsed = JSON.parse(file)
 		try {
-			prefs = UserRunrealConfigSchema.parse(parsed)
+			prefs = UserRunrealPreferencesSchema.parse(parsed)
 		} catch (e) {
 			console.error('Invalid preferences file:', e)
 			return prefs
@@ -32,7 +32,7 @@ const get = async (): Promise<UserRunrealConfig> => {
 	return prefs
 }
 
-const set = async (prefs: UserRunrealConfig): Promise<UserRunrealConfig> => {
+const set = async (prefs: UserRunrealPreferences): Promise<UserRunrealPreferences> => {
 	try {
 		const fileInfo = await Deno.stat(preferencesFullPath)
 		if (!fileInfo.isFile) {
