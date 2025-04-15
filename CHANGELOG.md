@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/runreal/cli/compare/v1.5.0...v1.6.0) (2025-04-15)
+
+
+### Features
+
+* add runreal auth ([#54](https://github.com/runreal/cli/issues/54)) ([449eca8](https://github.com/runreal/cli/commit/449eca8d5f9ce30914e173ea6305cb45fba5bdcb))
+
 ## [1.5.0](https://github.com/runreal/cli/compare/v1.4.1...v1.5.0) (2025-04-11)
 
 
