@@ -3,7 +3,7 @@
 		"dev": "deno run -A --watch=src src/index.ts",
 		"test": "deno test -A --watch",
 		"run": "deno run -A src/index.ts",
-		"install": "deno install -A --force --global --name runreal src/index.ts",
+		"install": "deno install -A --force --global --name runreal src/index.ts --config deno.jsonc",
 		"compile-win": "deno compile -A --target x86_64-pc-windows-msvc --output build/runreal-win-x64 src/index.ts",
 		"compile-linux": "deno compile -A --target x86_64-unknown-linux-gnu --output build/runreal-linux-x64 src/index.ts",
 		"compile-macos": "deno compile -A --target aarch64-apple-darwin --output build/runreal-macos-arm src/index.ts",
