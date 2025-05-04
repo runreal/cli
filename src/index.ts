@@ -15,6 +15,7 @@ import { script } from './commands/script.ts'
 import { runpython } from './commands/runpython.ts'
 import { uasset } from './commands/uasset/index.ts'
 import { auth } from './commands/auth.ts'
+import { listTargets } from './commands/list-targets.ts'
 
 await cmd
 	.name('runreal')
@@ -27,6 +28,7 @@ await cmd
 	.command('debug', debug)
 	.command('clean', clean)
 	.command('build', build)
+	.command('list-targets', listTargets)
 	.command('engine', engine)
 	.command('uat', uat)
 	.command('ubt', ubt)
