@@ -1,6 +1,7 @@
+import * as path from '@std/path'
 import { Command, EnumType, ValidationError } from '@cliffy/command'
 import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
-import { findProjectFile } from '../lib/utils.ts'
+import { findProjectFile, getProjectName } from '../lib/utils.ts'
 import { Config } from '../lib/config.ts'
 import type { GlobalOptions } from '../lib/types.ts'
 
@@ -30,6 +31,11 @@ const clientBCRArgs = [
 	...defaultBCRArgs,
 ]
 
+const gameBCRArgs = [
+	'-game',
+	...defaultBCRArgs,
+]
+
 const serverBCRArgs = [
 	'-server',
 	'-noclient',
@@ -38,8 +44,11 @@ const serverBCRArgs = [
 
 const profiles = {
 	'client': clientBCRArgs,
+	'game': gameBCRArgs,
 	'server': serverBCRArgs,
 }
+
+const profileNameMap = { client: 'Client', game: 'Game', server: 'Server' }
 
 export type PkgOptions = typeof pkg extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
@@ -52,7 +61,7 @@ export const pkg = new Command<GlobalOptions>()
 	.option('-c, --configuration <configuration:Configuration>', 'Configuration', {
 		default: EngineConfiguration.Development,
 	})
-	.option('-a, --archive-directory <path:file>', 'Path to archive directory')
+	.option('-a, --archive-directory <path:file>', 'Path to archive directory', { default: Deno.cwd() })
 	.option('-z, --zip', 'Should we zip the archive')
 	.option('-d, --dry-run', 'Dry run')
 	.option('--profile <profile:string>', 'Build profile', { default: 'client', required: true })
@@ -69,6 +78,8 @@ export const pkg = new Command<GlobalOptions>()
 
 		const engine = createEngine(enginePath)
 		const projectFile = await findProjectFile(projectPath).catch(() => null)
+		const projectName = await getProjectName(projectPath)
+
 		if (projectFile) {
 			bcrArgs.push(`-project=${projectFile}`)
 		} else {
@@ -80,6 +91,9 @@ export const pkg = new Command<GlobalOptions>()
 		}
 		if (profile === 'client') {
 			bcrArgs.push(`-clientconfig=${configuration}`)
+		}
+		if (profile === 'game') {
+			bcrArgs.push(`-gameconfig=${configuration}`)
 		}
 		if (archiveDirectory) {
 			bcrArgs.push('-archive')
@@ -99,11 +113,11 @@ export const pkg = new Command<GlobalOptions>()
 			// Reverse the EnginePlatform enum to get the build output platform name, ie Win64 => Windows
 			const platformName =
 				Object.keys(EnginePlatform)[Object.values(EnginePlatform).indexOf(platform as EnginePlatform)]
-			const profileName = profile === 'client' ? 'Client' : 'Server'
-			const expectedArchivePath = `${archiveDirectory}\\${platformName}${profileName}`
+			const profileName = profileNameMap[profile as keyof typeof profileNameMap] || ''
+			const archivePath = path.join(archiveDirectory, `${projectName}-${profileName}-${platformName}`)
 			const zipArgs = [
-				`-add=${expectedArchivePath}`,
-				`-archive=${expectedArchivePath}.zip`,
+				`-add=${archivePath}`,
+				`-archive=${archivePath}.zip`,
 				'-compression=5',
 			]
 			await engine.runUAT(['ZipUtils', ...zipArgs])
