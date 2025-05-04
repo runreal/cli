@@ -165,7 +165,7 @@ export abstract class Engine {
 		const args = ['-Mode=QueryTargets', `-Project=${projectFile}`]
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(`${projectPath}\\Intermediate\\TargetInfo.json`)
+			const targetInfoJson = path.resolve(path.join(projectPath, 'Intermediate', 'TargetInfo.json'))
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
@@ -266,7 +266,7 @@ class WindowsEngine extends Engine {
 		const args = ['-Mode=QueryTargets']
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(`${this.enginePath}\\Engine\\Intermediate\\TargetInfo.json`)
+			const targetInfoJson = path.resolve(path.join(this.enginePath, 'Engine', 'Intermediate', 'TargetInfo.json'))
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
@@ -329,7 +329,7 @@ class MacosEngine extends Engine {
 		const args = ['-Mode=QueryTargets']
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(`${this.enginePath}/Engine/Intermediate/TargetInfo.json`)
+			const targetInfoJson = path.resolve(path.join(this.enginePath, 'Engine', 'Intermediate', 'TargetInfo.json'))
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
@@ -392,7 +392,7 @@ class LinuxEngine extends Engine {
 		const args = ['-Mode=QueryTargets']
 		await this.ubt(args, { quiet: true })
 		try {
-			const targetInfoJson = path.resolve(`${this.enginePath}/Engine/Intermediate/TargetInfo.json`)
+			const targetInfoJson = path.resolve(path.join(this.enginePath, 'Engine', 'Intermediate', 'TargetInfo.json'))
 			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
