@@ -6,10 +6,9 @@ import type { GlobalOptions } from '../lib/types.ts'
 import { Config } from '../lib/config.ts'
 
 const TargetError = (target: string, targets: string[]) => {
-	return new ValidationError(`Invalid Target: ${target}
-Valid Targets: ${targets.join(', ')}
-	`)
+	return new ValidationError(`Invalid Target: ${target}. Run 'runreal list-targets' to see valid targets.`)
 }
+
 export type BuildOptions = typeof build extends Command<void, void, infer Options, infer Argument, GlobalOptions>
 	? Options
 	: never
