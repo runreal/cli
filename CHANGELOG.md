@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0](https://github.com/runreal/cli/compare/v1.5.0...v1.6.0) (2025-05-04)
+
+
+### Features
+
+* add list-targets cmd ([bc61ba9](https://github.com/runreal/cli/commit/bc61ba9fbb8a2d9c33525ac97b8dc87d88bf25b3))
+* add runreal auth ([#54](https://github.com/runreal/cli/issues/54)) ([449eca8](https://github.com/runreal/cli/commit/449eca8d5f9ce30914e173ea6305cb45fba5bdcb))
+
+
+### Bug Fixes
+
+* add game profile to pkg ([59fa15a](https://github.com/runreal/cli/commit/59fa15ab2c465124dc70ff4d9d9d266e32a9d432))
+* TargetInfo path resoluton ([7e94ccc](https://github.com/runreal/cli/commit/7e94cccc60f80df2ebf854eeb5a98409c4c61e06))
+
 ## [1.5.0](https://github.com/runreal/cli/compare/v1.4.1...v1.5.0) (2025-04-11)
 
 
