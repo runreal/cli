@@ -1,7 +1,6 @@
 import * as path from '@std/path'
-import { globber } from 'globber'
-import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
-import { Config } from './config.ts'
+import { readNdjson } from 'ndjson'
+import { exec } from '../lib/utils.ts'
 
 interface EngineVersionData {
 	MajorVersion: number
@@ -59,7 +58,18 @@ export enum EnginePlatform {
 	Unknown = 'Unknown',
 }
 
-interface TargetInfo {
+export interface AutomationToolLogs {
+	time: string
+	level: string
+	message: string
+	format: string
+	properties: Record<string, any>
+	id?: number
+	line?: number
+	lineCount?: number
+}
+
+export interface TargetInfo {
 	Name: string
 	Path: string
 	Type: string
@@ -98,6 +108,8 @@ export abstract class Engine {
 	abstract getGenerateScript(): string
 	abstract getGitDependencesBin(): string
 	abstract parseEngineTargets(): Promise<string[]>
+	abstract getEditorBin(): string
+	abstract getEditorCmdBin(): string
 
 	getEngineVersionData(): EngineVersionData {
 		const engineVersionFile = path.join(
@@ -160,59 +172,15 @@ export abstract class Engine {
 		return await exec(buildScript, args, options)
 	}
 
-	async parseProjectTargets(projectPath: string): Promise<string[]> {
-		const projectFile = await findProjectFile(projectPath)
-		const args = ['-Mode=QueryTargets', `-Project=${projectFile}`]
-		await this.ubt(args, { quiet: true })
+	async getAutomationToolLogs(enginePath: string) {
+		const logJson = path.join(enginePath, 'Engine', 'Programs', 'AutomationTool', 'Saved', 'Logs', 'Log.json')
+		let logs: AutomationToolLogs[] = []
 		try {
-			const targetInfoJson = path.resolve(path.join(projectPath, 'Intermediate', 'TargetInfo.json'))
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
-			const targets = Targets.map((target: TargetInfo) => target.Name)
-			return targets
+			logs = await readNdjson(logJson) as unknown as AutomationToolLogs[]
 		} catch (e) {
-			return []
+			// pass
 		}
-	}
-
-	static async runClean({
-		dryRun = false,
-	}: {
-		dryRun?: boolean
-	}) {
-		console.log('[runClean]', { dryRun })
-		const config = Config.getInstance()
-		const binaryGlob = path.join(config.getConfig().project.path, '**/Binaries')
-		const intermediateGlob = path.join(config.getConfig().project.path, '**/Intermediate')
-		const cwd = config.getConfig().project?.path
-		const iterator = globber({
-			cwd,
-			include: [binaryGlob, intermediateGlob],
-		})
-		for await (const file of iterator) {
-			if (dryRun) {
-				console.log('Would delete:', file.relative)
-				continue
-			}
-			console.log('Deleting:', file.relative)
-			await Deno.remove(file.relative)
-		}
-	}
-
-	async runBuildGraph(buildGraphScript: string, args: string[] = []) {
-		let bgScriptPath = path.resolve(buildGraphScript)
-		if (!bgScriptPath.endsWith('.xml')) {
-			throw new Error('Invalid buildgraph script')
-		}
-		if (path.relative(this.enginePath, bgScriptPath).startsWith('..')) {
-			console.log('Buildgraph script is outside of engine folder, copying...')
-			bgScriptPath = await copyBuildGraphScripts(this.enginePath, bgScriptPath)
-		}
-		const uatArgs = [
-			'BuildGraph',
-			`-Script=${bgScriptPath}`,
-			...args,
-		]
-		return await this.runUAT(uatArgs)
+		return logs
 	}
 }
 
@@ -274,6 +242,26 @@ class WindowsEngine extends Engine {
 			console.log(e)
 			return []
 		}
+	}
+	override getEditorBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Win64',
+			'UnrealEditor.exe',
+		)
+		return editorPath
+	}
+	override getEditorCmdBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Win64',
+			'UnrealEditor-Cmd.exe',
+		)
+		return editorPath
 	}
 }
 
@@ -338,6 +326,26 @@ class MacosEngine extends Engine {
 			return []
 		}
 	}
+	override getEditorBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Mac',
+			'UnrealEditor',
+		)
+		return editorPath
+	}
+	override getEditorCmdBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Mac',
+			'UnrealEditor-Cmd',
+		)
+		return editorPath
+	}
 }
 
 class LinuxEngine extends Engine {
@@ -401,6 +409,26 @@ class LinuxEngine extends Engine {
 			return []
 		}
 	}
+	override getEditorBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Linux',
+			'UnrealEditor',
+		)
+		return editorPath
+	}
+	override getEditorCmdBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Linux',
+			'UnrealEditor-Cmd',
+		)
+		return editorPath
+	}
 }
 
 // Factory function to create the appropriate Engine instance
@@ -446,6 +474,22 @@ export function getEditorPath(enginePath: string, platform: EnginePlatform): str
 				'Linux',
 				'UnrealEditor',
 			)
+		default:
+			throw new Error(`Unsupported platform: ${platform}`)
+	}
+}
+
+/**
+ * Get the platform-specific cook target
+ */
+export function getPlatformCookTarget(platform: EnginePlatform): string {
+	switch (platform) {
+		case EnginePlatform.Windows:
+			return 'Windows'
+		case EnginePlatform.Mac:
+			return 'MAC'
+		case EnginePlatform.Linux:
+			return 'Linux'
 		default:
 			throw new Error(`Unsupported platform: ${platform}`)
 	}

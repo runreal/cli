@@ -1,4 +1,5 @@
 import { Command } from '@cliffy/command'
+import { createProject } from '../lib/project.ts'
 import { createEngine } from '../lib/engine.ts'
 import type { GlobalOptions } from '../lib/types.ts'
 import { Config } from '../lib/config.ts'
@@ -29,9 +30,8 @@ export const listTargets = new Command<GlobalOptions>()
 		let projectTargets: string[] = []
 
 		if (projectPath) {
-			projectTargets = (await engine.parseProjectTargets(projectPath)).filter((target) =>
-				!engineTargets.includes(target)
-			)
+			const project = await createProject(enginePath, projectPath)
+			projectTargets = (await project.parseProjectTargets()).filter((target) => !engineTargets.includes(target))
 		}
 
 		if (engineOnly) {
