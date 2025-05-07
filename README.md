@@ -10,10 +10,12 @@
   <a href="https://runreal.dev">Website</a>
   ·
   <a href="https://x.com/runreal_dev">Twitter</a>
+  <br />
+  <br />
 </p>
 
-**Unreal Engine** Configure engines, build projects, and run UAT/UBT commands.
-**Buildgraph** Generate reports from your buildgraphs.
+- **Unreal Engine**: Configure engines, build projects, and run UAT/UBT commands.
+- **Buildgraph**: Generate reports from your buildgraphs.
 
 
 ## Installation
@@ -21,7 +23,7 @@
 Download the latest release from the [Releases](https://github.com/runreal/cli/releases/latest) page.
 
 
-## Setup
+## Building from source
 
 1. Clone the cli
 
