@@ -1,0 +1,117 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
+
+
+builds:
+  # You can have multiple builds defined as a yaml list
+  - #
+    # ID of the build.
+    #
+    # Default: Project directory name.
+    id: "cli"
+
+    # Use deno.
+    builder: deno
+
+    # Binary name.
+    # Can be a path (e.g. `bin/app`) to wrap the binary in a directory.
+    #
+    # Default: Project directory name.
+    binary: cli
+
+    # List of targets to be built, in Deno's format.
+    #
+    # See: https://docs.deno.com/runtime/reference/cli/compile/#supported-targets
+    # Default: [ "x86_64-pc-windows-msvc", "x86_64-apple-darwin", "aarch64-apple-darwin", "x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu" ]
+    targets:
+      - x86_64-unknown-linux-gnu
+      - aarch64-unknown-linux-gnu
+      - x86_64-pc-windows-msvc
+      - x86_64-apple-darwin
+      - aarch64-apple-darwin
+
+    # Path to project's (sub)directory containing the code.
+    # This is the working directory for the `deno compile` command(s).
+    #
+    # Default: '.'.
+    dir: src
+
+    # Main entry point.
+    #
+    # Default: 'main.ts'.
+    main: "index.ts"
+
+    # Set a specific deno binary to use when building.
+    # It is safe to ignore this option in most cases.
+    #
+    # Default: 'deno'.
+    # Templates: allowed.
+    tool: "deno"
+
+    # Sets the command to run to build.
+    #
+    # Default: 'compile'.
+    command: "compile"
+
+    # Custom flags.
+    #
+    # Templates: allowed.
+    # Default: [].
+    flags:
+      - --allow-all
+      # - --allow-net
+      # -
+      # - -A
+      # - --allow-net
+      # - "--allow-env"
+      # - "--allow-write"
+
+    # Custom environment variables to be set during the builds.
+    # Invalid environment variables will be ignored.
+    #
+    # Default: os.Environ() ++ env config section.
+    # Templates: allowed.
+    # env:
+      # - FOO=bar
+
+    # Hooks can be used to customize the final binary,
+    # for example, to run generators.
+    #
+    # Templates: allowed.
+    # hooks:
+    #   pre: ./foo.sh
+    #   post: ./script.sh {{ .Path }}
+
+    # If true, skip the build.
+    # Useful for library projects.
+    skip: false
+
+archives:
+  - formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
