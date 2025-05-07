@@ -3,6 +3,7 @@ import { Command } from '@cliffy/command'
 import { createProject } from '../../lib/project.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { Config } from '../../lib/config.ts'
+import { EngineConfiguration, EnginePlatform, EngineTarget } from '../../lib/engine.ts'
 
 export const editor = new Command<GlobalOptions>()
 	.description('Run the editor')
@@ -25,8 +26,12 @@ export const editor = new Command<GlobalOptions>()
 		console.log(`Running editor with ${editorArguments}`)
 
 		if (options.compile) {
-			await project.compileAndRunEditor({ extraRunArgs: editorArguments })
-		} else {
-			await project.runEditor({ extraArgs: editorArguments })
+			await project.compile({
+				target: EngineTarget.Editor,
+				configuration: EngineConfiguration.Development,
+				dryRun: options.dryRun,
+				platform: EnginePlatform.Windows,
+			})
 		}
+		await project.runEditor({ extraArgs: editorArguments })
 	})

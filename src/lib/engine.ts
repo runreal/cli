@@ -163,7 +163,7 @@ export abstract class Engine {
 		const buildScript = this.getBuildScript()
 		const args = [target, configuration, platform, ...extraArgs]
 		console.log('[runUBT]', args)
-		if (dryRun) return
+		if (dryRun) return { success: true, code: 0, signal: null, output: '' }
 		return await exec(buildScript, args)
 	}
 

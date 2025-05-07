@@ -17,6 +17,7 @@ export const compile = new Command<GlobalOptions>()
 	.option('-c, --configuration <configuration:Configuration>', 'Configuration', {
 		default: EngineConfiguration.Development,
 	})
+	.option('--buildgraph', 'Build Graph', { default: false })
 	.option('--dry-run', 'Dry run', { default: false })
 	.arguments('<target:string>')
 	.action(async (options, target = EngineTarget.Editor) => {
@@ -25,7 +26,7 @@ export const compile = new Command<GlobalOptions>()
 		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
 			cliOptions: options,
 		})
-		const project = await createProject(enginePath, projectPath)
+		const project = await createProject(enginePath, projectPath, options.buildgraph)
 		await project.compile({
 			target: target as EngineTarget,
 			configuration: configuration as EngineConfiguration,

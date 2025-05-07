@@ -24,7 +24,7 @@ export const run = new Command<GlobalOptions>()
 		})
 
 		const project = await createProject(enginePath, projectPath)
-		const { success, code } = await project.runBuildGraph(buildGraphScript, buildGraphArgs)
+		const { success, code } = await project.runCustomBuildGraph(buildGraphScript, buildGraphArgs)
 		if (!success) {
 			const logs = await project.engine.getAutomationToolLogs(enginePath)
 
@@ -36,6 +36,7 @@ export const run = new Command<GlobalOptions>()
 				await writeMarkdownReport(logs, options.buildgraphReportErrors)
 			}
 
-			Deno.exit(code)
+			//Deno.exit(code)
+			Deno.exit(1)
 		}
 	})
