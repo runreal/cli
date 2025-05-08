@@ -2,12 +2,11 @@ import { Command } from '@cliffy/command'
 
 import type { GlobalOptions } from '../../lib/types.ts'
 
+import { build } from './build.ts'
 import { clean } from './clean.ts'
-import { compile } from './compile.ts'
 import { cook } from './cook.ts'
-import { editor } from './editor.ts'
-import { gen } from './gen.ts'
-import { pkg } from './pkg.ts'
+import { deploy } from './deploy.ts'
+import { stage } from './stage.ts'
 import { run } from './run.ts'
 import { runpython } from './runpython.ts'
 
@@ -16,11 +15,10 @@ export const project = new Command<GlobalOptions>()
 	.action(function () {
 		this.showHelp()
 	})
+	.command('build', build)
 	.command('clean', clean)
-	.command('compile', compile)
 	.command('cook', cook)
-	.command('editor', editor)
-	.command('gen', gen)
-	.command('pkg', pkg)
+	.command('deploy', deploy)
 	.command('run', run)
+	.command('stage', stage)
 	.command('runpython', runpython)

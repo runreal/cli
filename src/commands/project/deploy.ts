@@ -4,10 +4,10 @@ import { Config } from '../../lib/config.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { createProject } from '../../lib/project.ts'
 
-export type PkgOptions = typeof pkg extends Command<void, void, infer Options, [], GlobalOptions> ? Options
+export type PkgOptions = typeof deploy extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
 
-export const pkg = new Command<GlobalOptions>()
+export const deploy = new Command<GlobalOptions>()
 	.description('package')
 	.type('Configuration', new EnumType(EngineConfiguration))
 	.type('Platform', new EnumType(EnginePlatform))
@@ -29,7 +29,7 @@ export const pkg = new Command<GlobalOptions>()
 			cliOptions: options,
 		})
 
-		const args = pkg.getLiteralArgs().concat(pkgArguments)
+		const args = deploy.getLiteralArgs().concat(pkgArguments)
 
 		const project = await createProject(enginePath, projectPath)
 		project.package({ archiveDirectory: archiveDirectory, profile: profile, extraArgs: args })

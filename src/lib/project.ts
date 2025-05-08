@@ -92,22 +92,39 @@ export class Project {
 		extraArgs = [],
 		dryRun = false,
 		platform = this.engine.getPlatformName(),
+		clean = false,
+		nouht = false,
+		noxge = true,
 	}: {
 		target?: EngineTarget
 		configuration?: EngineConfiguration
 		platform?: EnginePlatform
 		extraArgs?: string[]
 		dryRun?: boolean
+		clean?: boolean
+		nouht?: boolean
+		noxge?: boolean
 	}) {
 		const args = [
 			this.projectFileVars.projectArgument,
 			'-NoUBTMakefiles',
-			'-NoXGE',
 			'-NoHotReload',
 			'-NoCodeSign',
 			'-NoP4',
 			'-TraceWrites',
-		].concat(extraArgs)
+			'-Progress',
+			...extraArgs,
+		]
+
+		if (noxge) {
+			args.push('-NoXGE')
+		}
+		if (clean) {
+			args.push('-Clean')
+		}
+		if (nouht) {
+			args.push('-NoBuildUHT')
+		}
 
 		const projectTarget = `${this.projectFileVars.projectName}${target}`
 
@@ -216,9 +233,21 @@ export class Project {
 	}
 
 	async cookContent({
+		cultures = 'en',
+		onTheFly = false,
+		iterate = true,
+		noxge = true,
+		debug = false,
+		dryRun = false,
 		extraArgs = [],
 	}: {
 		extraArgs?: string[]
+		cultures?: string
+		onTheFly?: boolean
+		iterate?: boolean
+		noxge?: boolean
+		dryRun?: boolean
+		debug?: boolean
 	}) {
 		const platformTarget = getPlatformCookTarget(this.engine.getPlatformName())
 		const args = [
@@ -226,17 +255,29 @@ export class Project {
 			'-run=Cook',
 			`-targetplatform=${platformTarget}`,
 			'-fileopenlog',
-		].concat(extraArgs)
+			'-unversioned',
+			'-stdout',
+			...extraArgs,
+		]
 
-		console.log(`Running editor with: ${this.engine.getEditorCmdBin} ${args.join(' ')}`)
-
-		try {
-			const result = await exec(this.engine.getEditorCmdBin(), args)
-			return result
-		} catch (error: unknown) {
-			console.log(`Error running Editor: ${error instanceof Error ? error.message : String(error)}`)
-			Deno.exit(1)
+		if (cultures) {
+			const cultureArg = cultures.replace(',', '+')
+			args.push(`-cookcultures=${cultureArg}`)
 		}
+
+		if (onTheFly) {
+			args.push('-cookonthefly')
+		}
+
+		if (iterate) {
+			args.push('-iterate')
+		}
+
+		if (noxge) {
+			args.push('noxge')
+		}
+
+		await this.engine.runEditor({ useCmd: true, dryRun: dryRun, debug: debug, args: args })
 	}
 
 	async parseProjectTargets(): Promise<string[]> {

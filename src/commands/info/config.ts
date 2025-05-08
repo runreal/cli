@@ -2,11 +2,11 @@ import { Command } from '@cliffy/command'
 import { Config } from '../../lib/config.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 
-export type DebugConfigOptions = typeof debugConfig extends
+export type DebugConfigOptions = typeof config extends
 	Command<void, void, infer Options extends Record<string, unknown>, [], GlobalOptions> ? Options
 	: never
 
-export const debugConfig = new Command<GlobalOptions>()
+export const config = new Command<GlobalOptions>()
 	.option('-r, --render', 'Render the config with substitutions')
 	.description('debug config')
 	.action((options) => {
