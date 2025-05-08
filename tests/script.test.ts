@@ -1,6 +1,5 @@
 import { snapshotTest } from '@cliffy/testing'
 import { script } from '../src/commands/script.ts'
-import * as path from '@std/path'
 
 await snapshotTest({
 	name: 'should execute the command',
