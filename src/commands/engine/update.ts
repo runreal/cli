@@ -41,6 +41,9 @@ export const update = new Command<GlobalOptions>()
 
 		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
 		const branchArg = branch || cfg.engine.gitBranch
+		if (!branchArg) {
+			throw new ValidationError('Branch is required')
+		}
 
 		const isRepo = await isGitRepo(cfg.engine.path)
 		if (!isRepo) {

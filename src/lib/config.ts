@@ -2,13 +2,13 @@ import * as path from '@std/path'
 import { ValidationError } from '@cliffy/command'
 import { deepmerge } from '@rebeccastevens/deepmerge'
 import { ulid } from './ulid.ts'
-import type { CliOptions, RunrealConfig } from '../lib/types.ts'
+import type { CliOptions, UserConfig, XRunrealConfig } from '../lib/types.ts'
 import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
 import { Git, Perforce } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
 
 export class Config {
-	private config: Partial<RunrealConfig> = {}
+	private config: Partial<XRunrealConfig> = {}
 
 	private static configSingleton = new Config()
 
@@ -44,6 +44,7 @@ export class Config {
 				try {
 					const parsed = ConfigSchema.parse(configFile)
 					this.config = parsed
+					return
 				} catch (e) {
 					// TODO: handle zod error on user config file
 					console.log(e)
@@ -53,13 +54,17 @@ export class Config {
 		}
 	}
 
-	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): RunrealConfig {
-		this.mergeWithCliOptions(cliOptions)
-		this.validateConfig()
-		return this.config as RunrealConfig
+	getConfig(): XRunrealConfig {
+		return this.config as XRunrealConfig
 	}
 
-	renderConfig(cfg: RunrealConfig): RunrealConfig {
+	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): XRunrealConfig {
+		this.mergeWithCliOptions(cliOptions)
+		this.validateConfig()
+		return this.config as XRunrealConfig
+	}
+
+	renderConfig(cfg: XRunrealConfig): XRunrealConfig {
 		const rendered = renderConfig(cfg)
 		return normalizePaths(rendered)
 	}
@@ -76,10 +81,10 @@ export class Config {
 		return undefined
 	}
 
-	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
+	private async readConfigFile(configPath: string): Promise<Partial<XRunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
-			// const parsed = RunrealConfigSchema.parse(JSON.parse(data))
+			// const parsed = XRunrealConfigSchema.parse(JSON.parse(data))
 			return JSON.parse(data)
 		} catch (e) {
 			/* pass */
@@ -88,21 +93,21 @@ export class Config {
 	}
 
 	private mergeWithCliOptions(cliOptions: CliOptions) {
-		const picked: Partial<RunrealConfig> = {}
+		const picked: Partial<XRunrealConfig> = {}
 
 		for (const [cliOption, configPath] of Object.entries(this.cliOptionToConfigMap)) {
 			if (cliOptions[cliOption as keyof CliOptions]) {
 				const [section, property] = configPath.split('.')
-				if (!picked[section as keyof RunrealConfig]) {
-					picked[section as keyof RunrealConfig] = {} as any
+				if (!picked[section as keyof XRunrealConfig]) {
+					picked[section as keyof XRunrealConfig] = {} as any
 				}
-				;(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
+				;(picked[section as keyof XRunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
 			}
 		}
 		this.config = deepmerge(this.config, picked)
 	}
 
-	private resolvePaths(config: Partial<RunrealConfig>) {
+	private resolvePaths(config: Partial<XRunrealConfig>) {
 		if (config.engine?.path) {
 			config.engine.path = path.resolve(config.engine.path)
 		}
@@ -120,7 +125,7 @@ export class Config {
 		}
 	}
 
-	private getSourceMetadata(): Partial<RunrealConfig['metadata']> | null {
+	private getSourceMetadata(): Partial<XRunrealConfig['metadata']> | null {
 		const cwd = this.config.project?.path
 		if (!cwd) return null
 		if (this.config.project?.repoType === 'git') {
@@ -140,7 +145,7 @@ export class Config {
 		return null
 	}
 
-	private getGitBuildMetadata(projectPath: string): Partial<RunrealConfig['metadata']> {
+	private getGitBuildMetadata(projectPath: string): Partial<XRunrealConfig['metadata']> {
 		const cwd = projectPath
 		try {
 			const source = new Git(cwd)
@@ -163,7 +168,7 @@ export class Config {
 		}
 	}
 
-	private getPerforceBuildMetadata(projectPath: string): Partial<RunrealConfig['metadata']> {
+	private getPerforceBuildMetadata(projectPath: string): Partial<XRunrealConfig['metadata']> {
 		const cwd = projectPath
 		try {
 			const source = new Perforce(cwd)
@@ -182,7 +187,7 @@ export class Config {
 		}
 	}
 
-	private initializeBuildId() {
+	public getBuildId() {
 		if (this.config.build?.id) {
 			return this.config.build.id
 		}
@@ -218,7 +223,7 @@ export class Config {
 	private validateConfig() {
 		this.resolvePaths(this.config)
 		const metadata = this.initializeMetadata()
-		const id = this.initializeBuildId()
+		const id = this.getBuildId()
 
 		this.config = {
 			...this.config,

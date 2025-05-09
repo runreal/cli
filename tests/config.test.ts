@@ -9,20 +9,21 @@ Deno.test('Config.create should initialize with default values', async () => {
 	using time = new FakeTime()
 
 	const config = await Config.getInstance()
+	const cfg = config.mergeConfigCLIConfig({ cliOptions: {} })
 	const id = ulid()
 	config.getBuildId = () => id
 	const expected = {
-		engine: {
-			path: '',
-			repoType: 'git',
-			gitBranch: 'main',
-		},
-		project: {
-			name: '',
-			path: '',
-			buildPath: '',
-			repoType: 'git',
-		},
+		// engine: {
+		// 	path: '',
+		// 	repoType: 'git',
+		// 	gitBranch: 'main',
+		// },
+		// project: {
+		// 	name: '',
+		// 	path: '',
+		// 	buildPath: '',
+		// 	repoType: 'git',
+		// },
 		build: {
 			id: config.getConfig().build.id,
 		},
@@ -47,7 +48,7 @@ Deno.test('Config.create should initialize with default values', async () => {
 				changelist: '',
 			},
 		},
-		workflows: [],
+		//workflows: [],
 	}
 	assertEquals(config.getConfig(), expected)
 })

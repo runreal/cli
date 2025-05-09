@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import * as path from '@std/path'
 const env = (key: string) => Deno.env.get(key) || ''
 
 export const InternalSchema = z.object({
@@ -32,8 +33,8 @@ export const ConfigSchema = z.object({
 	engine: z.object({
 		path: z.string().describe('Path to the engine folder').optional().default(''),
 		//repoType: z.string().describe('git or perforce'),
-		gitSource: z.string().optional().describe('git source repository').optional(),
-		gitBranch: z.string().optional().describe('git branch to checkout').default('main').optional(),
+		gitSource: z.string().describe('git source repository').optional(),
+		gitBranch: z.string().describe('git branch to checkout').default('main').optional(),
 		gitDependenciesCachePath: z
 			.string()
 			.optional()
@@ -41,8 +42,10 @@ export const ConfigSchema = z.object({
 	}),
 	project: z.object({
 		name: z.string().optional().describe('Project name'),
-		path: z.string().describe('Path to the project folder <RUNREAL_PROJECT_PATH>').optional(),
-		buildPath: z.string().describe('Path to the build folder <RUNREAL_BUILD_PATH>').optional(),
+		path: z.string().describe('Path to the project folder <RUNREAL_PROJECT_PATH>').optional().default(Deno.cwd()),
+		buildPath: z.string().describe('Path to the build folder <RUNREAL_BUILD_PATH>').optional().default(
+			path.join(Deno.cwd(), 'build'),
+		),
 		repoType: z.string().describe('git or perforce').default('git'),
 	}),
 	build: z.object({
@@ -66,6 +69,9 @@ export const ConfigSchema = z.object({
 export const RunrealConfigSchema = z.object({
 	...ConfigSchema.shape,
 	...InternalSchema.shape,
+	build: z.object({
+		id: z.string().describe('Build ID, guaranteed to be set after config processing.'),
+	}),
 })
 
 // Deprecated
