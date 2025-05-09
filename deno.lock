@@ -5,6 +5,8 @@
     "jsr:@cliffy/command@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/flags@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/internal@1.0.0-rc.7": "1.0.0-rc.7",
+    "jsr:@cliffy/keycode@1.0.0-rc.7": "1.0.0-rc.7",
+    "jsr:@cliffy/prompt@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/testing@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@david/dax@0.42.0": "0.42.0",
@@ -54,6 +56,7 @@
     "jsr:@std/path@^1.0.6": "1.0.8",
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/path@^1.0.9": "1.0.9",
+    "jsr:@std/path@~1.0.6": "1.0.9",
     "jsr:@std/streams@0.221": "0.221.0",
     "jsr:@std/streams@1.0.9": "1.0.9",
     "jsr:@std/testing@1.0.0": "1.0.0",
@@ -64,8 +67,8 @@
     "npm:nanoid@5.1": "5.1.5",
     "npm:path-to-regexp@^6.3.0": "6.3.0",
     "npm:ueblueprint@2.0.0": "2.0.0",
-    "npm:zod-to-json-schema@3.24.5": "3.24.5_zod@3.24.2",
-    "npm:zod@3.24.2": "3.24.2"
+    "npm:zod-to-json-schema@3.24.5": "3.24.5_zod@4.0.0-beta.20250505T195954",
+    "npm:zod@next": "4.0.0-beta.20250505T195954"
   },
   "jsr": {
     "@cliffy/ansi@1.0.0-rc.7": {
@@ -97,6 +100,22 @@
       "integrity": "10412636ab3e67517d448be9eaab1b70c88eba9be22617b5d146257a11cc9b17",
       "dependencies": [
         "jsr:@std/fmt@~1.0.2"
+      ]
+    },
+    "@cliffy/keycode@1.0.0-rc.7": {
+      "integrity": "5b3f6c33994e81a76b79f108b1989642ac22705840da33781f7972d7dff05503"
+    },
+    "@cliffy/prompt@1.0.0-rc.7": {
+      "integrity": "a9cbd13acd8073558447cae8ca4cf593c09d23bcbe429cc63346920c21187b83",
+      "dependencies": [
+        "jsr:@cliffy/ansi",
+        "jsr:@cliffy/internal",
+        "jsr:@cliffy/keycode",
+        "jsr:@std/assert@~1.0.6",
+        "jsr:@std/fmt@~1.0.2",
+        "jsr:@std/io@~0.224.9",
+        "jsr:@std/path@~1.0.6",
+        "jsr:@std/text"
       ]
     },
     "@cliffy/table@1.0.0-rc.7": {
@@ -559,6 +578,9 @@
     "@types/trusted-types@2.0.7": {
       "integrity": "sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw=="
     },
+    "@zod/core@0.11.6": {
+      "integrity": "sha512-03Bv82fFSfjDAvMfdHHdGSS6SOJs0iCcJlWJv1kJHRtoTT02hZpyip/2Lk6oo4l4FtjuwTrsEQTwg/LD8I7dJA=="
+    },
     "esbuild@0.25.2": {
       "integrity": "sha512-16854zccKPnC+toMywC+uKNeYSv+/eXkevRAfwRD/G9Cleq66m8XFIrigkbvauLLlCfDL45Q2cWegSg53gGBnQ==",
       "optionalDependencies": [
@@ -633,14 +655,17 @@
     "undici-types@6.20.0": {
       "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
     },
-    "zod-to-json-schema@3.24.5_zod@3.24.2": {
+    "zod-to-json-schema@3.24.5_zod@4.0.0-beta.20250505T195954": {
       "integrity": "sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==",
       "dependencies": [
         "zod"
       ]
     },
-    "zod@3.24.2": {
-      "integrity": "sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ=="
+    "zod@4.0.0-beta.20250505T195954": {
+      "integrity": "sha512-iB8WvxkobVIXMARvQu20fKvbS7mUTiYRpcD8OQV1xjRhxO0EEpYIRJBk6yfBzHAHEdOSDh3SxDITr5Eajr2vtg==",
+      "dependencies": [
+        "@zod/core"
+      ]
     }
   },
   "remote": {
@@ -692,6 +717,7 @@
     "dependencies": [
       "jsr:@cliffy/ansi@1.0.0-rc.7",
       "jsr:@cliffy/command@1.0.0-rc.7",
+      "jsr:@cliffy/prompt@1.0.0-rc.7",
       "jsr:@cliffy/testing@1.0.0-rc.7",
       "jsr:@david/dax@0.42.0",
       "jsr:@luca/esbuild-deno-loader@0.11.1",
@@ -708,7 +734,7 @@
       "npm:nanoid@5.1",
       "npm:ueblueprint@2.0.0",
       "npm:zod-to-json-schema@3.24.5",
-      "npm:zod@3.24.2"
+      "npm:zod@next"
     ]
   }
 }

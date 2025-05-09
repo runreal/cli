@@ -8,7 +8,8 @@ import type { DebugConfigOptions } from '../commands/debug/debug-config.ts'
 import type { SetupOptions } from '../commands/engine/setup.ts'
 import type { InstallOptions } from '../commands/engine/install.ts'
 import type { UpdateOptions } from '../commands/engine/update.ts'
-import type { ConfigSchema, InternalSchema, UserRunrealConfigSchema, UserRunrealPreferencesSchema } from './schema.ts'
+//import type { ConfigSchema, InternalSchema, UserRunrealConfigSchema, UserRunrealPreferencesSchema } from './schema.ts'
+import type { ConfigSchema, InternalSchema, UserRunrealPreferencesSchema } from './schema.ts'
 import type { Type } from '@cliffy/command'
 
 export type GlobalOptions = typeof cmd extends Command<void, void, void, [], infer Options> ? Options
@@ -27,7 +28,7 @@ export type CliOptions = { [K in keyof allOptions]: Type.infer<allOptions[K]> }
 type InternalRunrealConfig = z.infer<typeof InternalSchema>
 export type RunrealConfig = z.infer<typeof ConfigSchema> & InternalRunrealConfig
 
-export type UserRunrealConfig = z.infer<typeof UserRunrealConfigSchema>
+//export type UserRunrealConfig = z.infer<typeof UserRunrealConfigSchema>
 
 export type UserRunrealPreferences = z.infer<typeof UserRunrealPreferencesSchema>
 

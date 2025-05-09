@@ -60,6 +60,7 @@ export const exec = new Command<GlobalOptions>()
 		const config = Config.getInstance()
 		const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
 
+		console.log(cfg.workflows)
 		if (!cfg.workflows) {
 			throw new ValidationError('No workflows defined in config')
 		}
