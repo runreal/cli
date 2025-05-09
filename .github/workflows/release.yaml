@@ -25,12 +25,6 @@ jobs:
         id: release
         with:
           token: ${{ secrets.GH_RUNREAL_TOKEN }}
-          pull-request-title-pattern: "chore${scope}: release${component} ${version}"
-          release-type: simple
-          draft: true
-          extra-files: |
-            README.md
-            src/version.ts
 
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
