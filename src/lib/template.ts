@@ -19,7 +19,7 @@ export const getSubstitutions = (cfg: RunrealConfig): Record<string, string | un
 	'metadata.git.commit': cfg.metadata?.git?.commitShort,
 	'metadata.perforce.stream': cfg.metadata?.perforce?.stream,
 	'metadata.perforce.changelist': cfg.metadata?.perforce?.changelist,
-	'buildkite.buildNumber': cfg.buildkite?.buildNumber,
+	'metadata.buildkite.buildNumber': cfg.metadata.buildkite?.buildNumber,
 	'metadata.ts': cfg.metadata?.ts,
 	'metadata.date': formatIsoTimestamp(cfg.metadata?.ts),
 })

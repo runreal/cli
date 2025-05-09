@@ -2,13 +2,13 @@ import * as path from '@std/path'
 import { ValidationError } from '@cliffy/command'
 import { deepmerge } from '@rebeccastevens/deepmerge'
 import { ulid } from './ulid.ts'
-import type { CliOptions, UserConfig, XRunrealConfig } from '../lib/types.ts'
-import { ConfigSchema, InternalSchema } from '../lib/schema.ts'
+import type { CliOptions, RunrealConfig, UserConfig } from '../lib/types.ts'
+import { InternalConfigSchema, UserConfigSchema } from '../lib/schema.ts'
 import { Git, Perforce } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
 
 export class Config {
-	private config: Partial<XRunrealConfig> = {}
+	private config: Partial<RunrealConfig> = {}
 
 	private static configSingleton = new Config()
 
@@ -22,7 +22,9 @@ export class Config {
 		'gitDependenciesCachePath': 'engine.dependenciesCachePath',
 	}
 
-	private constructor() {}
+	private constructor() {
+		this.config = {}
+	}
 
 	static async create(opts?: { path?: string }): Promise<Config> {
 		await Config.configSingleton.loadConfig({ path: opts?.path })
@@ -42,7 +44,7 @@ export class Config {
 			const configFile = await this.readConfigFile(configPath)
 			if (configFile) {
 				try {
-					const parsed = ConfigSchema.parse(configFile)
+					const parsed = UserConfigSchema.parse(configFile)
 					this.config = parsed
 					return
 				} catch (e) {
@@ -54,17 +56,17 @@ export class Config {
 		}
 	}
 
-	getConfig(): XRunrealConfig {
-		return this.config as XRunrealConfig
+	getConfig(): Partial<RunrealConfig> {
+		return this.config
 	}
 
-	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): XRunrealConfig {
+	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): RunrealConfig {
 		this.mergeWithCliOptions(cliOptions)
 		this.validateConfig()
-		return this.config as XRunrealConfig
+		return this.config as RunrealConfig
 	}
 
-	renderConfig(cfg: XRunrealConfig): XRunrealConfig {
+	renderConfig(cfg: RunrealConfig): RunrealConfig {
 		const rendered = renderConfig(cfg)
 		return normalizePaths(rendered)
 	}
@@ -81,7 +83,7 @@ export class Config {
 		return undefined
 	}
 
-	private async readConfigFile(configPath: string): Promise<Partial<XRunrealConfig> | null> {
+	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
 			// const parsed = XRunrealConfigSchema.parse(JSON.parse(data))
@@ -93,21 +95,21 @@ export class Config {
 	}
 
 	private mergeWithCliOptions(cliOptions: CliOptions) {
-		const picked: Partial<XRunrealConfig> = {}
+		const picked: Partial<RunrealConfig> = {}
 
 		for (const [cliOption, configPath] of Object.entries(this.cliOptionToConfigMap)) {
 			if (cliOptions[cliOption as keyof CliOptions]) {
 				const [section, property] = configPath.split('.')
-				if (!picked[section as keyof XRunrealConfig]) {
-					picked[section as keyof XRunrealConfig] = {} as any
+				if (!picked[section as keyof RunrealConfig]) {
+					picked[section as keyof RunrealConfig] = {} as any
 				}
-				;(picked[section as keyof XRunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
+				;(picked[section as keyof RunrealConfig] as any)[property] = cliOptions[cliOption as keyof CliOptions]
 			}
 		}
 		this.config = deepmerge(this.config, picked)
 	}
 
-	private resolvePaths(config: Partial<XRunrealConfig>) {
+	private resolvePaths(config: Partial<RunrealConfig>) {
 		if (config.engine?.path) {
 			config.engine.path = path.resolve(config.engine.path)
 		}
@@ -125,7 +127,7 @@ export class Config {
 		}
 	}
 
-	private getSourceMetadata(): Partial<XRunrealConfig['metadata']> | null {
+	private getSourceMetadata(): Partial<RunrealConfig['metadata']> | null {
 		const cwd = this.config.project?.path
 		if (!cwd) return null
 		if (this.config.project?.repoType === 'git') {
@@ -145,7 +147,7 @@ export class Config {
 		return null
 	}
 
-	private getGitBuildMetadata(projectPath: string): Partial<XRunrealConfig['metadata']> {
+	private getGitBuildMetadata(projectPath: string): Partial<RunrealConfig['metadata']> {
 		const cwd = projectPath
 		try {
 			const source = new Git(cwd)
@@ -168,7 +170,7 @@ export class Config {
 		}
 	}
 
-	private getPerforceBuildMetadata(projectPath: string): Partial<XRunrealConfig['metadata']> {
+	private getPerforceBuildMetadata(projectPath: string): Partial<RunrealConfig['metadata']> {
 		const cwd = projectPath
 		try {
 			const source = new Perforce(cwd)
@@ -199,11 +201,11 @@ export class Config {
 
 	private initializeMetadata() {
 		try {
-			const metadata = InternalSchema.parse({
-				buildkite: {},
+			const metadata = InternalConfigSchema.parse({
 				metadata: {
 					git: {},
 					perforce: {},
+					buildkite: {},
 				},
 			})
 

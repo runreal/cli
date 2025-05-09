@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert'
 import { getSubstitutions, normalizePaths, render, renderConfig } from '../src/lib/template.ts'
-import type { XRunrealConfig } from '../src/lib/types.ts'
+import type { RunrealConfig } from '../src/lib/types.ts'
 
 Deno.test('template tests', () => {
 	const tmpl =
@@ -14,16 +14,9 @@ Deno.test('template tests', () => {
 			git: { branch: '', branchSafe: '', commit: '', commitShort: '' },
 			perforce: { stream: '', changelist: '' },
 		},
-		buildkite: {
-			branch: '',
-			checkout: '',
-			buildNumber: '0',
-			buildCheckoutPath: '',
-			buildPipelineSlug: '',
-		},
 		build: { id: '' },
 		workflows: [],
-	} as XRunrealConfig
+	} as RunrealConfig
 
 	const result = render([tmpl], cfg)
 	assertEquals(result, [
@@ -32,17 +25,10 @@ Deno.test('template tests', () => {
 })
 
 Deno.test('getSubstitutions should correctly extract values from config', () => {
-	const cfg: XRunrealConfig = {
+	const cfg: RunrealConfig = {
 		project: { name: 'Project', path: '/projects/project', buildPath: '/output/path', repoType: 'git' },
 		engine: { path: '/engines/5.1', gitBranch: 'main' },
 		build: { id: '1234' },
-		buildkite: {
-			branch: '',
-			checkout: '',
-			buildNumber: '5678',
-			buildCheckoutPath: '',
-			buildPipelineSlug: '',
-		},
 		metadata: {
 			ts: '2024-02-29T12:34:56Z',
 			safeRef: 'safeRef',
@@ -53,6 +39,13 @@ Deno.test('getSubstitutions should correctly extract values from config', () => 
 				commitShort: 'shortcommit',
 			},
 			perforce: { changelist: 'cl', stream: 'stream' },
+			buildkite: {
+				branch: '',
+				checkout: '',
+				buildNumber: '5678',
+				buildCheckoutPath: '',
+				buildPipelineSlug: '',
+			},
 		},
 		workflows: [],
 	}
@@ -63,7 +56,7 @@ Deno.test('getSubstitutions should correctly extract values from config', () => 
 		'project.buildPath': '/output/path',
 		'build.path': '/output/path',
 		'build.id': '1234',
-		'buildkite.buildNumber': '5678',
+		'metadata.buildkite.buildNumber': '5678',
 		'metadata.safeRef': 'safeRef',
 		'metadata.git.branch': 'safebranch',
 		'metadata.git.commit': 'shortcommit',
@@ -84,7 +77,7 @@ Deno.test('render should replace placeholders with correct values', () => {
 		'Timestamp: ${metadata.ts}',
 		'Date: ${metadata.date}',
 	]
-	const cfg: Partial<XRunrealConfig> = {
+	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.1', gitBranch: 'main' },
 		build: { id: '1234' },
@@ -103,12 +96,12 @@ Deno.test('render should replace placeholders with correct values', () => {
 		'Timestamp: 2024-02-29T12:34:56Z',
 		'Date: 2024-02-29',
 	]
-	const result = render(input, cfg as XRunrealConfig)
+	const result = render(input, cfg as RunrealConfig)
 	assertEquals(result, expected)
 })
 
 Deno.test('renderConfig should deeply replace all placeholders in config object', () => {
-	const cfg: Partial<XRunrealConfig> = {
+	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.0', gitBranch: 'main' },
 		build: { id: '1234' },
@@ -135,7 +128,7 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 			},
 		],
 	}
-	const expected: Partial<XRunrealConfig> = {
+	const expected: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.0', gitBranch: 'main' },
 		build: { id: '1234' },
@@ -162,12 +155,12 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 			},
 		],
 	}
-	const result = renderConfig(cfg as XRunrealConfig)
+	const result = renderConfig(cfg as RunrealConfig)
 	assertEquals(result, expected)
 })
 
 Deno.test('replace paths in template', () => {
-	const cfg: Partial<XRunrealConfig> = {
+	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
 		engine: { path: '/engines/5.0', gitBranch: 'main' },
 		build: { id: '1234' },
@@ -195,7 +188,7 @@ Deno.test('replace paths in template', () => {
 		],
 	}
 
-	const result = normalizePaths(renderConfig(cfg as XRunrealConfig))
+	const result = normalizePaths(renderConfig(cfg as RunrealConfig))
 
 	assertEquals(result.workflows[0].steps[0].args[0], '/projects/project/Build/Build.xml')
 })
