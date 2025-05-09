@@ -13,10 +13,6 @@ export const script = new Command<GlobalOptions>()
 	.description('script')
 	.arguments('<input:string>')
 	.action(async (options, ...args: string[]) => {
-		if (Deno.build.standalone) {
-			logger.error('Script command is not available when running a compiled binary')
-			Deno.exit(1)
-		}
 
 		if (!args[0]) {
 			logger.error('No script name provided')
@@ -29,7 +25,6 @@ export const script = new Command<GlobalOptions>()
 			const scriptName = path.basename(filePath, '.ts')
 			const outfilePath = path.join(Deno.cwd(), '.runreal', 'scripts', `${scriptName}.esm.js`)
 			const outfileUrl = toFileUrl(outfilePath)
-
 			const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
 			const context: ScriptContext = {
 				config: cfg,
@@ -40,7 +35,7 @@ export const script = new Command<GlobalOptions>()
 			}
 
 			await esbuild.build({
-				plugins: [...denoPlugins()],
+			  plugins: [...denoPlugins({ loader: 'portable' })],
 				entryPoints: [fileUrl.href],
 				outfile: outfilePath,
 				bundle: true,
