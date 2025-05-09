@@ -1,4 +1,17 @@
 {
+	"name": "@runreal/cli",
+	"version": "1.6.0",
+	"description": "The open source Unreal Engine toolkit",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/runreal/cli"
+	},
+	"author": {
+		"name": "RUNREAL",
+		"email": "hello@runreal.dev",
+		"url": "https://runreal.dev"
+	},
 	"tasks": {
 		"dev": "deno run -A --watch=src src/index.ts",
 		"test": "deno test -A --watch",
@@ -31,7 +44,8 @@
 		"include": [
 			"src/",
 			"tests/",
-			"deno.jsonc"
+			"deno.jsonc",
+			"release-please-config.json"
 		],
 		"useTabs": true,
 		"lineWidth": 120,
@@ -64,5 +78,14 @@
 		"ulid": "https://deno.land/x/ulid@v0.3.0/mod.ts",
 		"xml2js": "https://deno.land/x/xml2js@1.0.0/mod.ts",
 		"globber": "https://deno.land/x/globber@0.1.0/mod.ts"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"publish": {
+		"include": [
+			"README.md",
+			"src"
+		]
 	}
 }
