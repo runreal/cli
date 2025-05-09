@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`should execute the command  1`] = `
+snapshot[`should execute the command 1`] = `
 stdout:
 "hello from script
 hello from dax

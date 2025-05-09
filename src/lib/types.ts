@@ -54,12 +54,11 @@ export interface GitIgnoreFiles {
 }
 
 export interface ScriptContext {
-	env: string
 	config: RunrealConfig
 	lib: {
 		$: typeof $
-		path: typeof path
 	}
+	scriptName: string
 }
 
 export interface Script {

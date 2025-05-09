@@ -1,7 +1,7 @@
 common:
   - deno_matrix: &deno_matrix
       matrix:
-        - "ubuntu-2.2.8"
+        - "ubuntu-2.3.1"
       plugins:
         - docker#v5.10.0:
             image: "denoland/deno:{{matrix}}"
