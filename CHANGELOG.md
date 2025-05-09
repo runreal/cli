@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/runreal/cli/compare/v1.6.0...v1.7.0) (2025-05-09)
+
+
+### Features
+
+* new editor and project commands ([#66](https://github.com/runreal/cli/issues/66)) ([0e97f69](https://github.com/runreal/cli/commit/0e97f695e6da36cabe800d030170d8e349588880))
+
+
+### Bug Fixes
+
+* script runner os + compiled build fixes ([#73](https://github.com/runreal/cli/issues/73)) ([0ea35ab](https://github.com/runreal/cli/commit/0ea35abe28ee41ccb70f0f8b2600bfb778f635dc))
+* update version ([e6a5cdd](https://github.com/runreal/cli/commit/e6a5cddd977bce9cc424a70acb6e57b95a68434a))
+
 ## [1.6.0](https://github.com/runreal/cli/compare/v1.5.0...v1.6.0) (2025-05-04)
 
 
