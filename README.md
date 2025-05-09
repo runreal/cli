@@ -27,8 +27,8 @@
 # Compile the editor
 runreal project compile Editor
 
-# Compile your project
-runreal project compile YourProject
+# Compile your project targets
+runreal project compile Client
 
 # List available build targets
 runreal list-targets
@@ -79,6 +79,54 @@ $v="1.0.0"; irm https://raw.githubusercontent.com/runreal/cli/refs/heads/main/in
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/runreal/cli/refs/heads/main/install.sh | sh -s v1.0.0
+```
+
+## Usage
+```sh
+runreal --help
+
+Usage:   runreal
+Version: 1.6.0
+
+Description:
+
+  the Unreal Engine runner
+
+Options:
+
+  -h, --help                        - Show this help.
+  -V, --version                     - Show the version number for this program.
+  --session-id       <sessionId>    - Session Id                                 (Default: "01JTVDP0Z1N2ES4703Y44MQTFQ")
+  --log-level        <level>        - Log level                                  (Default: "DEBUG", Values: "DEBUG", "INFO", "ERROR")
+  -c, --config-path  <configPath>   - Path to config file
+  --engine-path      <enginePath>   - Path to engine folder
+  --project-path     <projectPath>  - Path to project folder
+  --build-id         <buildId>      - Overide build ID
+  --build-path       <buildPath>    - Path to save build outputs
+  --build-ts         <buildTs>      - Overide build timestamp
+
+Commands:
+
+  init                               - init
+  debug                              - debug
+  list-targets                       - list-targets
+  engine                             - engine
+  uat           <command> [args...]  - uat
+  ubt           <command> [args...]  - ubt
+  buildgraph                         - buildgraph
+  workflow                           - workflow
+  script        <input>              - script
+  auth          <command> [args...]  - auth
+  uasset                             - uasset
+  project                            - project
+
+Environment variables:
+
+  RUNREAL_ENGINE_PATH   <enginePath>   - Overide path to engine folder
+  RUNREAL_PROJECT_PATH  <projectPath>  - Overide path to project folder
+  RUNREAL_BUILD_ID      <buildId>      - Overide build ID
+  RUNREAL_BUILD_PATH    <buildPath>    - Overide path to build output folder
+  RUNREAL_BUILD_TS      <buildTs>      - Overide build timestamp
 ```
 
 ## Building from source
