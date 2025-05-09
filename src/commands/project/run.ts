@@ -3,6 +3,7 @@ import { Command } from '@cliffy/command'
 import { createProject } from '../../lib/project.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { Config } from '../../lib/config.ts'
+import { EngineConfiguration, EnginePlatform, EngineTarget } from '../../lib/engine.ts'
 
 export const run = new Command<GlobalOptions>()
 	.description('Run the game')
@@ -19,8 +20,12 @@ export const run = new Command<GlobalOptions>()
 		const project = await createProject(enginePath, projectPath)
 
 		if (options.compile) {
-			await project.runEditor({ extraArgs: ['-game', ...runArguments] })
-		} else {
-			await project.compileAndRunEditor({ extraRunArgs: ['-game', ...runArguments] })
+			await project.compile({
+				target: EngineTarget.Editor,
+				configuration: EngineConfiguration.Development,
+				dryRun: options.dryRun,
+				platform: EnginePlatform.Windows,
+			})
 		}
+		await project.runEditor({ extraArgs: ['-game', ...runArguments] })
 	})

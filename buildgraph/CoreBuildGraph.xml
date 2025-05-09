@@ -1,0 +1,345 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+
+<!-- Variables -->
+
+	<Option Name="BuildId" 			DefaultValue="" Restrict="^[a-zA-Z0-9-]*$" Description="Build string id used for archive name (${branch}-${gitShortHash}-${buildNumber})"/>
+
+	<!-- PCB CONFIGURATION -->
+	<Option Name="EditorTarget" Restrict="[^ ]+" DefaultValue="$(ProjectName)Editor" Description="Name of the editor target to be built"/>
+	<Option Name="GameTargets" Restrict="[^ ]*" DefaultValue="" Description="Names of game targets to build separated by semicolons, eg. UnrealClient;UnrealServer"/>
+	<Option Name="Licensee" Restrict="true|false" DefaultValue="true" Description="Whether to treat the changelist number as being from a licensee Perforce server"/>
+	<Option Name="Versioned" Restrict="true|false" DefaultValue="$(IsBuildMachine)" Description="Whether to embed changelist number into binaries"/>
+	<Option Name="Promoted" Restrict="true|false" DefaultValue="true" Description="Whether to set the promoted flag in version files, allowing the editor to run without UBT."/>
+	<Option Name="ArchiveStream" Restrict="(?://.*)?" DefaultValue="" Description="Stream path that will contain zip file of the compiled binaries, for use by UnrealGameSync"/>
+	<Option Name="ForceSubmit" Restrict="true|false" DefaultValue="false" Description="Forces the submit to happen even if another change has been submitted (resolves in favor of local files)"/>
+	<Option Name="ArchiveName" Restrict="[^ ]*" DefaultValue="$(EditorTarget)" Description="Names of archive to generate instead of using the GameTarget, when the GameTarget may be UnrealEditor and result in a clash"/>
+	<Option Name="SymbolStorePath" DefaultValue="" Description ="Output directory for symbol storage"/>
+
+	<!-- CLIENT CONFIGURATION -->
+	<Option	Name="ClientPlatforms" 		DefaultValue="Win64" Description=""/>
+	<Option	Name="ClientConfigurations" DefaultValue="Development" Description="Configurations to build/use separated by ';'"/>
+	<Option Name="ClientTargetType" DefaultValue="Client" Description="Type of target"/>
+
+	<!-- SERVER CONFIGURATION -->
+	<Option	Name="ServerPlatforms" 		DefaultValue="Win64" Description=""/>
+	<Option	Name="ServerConfigurations" DefaultValue="Development" Description="Configurations to build/use separated by ';'"/>
+	
+	<!-- Helpers/Globals -->
+	<Option Name="PreferredAgent" DefaultValue="Compile$(HostPlatform)" Description ="Agent type to use for job"/>
+	<Option Name="OutputDir" DefaultValue="$(RootDir)\LocalBuilds\$(EditorTarget)Binaries" Description ="Output directory for compiled binaries"/>
+	<Option Name="AdditionalTools" Restrict="[^ ]*" DefaultValue="" Description="Tool Compiles to build seperated by semicolons, eg. UnrealMultiUserServer;BuildPatchTool"/>
+	<Option Name="TargetPlatforms" Restrict="[^ ]*" DefaultValue="$(HostPlatform)" Description="List of the target platforms to build for, separated by semicolons, eg. Win64;Android"/>
+
+	<Property Name="ProjectArgument" Value="-Project=&quot;$(ProjectFile)&quot;"/>
+	
+	<Option Name="ExtraCompileArguments" DefaultValue="" Restrict="" Description="Configurable compile args applied to all compile targets."/>
+	<Option Name="ExtraCookArguments" DefaultValue="" Restrict="" Description="Extra arguments to use when cooking" />
+	<Option Name="ExtraPackageArguments" DefaultValue="" Restrict="" Description="Extra arguments to use when staging and packaging" />
+
+	<!-- GENERATED PROPERTIES -->
+	<Property Name="GeneratedClients" Value=""/>
+	<Property Name="GeneratedServers" Value=""/>
+	<Property Name="PackagedClients" Value=""/>
+	<Property Name="PackagedServers" Value=""/>
+
+	<Property Name="ClientTargetName" Value="$(ProjectName)$(ClientTargetType)"/>
+	<Property Name="ServerTargetName" Value="$(ProjectName)Server"/>
+
+<!-- Compile -->
+
+	<!-- TOOL COMPILATION -->
+	<Agent Name="COMPILER" Type="Any">
+		<!-- SET VERSION / BUILD ID -->
+		<Node Name="Set Build Version">
+			<Log Message="--- :v: Versioning Build"/>
+			<SetVersion Change="$(Change)" Branch="$(EscapedBranch)" Licensee="$(Licensee)" If="$(Versioned)"/>
+			<SetVersion Change="0" Branch="$(EscapedBranch)" Licensee="$(Licensee)" If="!$(Versioned) and $(Promoted)"/>
+		</Node>
+
+		<!-- ENGINE TOOLS -->
+		<Property Name="EditorPlatform" Value="$(HostPlatform)"/>
+		<Node Name="Compile Engine Tools $(EditorPlatform)" Produces="#ToolBinaries">
+			<Log Message="--- :wrench: Compiling Engine Tools $(EditorPlatform)"/>
+			<Compile Target="ShaderCompileWorker" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Development" Tag="#ToolBinaries"/>
+			<Compile Target="UnrealLightmass" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Development" Tag="#ToolBinaries"/>
+			<Compile Target="InterchangeWorker" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Development" Tag="#ToolBinaries"/>
+			<Compile Target="UnrealPak" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Development" Tag="#ToolBinaries"/>
+			<Compile Target="BootstrapPackagedGame" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Shipping" Tag="#ToolBinaries"/>
+			<Compile Target="CrashReportClient" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Shipping" Tag="#ToolBinaries"/>
+			<Compile Target="CrashReportClientEditor" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Shipping" Tag="#ToolBinaries"/>
+			<ForEach Name="AdditonalTool" Values="$(AdditionalTools)">
+				<Compile Target="$(AdditonalTool)" Platform="$(EditorPlatform)" Arguments="$(ExtraCompileArguments)" Configuration="Development" Tag="#ToolBinaries"/>
+			</ForEach>
+			<!-- 
+				This exe is a copy of ShaderCompileWorker.exe, created as a post-build step. See \Engine\Source\Programs\ShaderCompileWorker\ShaderCompileWorker.Target.cs.
+				It's needed for shader compilation to work with Incredibuild.
+			-->
+			<Tag Files="$(RootDir)\Engine\Binaries\Win64\XGEControlWorker.exe" With="#ToolBinaries"/>
+		</Node>
+		
+		<!-- GAME EDITOR -->
+		<Node Name="Compile $(ProjectName)Editor $(EditorPlatform) Development" Requires="#ToolBinaries" Produces="#EditorBinaries;#TargetInfo">
+			<Log Message="--- :cpp: Compiling $(ProjectName)Editor $(EditorPlatform)"/>
+			<Compile Target="$(ProjectName)Editor" Platform="$(EditorPlatform)" Arguments="$(ProjectArgument) $(ExtraCompileArguments)" Configuration="Development" Tag="#EditorBinaries"/>
+			<QueryTargets ProjectFile="$(ProjectFile)" Tag="#TargetInfo"/>
+		</Node>
+	</Agent>
+
+	<!-- TARGET COMPILATION -->
+	<Agent Name="TARGETS" Type="Any">
+		<!-- CLIENT -->
+		<ForEach Name="Platform" Values="$(ClientPlatforms)">
+			<ForEach Name="Config" Values="$(ClientConfigurations)">
+				<Node Name="Compile $(ClientTargetName) $(Platform) $(Config)" Requires="#ToolBinaries;#EditorBinaries;#TargetInfo;" Produces="#$(ClientTargetName)_$(Platform)_$(Config)">
+					<Log Message="--- :cpp: Compiling $(ClientTargetName) $(Platform) $(Config)"/>
+					<Compile Target="$(ClientTargetName)" Platform="$(Platform)" Arguments="$(ProjectArgument) $(ExtraCompileArguments)" Configuration="$(Config)" Tag="#$(ClientTargetName)_$(Platform)_$(Config)"/>
+					<Property Name="GeneratedClients" Value="$(GeneratedClients);#$(ClientTargetName)_$(Platform)_$(Config)"/>
+				</Node>
+			</ForEach>
+		</ForEach>
+
+		<!-- SERVER -->
+		<ForEach Name="Platform" Values="$(ServerPlatforms)">
+			<ForEach Name="Config" Values="$(ServerConfigurations)">
+				<Node Name="Compile $(ServerTargetName) $(Platform) $(Config)" Requires="#ToolBinaries" Produces="#$(ServerTargetName)_$(Platform)_$(Config)">
+					<Log Message="--- :cpp: Compiling $(ServerTargetName) $(Platform) $(Config)"/>
+					<Compile Target="$(ServerTargetName)" Platform="$(Platform)" Arguments="$(ProjectArgument) $(ExtraCompileArguments)" Configuration="$(Config)" Tag="#$(ServerTargetName)_$(Platform)_$(Config)"/>
+					<Property Name="GeneratedServers" Value="$(GeneratedServers);#$(ServerTargetName)_$(Platform)_$(Config)"/>
+				</Node>
+			</ForEach>
+		</ForEach>
+	</Agent>
+
+<!-- Precompile -->
+	
+	<!-- PRECOMPILED BINARIES -->
+	<Agent Name="PCB" Type="Any">
+		<!-- Compile the game targets -->
+		<Property Name="GameBinaries" Value=""/>
+		<ForEach Name="GameTarget" Values="$(GameTargets)">
+			<ForEach Name="TargetPlatform" Values="$(TargetPlatforms)">
+				<Node Name="Compile $(GameTarget) $(TargetPlatform)" Requires="Compile $(ProjectName)Tools Win64" Produces="#GameBinaries_$(GameTarget)_$(TargetPlatform)">
+					<Log Message="--- :cpp: Compiling $(GameTarget) $(TargetPlatform)"/>
+					<Compile Target="$(GameTarget)" Platform="$(TargetPlatform)" Configuration="Development" Tag="#GameBinaries_$(GameTarget)_$(TargetPlatform)"/>
+					<Compile Target="$(GameTarget)" Platform="$(TargetPlatform)" Configuration="Shipping" Tag="#GameBinaries_$(GameTarget)_$(TargetPlatform)"/>
+				</Node>
+				<Property Name="GameBinaries" Value="$(GameBinaries)#GameBinaries_$(GameTarget)_$(TargetPlatform);"/>
+			</ForEach>
+		</ForEach>
+
+		<!-- Copy all the files to the output directory -->
+		<Node Name="Tag Output Files" Requires="#ToolBinaries;#EditorBinaries;#TargetInfo;$(GameBinaries)" Produces="#OutputFiles">
+			<Tag Files="#ToolBinaries;#EditorBinaries;$(GameBinaries)" Except=".../Intermediate/..." With="#OutputFiles"/>
+			<Tag Files="#TargetInfo" With="#OutputFiles"/>
+		</Node>
+
+		<!-- Copy all the files to the output directory -->
+		<Node Name="Copy To Staging Directory" Requires="#OutputFiles">
+			<Delete Files="$(OutputDir)/..."/>
+			<Copy Files="#OutputFiles" From="$(RootDir)" To="$(OutputDir)"/>			
+		</Node>
+
+		<!-- Tag PDBs with source information and write them to a symbol store. Only called if SymbolStorage option supplies a path  -->
+		<Node Name="Store Symbols" Requires="#OutputFiles">
+			<Log Message="--- :symbols: Storing symbols..."/>
+			<!-- Embed source info into the PDB files. Should be done from this machine to ensure that paths are correct. -->
+			<Log Message="Embedding source file information into PDB files..." />
+			<Tag Files="Engine/Source/...;Engine/Plugins/..." Filter="*.c;*.h;*.cpp;*.hpp;*.inl" Except="Engine/Source/ThirdParty/..." With="#SourceFiles"/>
+			<SrcSrv BinaryFiles="#BinaryFiles" SourceFiles="#SourceFiles" Branch="$(Branch)" Change="$(CodeChange)"/>
+			<Log Message="Writing symbols to $(SymbolStorePath)"/>
+			<SymStore Platform="Win64" Files="#OutputFiles" StoreDir="$(SymbolStorePath)" Product="UGSEditor" BuildVersion="$(CodeChange)"/>
+		</Node>
+
+		<!-- Dependencies required for submitting binaries -->
+		<Property Name="SubmissionDependencies" Value="#OutputFiles" />
+		<Property Name="SubmissionDependencies" Value="$(SubmissionDependencies); Store Symbols" If="'$(SymbolStorePath)' != ''" />
+
+		<!-- Create a zip archive and submit that to Perforce for use by UGS -->
+		<Node Name="Submit To Perforce For UGS" Requires="$(SubmissionDependencies)">
+			<Log Message="--- :film_projector: Staging binaries..."/>
+			<!-- Clear out the archive directory -->
+			<Property Name="ArchiveDir" Value="$(RootDir)\LocalBuilds\ArchiveForUGS"/>
+			<Delete Files="$(ArchiveDir)\..."/>
+
+			<!-- Tag AutomationTool build folder recursively -->
+			<Tag Files="Engine/Binaries/DotNET/AutomationTool/..." With="#ArchiveBinaries"/>
+			
+			<!-- Write a text file marker indicating that we're using precompiled binaries -->
+			<Spawn Exe="cmd.exe" Arguments="/C echo. &gt;&quot;$(RootDir)/Engine/Build/PrecompiledBinaries.txt&quot;"/>
+			<Tag Files="$(RootDir)/Engine/Build/PrecompiledBinaries.txt" With="#ArchiveFiles"/>
+
+			<!-- Partition all the binaries and symbols -->
+			<Tag Files="#OutputFiles" Except=".../Intermediate/..." With="#ArchiveFiles"/>
+			<Tag Files="#ArchiveFiles" Except="*.pdb" With="#ArchiveBinaries"/>
+			<Tag Files="#ArchiveFiles" Filter="*.pdb" With="#ArchiveSymbols"/>
+
+			<!-- List all the files being archived -->
+			<Log Message="Archive binaries:" Files="#ArchiveBinaries"/>
+			<Log Message="Archive symbols:" Files="#ArchiveSymbols"/>
+
+			<!-- Stage all the files to be archived -->
+			<Property Name="ArchiveStagingDir" Value="$(ArchiveDir)\Staging"/>
+			<Copy Files="#ArchiveBinaries" From="$(RootDir)" To="$(ArchiveStagingDir)"/>
+			<Log Message="--- :symbols: Striping symbols..."/>
+			<Strip Files="#ArchiveSymbols" BaseDir="$(RootDir)" OutputDir="$(ArchiveStagingDir)" Platform="Win64"/>
+
+			<!-- Create the zip file and submit it to Perforce -->
+			<Log Message="--- :zipper_mouth_face: Zipping..."/>
+			<Property Name="ArchivePerforceDir" Value="$(ArchiveDir)\Perforce"/>
+			<Property Name="ArchiveFile" Value="$(ArchivePerforceDir)\$(EscapedBranch)-$(ArchiveName).zip"/>
+			<Zip FromDir="$(ArchiveStagingDir)" ZipFile="$(ArchiveFile)"/>
+		</Node>
+	</Agent>
+
+<!-- Editor -->
+
+	<!-- RUN -->
+	<Agent Name="RUNNER" Type="Any">
+		<Node Name="Run Editor" Requires="#EditorBinaries">
+			<Property Name="EditorArguments" Value="$(ProjectFile)"/>
+			<Spawn Exe="$(RootDir)/Engine/Binaries/Win64/UnrealEditor.exe" Arguments="$(EditorArguments)"/>
+		</Node>
+
+		<Node Name="Run Game" Requires="#EditorBinaries">
+			<Property Name="GameArguments" Value="$(ProjectName) -game"/>
+			<Spawn Exe="$(RootDir)/Engine/Binaries/Win64/UnrealEditor.exe" Arguments="$(GameArguments)"/>
+		</Node>
+
+		<Node Name="Run Server" Requires="#EditorBinaries">
+			<Property Name="ServerArguments" Value="$(ProjectName) -game -server"/>
+			<Spawn Exe="$(RootDir)/Engine/Binaries/Win64/UnrealEditor.exe" Arguments="$(ServerArguments)"/>
+		</Node>
+	</Agent>
+
+<!-- Package -->
+
+	<!-- COOKER (ALL) -->
+	<Agent Name="COOKER" Type="Any">
+		<Property Name="CookArguments" Value="$(ExtraCookArguments)"/>
+		<Property Name="CookPlatform" Value="Win64" />
+		<Property Name="CookConfig" Value="Development"/>
+		<Property Name="BCRArgs" Value="-project=$(ProjectFile) -platform=$(CookPlatform) -configuration=$(CookConfig)" />
+		<!-- Cook -->
+		<Node Name="Cook All" Requires="#ToolBinaries;#EditorBinaries;" Produces="#Cook Complete">
+			<Log Message="--- :cooking: Cooking..."/>
+			<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -cook -skipstage -skippak -skippackage $(CookArguments)" />
+		</Node>
+	</Agent>
+
+	<!-- PACKAGE -->
+	<Agent Name="PACKAGER" Type="Any">
+		<Property Name="CookArguments" Value="$(ExtraCookArguments)"/>
+		<Property Name="PackageArguments" Value="$(ExtraPackageArguments)"/>
+
+		<!-- CLIENT -->
+		<ForEach Name="Platform" Values="$(ClientPlatforms)">
+			<!-- Set CookPlatform since it isn't always the same as the target -->
+			<Property Name="CookPlatform" Value="$(Platform)" />
+			<Property Name="CookPlatform" Value="$(Platform)_ETC2" If="'$(Platform)' == 'Android'"/>
+			<Property Name="OutputPlatform" Value="$(Platform)" />
+			<Property Name="OutputPlatform" Value="Windows" If="'$(Platform)' == 'Win64'"/>
+
+			<!-- Cook -->
+			<Property Name="PlatformCookNodeName" Value="Cook $(ClientTargetName) $(Platform)" />
+			<Node Name="$(PlatformCookNodeName)" Requires="#ToolBinaries;#EditorBinaries" Produces="#$(PlatformCookNodeName) Complete">
+				<Log Message="--- :cooking: Cooking..."/>
+				<Command Name="BuildCookRun" Arguments="-project=$(ProjectFile) -platform=$(CookPlatform) -cook -game -skipbuild -skipstage -skippak -skippackage $(CookArguments)" />
+			</Node>
+
+			<ForEach Name="Config" Values="$(ClientConfigurations)">
+				<Property Name="PlatformStageNodeName" Value="Stage $(ClientTargetName) $(Platform) $(Config)" />
+				<Property Name="PlatformPackageNodeName" Value="Package $(ClientTargetName) $(Platform) $(Config)" />
+				<Property Name="PlatformArchiveNodeName" Value="Archive $(ClientTargetName) $(Platform) $(Config)" />
+				<Property Name="PlatformZipNodeName" Value="Zip $(ClientTargetName) $(Platform) $(Config)" />
+				<Property Name="ArchiveDir" Value="$(OutputDir)/$(BuildId)/$(ClientTargetName)-$(Platform)-$(Config)"/>
+				<!-- Default BuildCookRun args needed when staging/packaging/archiving this configuration -->
+				<Property Name="BCRArgs" Value="-project=$(ProjectFile) -target=$(ClientTargetName) -platform=$(Platform) $(PackageArguments)" />
+				<Property Name="BCRArgs" Value="$(BCRArgs) -client" If="'$(ClientTargetType)' == 'Client'" />
+				<!-- Stage -->
+				<Node Name="$(PlatformStageNodeName)" Requires="#$(ClientTargetName)_$(Platform)_$(Config);#$(PlatformCookNodeName) Complete">
+					<!-- Clear out the archive directory -->
+					<Delete Files="$(ArchiveDir)/..."/>
+					<Log Message="--- :package: Staging..."/>
+					<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -skipcook -stage -pak" />
+				</Node>
+				<!-- Package -->
+				<Node Name="$(PlatformPackageNodeName)" Requires="$(PlatformStageNodeName)">
+					<Log Message="--- :package: Packaging..."/>
+					<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -skipcook -skipstage -skippak -package" />
+				</Node>
+				<!-- Publish (Packages) -->
+				<Node Name="$(PlatformArchiveNodeName)" Requires="$(PlatformPackageNodeName)">
+					<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -skipcook -skipstage -skippak -skippackage -archive -archivedirectory=&quot;$(ArchiveDir)&quot;" />
+				</Node>
+				<!-- Zip -->
+				<Node Name="$(PlatformZipNodeName)" Requires="$(PlatformArchiveNodeName)" Produces="#$(PlatformZipNodeName) Complete">
+					<Log Message="--- :zipper_mouth_face: Zipping..."/>
+					<Property Name="ArchiveFile" Value="$(OutputDir)/$(ClientTargetName)-$(Platform)-$(Config).$(BuildId).zip"/>
+					<Zip FromDir="$(ArchiveDir)/$(OutputPlatform)Client" ZipFile="$(ArchiveFile)" If="'$(ClientTargetType)' == 'Client'"/>
+					<Zip FromDir="$(ArchiveDir)/$(OutputPlatform)" ZipFile="$(ArchiveFile)" If="'$(ClientTargetType)' == 'Game'"/>
+				</Node>
+				<Property Name="PackagedClients" Value="$(PackagedClients);#$(PlatformZipNodeName) Complete"/>
+			</ForEach>
+		</ForEach>
+
+		<!-- SERVER -->
+		<ForEach Name="Platform" Values="$(ServerPlatforms)">
+			<!-- Set CookPlatform since it isn't always the same as the target -->
+			<Property Name="CookPlatform" Value="$(Platform)" />
+			<Property Name="OutputPlatform" Value="$(Platform)" />
+			<Property Name="OutputPlatform" Value="Windows" If="'$(Platform)' == 'Win64'"/>
+
+			<!-- Cook -->
+			<Property Name="PlatformCookNodeName" Value="Cook $(ServerTargetName) $(Platform)" />
+			<Node Name="$(PlatformCookNodeName)" Requires="#ToolBinaries;#EditorBinaries" Produces="#$(PlatformCookNodeName) Complete">
+				<Log Message="--- :cooking: Cooking..."/>
+				<Command Name="BuildCookRun" Arguments="-project=$(ProjectFile) -platform=$(CookPlatform) -cook -server -noclient -skipbuild -skipstage -skippak -skippackage $(CookArguments)" />
+			</Node>
+
+			<ForEach Name="Config" Values="$(ServerConfigurations)">
+				<Property Name="PlatformStageNodeName" Value="Stage $(ServerTargetName) $(Platform) $(Config)" />
+				<Property Name="PlatformPackageNodeName" Value="Package $(ServerTargetName) $(Platform) $(Config)" />
+				<Property Name="PlatformArchiveNodeName" Value="Archive $(ServerTargetName) $(Platform) $(Config)" />
+				<Property Name="PlatformZipNodeName" Value="Zip $(ServerTargetName) $(Platform) $(Config)" />
+				<Property Name="ArchiveDir" Value="$(OutputDir)/$(BuildId)/$(ServerTargetName)-$(Platform)-$(Config)"/>
+				<!-- Default BuildCookRun args needed when staging/packaging/archiving this configuration -->
+				<Property Name="BCRArgs" Value="-project=$(ProjectFile) -target=$(ServerTargetName) -platform=$(Platform) -configuration=$(Config) $(PackageArguments)" />
+				<Property Name="BCRArgs" Value="$(BCRArgs) -server -noclient" />
+				<!-- Stage -->
+				<Node Name="$(PlatformStageNodeName)" Requires="#$(ServerTargetName)_$(Platform)_$(Config);#$(PlatformCookNodeName) Complete">
+					<!-- Clear out the archive directory -->
+					<Log Message="--- :package: Staging..."/>
+					<Delete Files="$(ArchiveDir)/..."/>
+					<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -skipcook -stage -pak" />
+				</Node>
+				<!-- Package -->
+				<Node Name="$(PlatformPackageNodeName)" Requires="$(PlatformStageNodeName)">
+					<Log Message="--- :package: Packaging..."/>
+					<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -skipcook -skipstage -skippak -package" />
+				</Node>
+				<!-- Publish (Packages) -->
+				<Node Name="$(PlatformArchiveNodeName)" Requires="$(PlatformPackageNodeName)">
+					<Command Name="BuildCookRun" Arguments="$(BCRArgs) -skipbuild -skipcook -skipstage -skippak -skippackage -archive -archivedirectory=&quot;$(ArchiveDir)&quot;" />
+				</Node>
+				<!-- Zip -->
+				<Node Name="$(PlatformZipNodeName)" Requires="$(PlatformArchiveNodeName)" Produces="#$(PlatformZipNodeName) Complete">
+					<Log Message="--- :zipper_mouth_face: Zipping..."/>
+					<Property Name="ArchiveFile" Value="$(OutputDir)/$(ServerTargetName)-$(Platform)-$(Config).$(BuildId).zip"/>
+					<Zip FromDir="$(ArchiveDir)/$(OutputPlatform)Server" ZipFile="$(ArchiveFile)"/>
+				</Node>
+				<Property Name="PackagedServers" Value="$(PackagedServers);#$(PlatformZipNodeName) Complete"/>
+			</ForEach>
+		</ForEach>
+	</Agent>
+
+<!-- Run -->
+
+<!-- Aggregates -->
+	<Aggregate Name="Build Clients" 	Requires="$(GeneratedClients)"/>
+	<Aggregate Name="Package Clients" 	Requires="$(PackagedClients)"/>
+	<Aggregate Name="Build Servers" 	Requires="$(GeneratedServers)"/>
+	<Aggregate Name="Package Servers" 	Requires="$(PackagedServers)"/>
+	<Aggregate Name="Build UGS PCBs"	Requires="Submit To Perforce For UGS"/>
+	
+</BuildGraph>
