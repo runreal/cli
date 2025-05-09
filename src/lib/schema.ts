@@ -53,6 +53,7 @@ export const ConfigSchema = z.object({
 				z.object({
 					command: z.string().describe('Command to execute'),
 					args: z.array(z.string()).optional().describe('Command arguments'),
+					condition: z.string().optional().describe('Condition to execute the step'),
 				}),
 			),
 		}),

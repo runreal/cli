@@ -32,15 +32,30 @@ const placeholderRegex = /\$\{([^}]+)\}/g
 const pathRegex = /\$path\(([^)]+)\)/g
 
 /**
- * Replace all ${placeholders} in the items with values from the substitutions object.
+ * Replace all ${placeholders} in a string with values from the substitutions object.
  * If a placeholder is not found in the substitutions object, it will be kept as is.
- * @param {string[]} input
- * @param {RunrealConfig} cfg
- * @returns {string[]} the rendered items
+ * @param {string} input Single string to render
+ * @param {RunrealConfig} cfg Config to use for substitutions
+ * @returns {string} The rendered string
  */
-export function render(input: string[], cfg: RunrealConfig): string[] {
+export function render(input: string, cfg: RunrealConfig): string
+/**
+ * Replace all ${placeholders} in an array of strings with values from the substitutions object.
+ * If a placeholder is not found in the substitutions object, it will be kept as is.
+ * @param {string[]} input Array of strings to render
+ * @param {RunrealConfig} cfg Config to use for substitutions
+ * @returns {string[]} The rendered strings
+ */
+export function render(input: string[], cfg: RunrealConfig): string[]
+export function render(input: string | string[], cfg: RunrealConfig): string | string[] {
 	const substitutions: Record<string, string | undefined> = getSubstitutions(cfg)
-	return input.map((arg) => subReplace(placeholderRegex, arg, substitutions))
+
+	if (typeof input === 'string') {
+		return subReplace(placeholderRegex, input, substitutions)
+	}
+
+	const rendered = input.map((arg) => subReplace(placeholderRegex, arg, substitutions))
+	return rendered
 }
 
 const subReplace = (regex: RegExp, item: string, substitutions: Record<string, string | undefined>) => {

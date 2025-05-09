@@ -49,6 +49,37 @@ async function buildkiteExecutor(steps: { command: string; args: string[] }[]) {
 	}
 }
 
+function evaluateCondition(condition?: string): boolean {
+	if (!condition) return true
+
+	try {
+		// Environment variable checks: ${env('NAME=VALUE')}
+		const envRegex = /\${env\('([^']+)'\)}/
+		const envMatch = condition.match(envRegex)
+
+		if (envMatch) {
+			const envVar = envMatch[1]
+			const [name, expectedValue] = envVar.split('=')
+			const value = Deno.env.get(name)
+
+			if (expectedValue) {
+				return value === expectedValue
+			}
+
+			return value === 'true' || value === '1' || value === 'yes'
+		}
+
+		// Support for direct boolean values or string "true"/"false"
+		if (condition === 'true') return true
+		if (condition === 'false') return false
+
+		return false
+	} catch (error) {
+		console.log(`[workflow] error evaluating condition "${condition}":`, error)
+		return false
+	}
+}
+
 export const exec = new Command<GlobalOptions>()
 	.option('-d, --dry-run', 'Dry run')
 	.type('mode', new EnumType(Mode))
@@ -69,27 +100,36 @@ export const exec = new Command<GlobalOptions>()
 			throw new ValidationError(`Workflow ${workflow} not found`)
 		}
 
-		const steps: { command: string; args: string[] }[] = []
+		const steps: { command: string; args: string[]; condition?: string }[] = []
 		for await (const step of run.steps) {
-			const command = render([step.command], cfg)[0]
-			const args = render(step.args || [], cfg)
-			steps.push({ command, args })
+			const command = render(step.command, cfg)
+			const args = step.args ? step.args.map((arg) => render(arg, cfg)) : []
+			steps.push({ command, args, condition: step.condition })
 		}
 
 		if (dryRun) {
 			for (const step of steps) {
 				console.log(`[workflow] exec => ${step.command} ${step.args.join(' ')}`)
 			}
-
 			return
 		}
 
 		// Stop cliffy for exiting the process after running single command
 		cmd.noExit()
 
+		// Filter steps based on conditions
+		const filteredSteps = []
+		for (const step of steps) {
+			if (evaluateCondition(step.condition)) {
+				filteredSteps.push(step)
+			} else {
+				console.log(`[workflow] skipping step due to condition: ${step.command} ${step.args.join(' ')}`)
+			}
+		}
+
 		if (mode === Mode.Local) {
-			await localExecutor(steps).catch((e) => Deno.exit(1))
+			await localExecutor(filteredSteps).catch((e) => Deno.exit(1))
 		} else if (mode === Mode.Buildkite) {
-			await buildkiteExecutor(steps).catch((e) => Deno.exit(1))
+			await buildkiteExecutor(filteredSteps).catch((e) => Deno.exit(1))
 		}
 	})
