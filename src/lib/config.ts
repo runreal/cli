@@ -62,7 +62,7 @@ export class Config {
 
 	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): RunrealConfig {
 		this.mergeWithCliOptions(cliOptions)
-		this.validateConfig()
+		this.processConfig()
 		return this.config as RunrealConfig
 	}
 
@@ -86,7 +86,6 @@ export class Config {
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
-			// const parsed = XRunrealConfigSchema.parse(JSON.parse(data))
 			return JSON.parse(data)
 		} catch (e) {
 			/* pass */
@@ -222,7 +221,7 @@ export class Config {
 		}
 	}
 
-	private validateConfig() {
+	private processConfig() {
 		this.resolvePaths(this.config)
 		const metadata = this.initializeMetadata()
 		const id = this.getBuildId()
