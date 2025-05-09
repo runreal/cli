@@ -15,7 +15,6 @@ export const script = new Command<GlobalOptions>()
 	.arguments('<input:string>')
 	.action(async (options, ...args: string[]) => {
 
-
 		if (!args[0]) {
 			logger.error('No script name provided')
 			Deno.exit(1)
