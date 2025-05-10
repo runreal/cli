@@ -1,6 +1,5 @@
 import { mergeReadableStreams } from '@std/streams'
 import * as path from '@std/path'
-import { xml2js } from 'xml2js'
 import { createEngine } from './engine.ts'
 import type { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 
@@ -259,6 +258,8 @@ export const deleteEngineHooks = async (enginePath: string) => {
 	await Deno.remove(hooksPath, { recursive: true }).catch(() => {})
 }
 
+/*
+@deprecated - revist with alternative xml parser
 export const getDepsList = async (enginePath: string) => {
 	const ueDependenciesManifest = path.join(enginePath, '.uedependencies')
 	const data = await Deno.readTextFile(ueDependenciesManifest)
@@ -270,6 +271,7 @@ export const getDepsList = async (enginePath: string) => {
 		timestamp: Timestamp,
 	}))
 }
+*/
 
 export const getGitIgnoreList = (
 	enginePath: string,

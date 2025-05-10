@@ -1,5 +1,5 @@
 import * as path from '@std/path'
-import { readNdjson } from 'ndjson'
+import * as ndjson from '../lib/ndjson.ts'
 import { exec } from '../lib/utils.ts'
 
 interface EngineVersionData {
@@ -174,12 +174,7 @@ export abstract class Engine {
 
 	async getAutomationToolLogs(enginePath: string) {
 		const logJson = path.join(enginePath, 'Engine', 'Programs', 'AutomationTool', 'Saved', 'Logs', 'Log.json')
-		let logs: AutomationToolLogs[] = []
-		try {
-			logs = await readNdjson(logJson) as unknown as AutomationToolLogs[]
-		} catch (e) {
-			// pass
-		}
+		const logs = await ndjson.safeParse<AutomationToolLogs[]>(logJson, [])
 		return logs
 	}
 }
