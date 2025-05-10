@@ -1,6 +1,5 @@
 import * as path from '@std/path'
-import { globber } from 'globber'
-
+import { expandGlob } from '@std/fs'
 import { ValidationError } from '@cliffy/command'
 import { logger } from '../lib/logger.ts'
 
@@ -270,19 +269,17 @@ export class Project {
 
 	async runClean(dryRun?: boolean) {
 		const cwd = this.projectFileVars.projectDir
-
-		const iterator = globber({
-			cwd,
-			include: ['**/Binaries/**', '**/Intermediate/**'],
-		})
-		for await (const file of iterator) {
-			if (dryRun) {
-				console.log('Would delete:', file.absolute)
-				continue
-			}
-			if (file.isFile) {
-				console.log('Deleting:', file.absolute)
-				await Deno.remove(file.absolute)
+		const patterns = ['**/Binaries/**', '**/Intermediate/**']
+		for (const pattern of patterns) {
+			for await (const file of expandGlob(pattern, { root: cwd })) {
+				if (file.isFile) {
+					if (dryRun) {
+						logger.info(`[dry-run] deleting ${file.path}`)
+					} else {
+						logger.info(`deleting ${file.path}`)
+						await Deno.remove(file.path)
+					}
+				}
 			}
 		}
 	}
@@ -329,9 +326,6 @@ export async function createProject(enginePath: string, projectPath: string): Pr
 		projectArgument: `-project=${projectFile}`,
 		projectDir: path.dirname(projectFile),
 	}
-	console.log(
-		`projectFullPath=${projectFileVars.projectFullPath} projectName=${projectFileVars.projectName} projectArgument=${projectFileVars.projectArgument} projectDir=${projectFileVars.projectDir}`,
-	)
 	const project = new Project(createEngine(enginePath), projectFileVars)
 
 	return Promise.resolve(project)
