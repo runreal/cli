@@ -1,17 +1,9 @@
 {
+	"$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
 	"name": "@runreal/cli",
 	"version": "1.6.0",
 	"description": "The open source Unreal Engine toolkit",
 	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/runreal/cli"
-	},
-	"author": {
-		"name": "RUNREAL",
-		"email": "hello@runreal.dev",
-		"url": "https://runreal.dev"
-	},
 	"tasks": {
 		"dev": "deno run -A --watch=src src/index.ts",
 		"test": "deno test -A --watch",
