@@ -11,5 +11,8 @@ export const debugBuildId = new Command<GlobalOptions>()
 	.action((options) => {
 		const config = Config.getInstance()
 		const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
+
 		console.log(cfg.build.id)
+		console.log(cfg.project.path)
+		console.log(cfg.engine.path)
 	})

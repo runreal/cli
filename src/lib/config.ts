@@ -1,60 +1,14 @@
 import * as path from '@std/path'
-import * as dotenv from '@std/dotenv'
-import { z } from 'zod'
 import { ValidationError } from '@cliffy/command'
 import { deepmerge } from '@rebeccastevens/deepmerge'
-
 import { ulid } from './ulid.ts'
-import type { CliOptions, RunrealConfig, UserRunrealConfig } from '../lib/types.ts'
-import { RunrealConfigSchema, UserRunrealConfigSchema } from '../lib/schema.ts'
-import { Git, Perforce, Source } from './source.ts'
+import type { CliOptions, RunrealConfig, UserConfig } from '../lib/types.ts'
+import { InternalConfigSchema, UserConfigSchema } from '../lib/schema.ts'
+import { Git, Perforce } from './source.ts'
 import { normalizePaths, renderConfig } from './template.ts'
 
-const env = (key: string) => Deno.env.get(key) || ''
-
-dotenv.loadSync({ export: true })
-
-const defaultConfig = (): RunrealConfig => ({
-	engine: {
-		path: '',
-		repoType: 'git',
-		gitBranch: 'main',
-	},
-	project: {
-		name: '',
-		path: '',
-		buildPath: '',
-		repoType: 'git',
-	},
-	build: {
-		id: env('RUNREAL_BUILD_ID') || '',
-	},
-	buildkite: {
-		branch: env('BUILDKITE_BRANCH') || '',
-		checkout: env('BUILDKITE_COMMIT') || '',
-		buildNumber: env('BUILDKITE_BUILD_NUMBER') || '0',
-		buildCheckoutPath: env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
-		buildPipelineSlug: env('BUILDKITE_PIPELINE_SLUG') || '',
-	},
-	metadata: {
-		ts: env('RUNREAL_BUILD_TS') || new Date().toISOString(),
-		safeRef: '',
-		git: {
-			branch: '',
-			branchSafe: '',
-			commit: '',
-			commitShort: '',
-		},
-		perforce: {
-			changelist: '',
-			stream: '',
-		},
-	},
-	workflows: [],
-})
-
 export class Config {
-	private config: RunrealConfig = defaultConfig()
+	private config: Partial<RunrealConfig> = {}
 
 	private static configSingleton = new Config()
 
@@ -68,49 +22,53 @@ export class Config {
 		'gitDependenciesCachePath': 'engine.dependenciesCachePath',
 	}
 
-	private constructor() {}
+	private constructor() {
+		this.config = {}
+	}
 
 	static async create(opts?: { path?: string }): Promise<Config> {
 		await Config.configSingleton.loadConfig({ path: opts?.path })
 		return Config.configSingleton
 	}
 
-	async loadConfig(opts?: { path?: string }): Promise<RunrealConfig> {
+	static getInstance(): Config {
+		return Config.configSingleton
+	}
+
+	async loadConfig(opts?: { path?: string }): Promise<void> {
 		let configPath = opts?.path
 		if (!configPath) {
 			configPath = await this.searchForConfigFile()
 		}
 		if (configPath) {
-			await this.mergeConfig(configPath)
+			const configFile = await this.readConfigFile(configPath)
+			if (configFile) {
+				try {
+					const parsed = UserConfigSchema.parse(configFile)
+					this.config = parsed
+					return
+				} catch (e) {
+					// TODO: handle zod error on user config file
+					console.log(e)
+					throw new ValidationError('Invalid config')
+				}
+			}
 		}
-		return this.getConfig()
 	}
 
-	getConfig(): RunrealConfig {
+	getConfig(): Partial<RunrealConfig> {
 		return this.config
-	}
-
-	static getInstance(): Config {
-		return Config.configSingleton
 	}
 
 	mergeConfigCLIConfig({ cliOptions }: { cliOptions: CliOptions }): RunrealConfig {
 		this.mergeWithCliOptions(cliOptions)
-		this.validateConfig()
-		return this.getConfig()
+		this.processConfig()
+		return this.config as RunrealConfig
 	}
 
 	renderConfig(cfg: RunrealConfig): RunrealConfig {
 		const rendered = renderConfig(cfg)
 		return normalizePaths(rendered)
-	}
-
-	async mergeConfig(configPath: string) {
-		const cfg = await this.readConfigFile(configPath)
-		if (!cfg) return
-		const mergeConfig = deepmerge(this.config, cfg)
-		const newConfig = RunrealConfigSchema.parse(mergeConfig)
-		this.config = newConfig
 	}
 
 	private async searchForConfigFile(): Promise<string | undefined> {
@@ -125,11 +83,10 @@ export class Config {
 		return undefined
 	}
 
-	private async readConfigFile(configPath: string): Promise<Partial<UserRunrealConfig> | null> {
+	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
 			const data = await Deno.readTextFile(path.resolve(configPath))
-			const parsed = UserRunrealConfigSchema.parse(JSON.parse(data))
-			return parsed
+			return JSON.parse(data)
 		} catch (e) {
 			/* pass */
 		}
@@ -151,7 +108,7 @@ export class Config {
 		this.config = deepmerge(this.config, picked)
 	}
 
-	private resolvePaths(config: RunrealConfig) {
+	private resolvePaths(config: Partial<RunrealConfig>) {
 		if (config.engine?.path) {
 			config.engine.path = path.resolve(config.engine.path)
 		}
@@ -169,7 +126,7 @@ export class Config {
 		}
 	}
 
-	private getBuildMetadata(): Partial<RunrealConfig['metadata']> | null {
+	private getSourceMetadata(): Partial<RunrealConfig['metadata']> | null {
 		const cwd = this.config.project?.path
 		if (!cwd) return null
 		if (this.config.project?.repoType === 'git') {
@@ -208,7 +165,7 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return defaultConfig().metadata
+			return { safeRef: '', git: { branch: '', branchSafe: '', commit: '', commitShort: '' } }
 		}
 	}
 
@@ -227,54 +184,54 @@ export class Config {
 				},
 			}
 		} catch (e) {
-			return defaultConfig().metadata
+			return { safeRef: '', perforce: { changelist: '', stream: '' } }
 		}
 	}
 
-	getBuildId() {
+	public getBuildId() {
 		if (this.config.build?.id) {
 			return this.config.build.id
 		}
-		if (!this.config.project?.path) {
-			return ulid()
+		if (this.config.metadata?.safeRef && this.config.metadata?.safeRef !== '') {
+			return this.config.metadata.safeRef
 		}
-		if (!this.config.project?.repoType) {
-			return ulid()
-		}
+		return ulid()
+	}
+
+	private initializeMetadata() {
 		try {
-			const source = Source(this.config.project.path, this.config.project.repoType)
-			const safeRef = source.safeRef()
-			return safeRef
+			const metadata = InternalConfigSchema.parse({
+				metadata: {
+					git: {},
+					perforce: {},
+					buildkite: {},
+				},
+			})
+
+			const sourceMetadata = this.getSourceMetadata()
+			if (sourceMetadata) {
+				metadata.metadata = {
+					...metadata.metadata,
+					...sourceMetadata,
+				}
+			}
+			return metadata
 		} catch (e) {
-			return ulid()
+			console.log(e)
 		}
 	}
 
-	private validateConfig() {
+	private processConfig() {
 		this.resolvePaths(this.config)
-		try {
-			this.config = RunrealConfigSchema.parse(this.config)
+		const metadata = this.initializeMetadata()
+		const id = this.getBuildId()
 
-			const metadata = this.getBuildMetadata()
-			this.config.metadata = {
-				...this.config.metadata,
-				...metadata,
-				ts: env('RUNREAL_BUILD_TS') || new Date().toISOString(),
-			}
-
-			const buildId = this.getBuildId()
-			this.config.build = {
-				...this.config.build,
-				id: buildId,
-			}
-		} catch (e) {
-			if (e instanceof z.ZodError) {
-				const errors = e.errors.map((err) => {
-					return `  config.${err.path.join('.')} is ${err.message}`
-				})
-				throw new ValidationError(`Invalid config: \n${errors.join('\n')}`)
-			}
-			throw new ValidationError('Invalid config')
+		this.config = {
+			...this.config,
+			...metadata,
+			build: {
+				id,
+			},
 		}
 	}
 }

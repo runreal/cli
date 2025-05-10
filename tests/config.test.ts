@@ -9,32 +9,20 @@ Deno.test('Config.create should initialize with default values', async () => {
 	using time = new FakeTime()
 
 	const config = await Config.getInstance()
+	const cfg = config.mergeConfigCLIConfig({ cliOptions: {} })
 	const id = ulid()
 	config.getBuildId = () => id
+
+	const configData = config.getConfig()
+	assert(configData.build)
+	assert(configData.metadata)
+
 	const expected = {
-		engine: {
-			path: '',
-			repoType: 'git',
-			gitBranch: 'main',
-		},
-		project: {
-			name: '',
-			path: '',
-			buildPath: '',
-			repoType: 'git',
-		},
 		build: {
-			id: config.getConfig().build.id,
-		},
-		buildkite: {
-			branch: '',
-			checkout: '',
-			buildNumber: '0',
-			buildCheckoutPath: Deno.cwd(),
-			buildPipelineSlug: '',
+			id: configData.build.id,
 		},
 		metadata: {
-			ts: config.getConfig().metadata.ts,
+			ts: configData.metadata.ts,
 			safeRef: '',
 			git: {
 				branch: '',
@@ -46,10 +34,16 @@ Deno.test('Config.create should initialize with default values', async () => {
 				stream: '',
 				changelist: '',
 			},
+			buildkite: {
+				branch: '',
+				checkout: '',
+				buildNumber: '0',
+				buildCheckoutPath: Deno.cwd(),
+				buildPipelineSlug: '',
+			},
 		},
-		workflows: [],
 	}
-	assertEquals(config.getConfig(), expected)
+	assertEquals(configData, expected)
 })
 
 Deno.test('Config.get should apply CLI options', async () => {
@@ -87,6 +81,8 @@ Deno.test('Config.get with path', async () => {
 Deno.test.ignore('Config.create should load environment variables', async () => {
 	Deno.env.set('RUNREAL_BUILD_ID', 'test-id')
 	const config = await Config.create()
-	assertEquals(config.getConfig().build.id, 'test-id')
+	const configData = config.getConfig()
+	assert(configData.build)
+	assertEquals(configData.build.id, 'test-id')
 	Deno.env.delete('RUNREAL_BUILD_ID')
 })

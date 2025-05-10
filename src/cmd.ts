@@ -1,9 +1,10 @@
 import { Command, EnumType } from '@cliffy/command'
+import * as dotenv from '@std/dotenv'
+
 import { ulid } from './lib/ulid.ts'
 import { Config } from './lib/config.ts'
 import { logger, LogLevel } from './lib/logger.ts'
 import { VERSION } from './version.ts'
-
 import { debug } from './commands/debug/index.ts'
 import { engine } from './commands/engine/index.ts'
 import { init } from './commands/init.ts'
@@ -17,6 +18,8 @@ import { auth } from './commands/auth.ts'
 import { project } from './commands/project/index.ts'
 import { listTargets } from './commands/list-targets.ts'
 const LogLevelType = new EnumType(LogLevel)
+
+dotenv.loadSync({ export: true })
 
 export const cmd = new Command()
 	.globalOption('--session-id <sessionId:string>', 'Session Id', {
