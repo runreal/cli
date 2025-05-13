@@ -6,6 +6,7 @@ import { VERSION } from './version.ts'
 
 import { buildgraph } from './commands/buildgraph/index.ts'
 import { run } from './commands/run/index.ts'
+import { plugin } from './commands/plugin/index.ts'
 import { engine } from './commands/engine/index.ts'
 import { info } from './commands/info/index.ts'
 import { project } from './commands/project/index.ts'
@@ -56,6 +57,7 @@ export const cli = cmd
 	.command('run', run)
 	.command('engine', engine)
 	.command('project', project)
+	.command('plugin', plugin)
 	.command('sln', sln)
 	.command('uasset', uasset)
 	.command('workflow', workflow)
