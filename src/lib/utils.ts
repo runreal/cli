@@ -410,3 +410,28 @@ ${blueprint}
 `
 	return html
 }
+
+export async function findFilesByExtension(
+	rootDir: string,
+	extension: string,
+	recursive: boolean,
+): Promise<string[]> {
+	const files: string[] = []
+
+	try {
+		for await (const entry of Deno.readDir(rootDir)) {
+			const checkPath = `${rootDir}/${entry.name}`
+
+			if (entry.isDirectory && recursive) {
+				const subFiles = await findFilesByExtension(checkPath, extension, recursive)
+				files.push(...subFiles)
+			} else if (entry.isFile && checkPath.endsWith(extension)) {
+				files.push(checkPath)
+			}
+		}
+	} catch (error) {
+		console.error(`Error reading directory ${rootDir}:`, error)
+	}
+
+	return files
+}

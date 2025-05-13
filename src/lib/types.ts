@@ -4,7 +4,7 @@ import type { $ } from '@david/dax'
 import type { z } from 'zod'
 import type { cmd } from '../cmd.ts'
 
-import type { DebugConfigOptions } from '../commands/debug/debug-config.ts'
+import type { DebugConfigOptions } from '../commands/info/config.ts'
 import type { SetupOptions } from '../commands/engine/setup.ts'
 import type { InstallOptions } from '../commands/engine/install.ts'
 import type { UpdateOptions } from '../commands/engine/update.ts'

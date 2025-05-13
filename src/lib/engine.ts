@@ -24,6 +24,42 @@ interface EngineVersionData {
   "BranchName": "++UE5+Release-5.0"
 }
 */
+
+export enum CookStyle {
+	pak = 'pak',
+	zen = 'zen',
+	nopak = 'nopak',
+}
+
+export enum CookTarget {
+	Windows = 'Windows',
+	WindowsClient = 'WindowsClient',
+	WindowsNoEditor = 'WindowsNoEditor',
+	WindowsServer = 'WindowsServer',
+	Linux = 'Linux',
+	LinuxClient = 'LinuxClient',
+	LinuxNoEditor = 'LinuxNoEditor',
+	LinuxServer = 'LinuxServer',
+	Mac = 'Mac',
+	MacClient = 'MacClient',
+	MacNoEditor = 'MacNoEditor',
+	MacServer = 'MacServer',
+	Android = 'Android',
+	Android_ASTC = 'Android_ASTC',
+	Android_DXT = 'Android_DXT',
+	Android_ETC2 = 'Android_ETC2',
+	IOS = 'IOS',
+	PS4 = 'PS4',
+	PS5 = 'PS5',
+	Switch = 'Switch',
+	XboxOne = 'XboxOne',
+	XSX = 'XSX',
+	TVOS = 'TVOS',
+	HoloLens = 'HoloLens',
+	AllDesktop = 'AllDesktop',
+	HTML5 = 'HTML5',
+}
+
 export enum EngineConfiguration {
 	Debug = 'Debug',
 	DebugGame = 'DebugGame',
@@ -39,8 +75,7 @@ export enum EngineTarget {
 	Server = 'Server',
 }
 
-export enum ProjectTarget {
-	Editor = 'Editor',
+export enum GameTarget {
 	Game = 'Game',
 	Client = 'Client',
 	Server = 'Server',
@@ -76,7 +111,7 @@ export interface TargetInfo {
 }
 
 interface UBTOptions {
-	target: ProjectTarget | string
+	target: EngineTarget | string
 	configuration?: EngineConfiguration
 	platform?: EnginePlatform
 	extraArgs?: string[]
@@ -108,7 +143,7 @@ export abstract class Engine {
 	abstract getGenerateScript(): string
 	abstract getGitDependencesBin(): string
 	abstract parseEngineTargets(): Promise<string[]>
-	abstract getEditorBin(): string
+	abstract getEditorBin(cmdBin?: boolean, debug?: boolean): string
 	abstract getEditorCmdBin(): string
 
 	getEngineVersionData(): EngineVersionData {
@@ -165,6 +200,34 @@ export abstract class Engine {
 		console.log('[runUBT]', args)
 		if (dryRun) return
 		return await exec(buildScript, args)
+	}
+
+	async runEditor({
+		useCmd = false,
+		dryRun = false,
+		debug = false,
+		args,
+	}: {
+		useCmd?: boolean
+		dryRun?: boolean
+		debug?: boolean
+		args: Array<string>
+	}) {
+		const editorBin = this.getEditorBin(useCmd, debug)
+
+		console.log(`Running editor with: ${editorBin} ${args.join(' ')}`)
+
+		if (dryRun) {
+			return
+		}
+
+		try {
+			const result = await exec(editorBin, args)
+			return result
+		} catch (error: unknown) {
+			console.log(`Error running Editor: ${error instanceof Error ? error.message : String(error)}`)
+			Deno.exit(1)
+		}
 	}
 
 	async ubt(args: string[] = [], options = { quiet: false }) {
@@ -238,13 +301,20 @@ class WindowsEngine extends Engine {
 			return []
 		}
 	}
-	override getEditorBin(): string {
+	override getEditorBin(cmdBin?: boolean, debug?: boolean): string {
+		let exeName = 'UnrealEditor'
+		if (cmdBin) {
+			exeName = exeName + '-Cmd'
+		}
+		if (debug) {
+			exeName = exeName + 'Win64-Debug'
+		}
 		const editorPath = path.join(
 			this.enginePath,
 			'Engine',
 			'Binaries',
 			'Win64',
-			'UnrealEditor.exe',
+			`${exeName}.exe`,
 		)
 		return editorPath
 	}
@@ -321,7 +391,7 @@ class MacosEngine extends Engine {
 			return []
 		}
 	}
-	override getEditorBin(): string {
+	override getEditorBin(cmdBin?: boolean, debug?: boolean): string {
 		const editorPath = path.join(
 			this.enginePath,
 			'Engine',
@@ -404,7 +474,7 @@ class LinuxEngine extends Engine {
 			return []
 		}
 	}
-	override getEditorBin(): string {
+	override getEditorBin(cmdBin?: boolean, debug?: boolean): string {
 		const editorPath = path.join(
 			this.enginePath,
 			'Engine',
@@ -477,15 +547,11 @@ export function getEditorPath(enginePath: string, platform: EnginePlatform): str
 /**
  * Get the platform-specific cook target
  */
-export function getPlatformCookTarget(platform: EnginePlatform): string {
-	switch (platform) {
-		case EnginePlatform.Windows:
-			return 'Windows'
-		case EnginePlatform.Mac:
-			return 'MAC'
-		case EnginePlatform.Linux:
-			return 'Linux'
-		default:
-			throw new Error(`Unsupported platform: ${platform}`)
+export function getPlatformCookTarget(platform: EnginePlatform, gameTarget: GameTarget): string {
+	const prefix = platform
+	let suffix = gameTarget as string
+	if (gameTarget == GameTarget.Game) {
+		suffix = ''
 	}
+	return prefix + suffix
 }

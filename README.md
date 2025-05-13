@@ -24,20 +24,23 @@
 
 ## Getting Started
 ```sh
-# Compile the editor
-runreal project compile Editor
+# Build the editor
+runreal project build Editor
 
-# Compile your project targets
-runreal project compile Client
+# Build your project targets
+runreal project build Client
 
 # List available build targets
-runreal list-targets
+runreal info list-targets
+
+# Run your editor
+runreal run Editor
 
 # Run your game
-runreal project run
+runreal run Game
 
 # Package your project
-runreal project pkg -p Win64 -c Development
+runreal project pkg Game Win64 Development nopak
 
 # Execute a buildgraph script
 runreal buildgraph run <script.xml>
