@@ -1,8 +1,8 @@
 import { Command } from '@cliffy/command'
-import { createProject } from '../lib/project.ts'
-import { createEngine } from '../lib/engine.ts'
-import type { GlobalOptions } from '../lib/types.ts'
-import { Config } from '../lib/config.ts'
+import { createProject } from '../../lib/project.ts'
+import { createEngine } from '../../lib/engine.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
+import { Config } from '../../lib/config.ts'
 
 export type ListTargetsOptions = typeof listTargets extends
 	Command<void, void, infer Options, infer Argument, GlobalOptions> ? Options
