@@ -17,7 +17,11 @@ export const plugin = new Command<GlobalOptions>()
 		const match = await findPluginFile(pluginName, projectPath, enginePath)
 		if (match) {
 			const pluginData = await readUPluginFile(match)
-			displayUPluginInfo(pluginData)
+			if (pluginData) {
+				displayUPluginInfo(pluginData)
+			} else {
+				console.log('plugin could not be loaded')
+			}
 		} else {
 			console.log('could not find plugin')
 		}

@@ -15,5 +15,9 @@ export const project = new Command<GlobalOptions>()
 		const project = await createProject(enginePath, projectPath)
 
 		const projectData = await readUProjectFile(project.projectFileVars.projectFullPath)
-		displayUProjectInfo(projectData)
+		if (projectData) {
+			displayUProjectInfo(projectData)
+		} else {
+			console.log('project could not be loaded')
+		}
 	})

@@ -4,12 +4,34 @@ import type { GlobalOptions } from '../../lib/types.ts'
 import { createProject } from '../../lib/project.ts'
 import { findPluginFile, readUPluginFile, readUProjectFile, UPlugin } from '../../lib/project-info.ts'
 
-async function getEnabledPlugins(pluginName: string, projectPath: string, enginePath: string) {
-	const pluginArray: Array<UPlugin> = []
+async function getEnabledPlugins(pluginName: string, projectPath: string, enginePath: string, refArray: Array<string>) {
+	const pluginArray: Array<string> = []
 	const match = await findPluginFile(pluginName, projectPath, enginePath)
 	if (match && match != '') {
 		const pluginData = await readUPluginFile(match)
-		pluginArray.push(pluginData)
+
+		if (pluginData && pluginData.Plugins) {
+			for (const plugin of pluginData.Plugins) {
+				if (plugin.Enabled) {
+					if (![...refArray, ...pluginArray].includes(plugin.Name)) {
+						pluginArray.push(plugin.Name)
+					}
+				}
+			}
+
+			const subPlugins: Array<string> = []
+			for (const pluginName of pluginArray) {
+				if (![...refArray, ...subPlugins].includes(pluginName)) {
+					const subPluginArray = await getEnabledPlugins(pluginName, projectPath, enginePath, [
+						...pluginArray,
+						...refArray,
+						...subPlugins,
+					])
+					subPlugins.push(...subPluginArray)
+				}
+			}
+			pluginArray.push(...subPlugins)
+		}
 	} else {
 		console.log('could not find plugin')
 	}
@@ -33,12 +55,19 @@ export const list = new Command<GlobalOptions>()
 		const project = await createProject(enginePath, projectPath)
 		const projectData = await readUProjectFile(project.projectFileVars.projectFullPath)
 
-		if (projectData.Plugins) {
-			projectData.Plugins.forEach(async (plugin) => {
-				console.log(`${plugin.Name} - Enabled:${plugin.Enabled}`)
-				if (recursive) {
-					await getEnabledPlugins(plugin.Name, projectPath, enginePath)
+		const allEnabledPlugins: Array<string> = []
+
+		if (projectData && projectData.Plugins) {
+			for (const plugin of projectData.Plugins) {
+				if (plugin.Enabled) {
+					allEnabledPlugins.push(plugin.Name)
 				}
-			})
+				if (recursive) {
+					const enabledPlugins = await getEnabledPlugins(plugin.Name, projectPath, enginePath, allEnabledPlugins)
+					allEnabledPlugins.push(...enabledPlugins)
+				}
+			}
 		}
+		const uniquePlugins = [...new Set(allEnabledPlugins)]
+		console.log(uniquePlugins)
 	})

@@ -1,5 +1,6 @@
-import { findFilesByExtension } from './utils.ts'
 import * as path from '@std/path'
+
+import { findFilesByExtension } from './utils.ts'
 
 /**
  * Enum for target types
@@ -362,22 +363,25 @@ export interface UProject {
 	PostBuildSteps?: BuildSteps
 }
 
-export async function readUPluginFile(filePath: string): Promise<UPlugin> {
+export async function readUPluginFile(filePath: string): Promise<UPlugin | null> {
 	try {
 		// Read the file
 		const text = await Deno.readTextFile(filePath)
 
 		// Parse the JSON content
-		const upluginData: UPlugin = JSON.parse(text)
+		const upluginData: UPlugin = await JSON.parse(text)
 
 		return upluginData
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
-			throw new Error(`File not found: ${filePath}`)
+			console.warn(`File not found: ${filePath}`)
+			return null
 		} else if (error instanceof SyntaxError) {
-			throw new Error(`Invalid .uplugin file format: ${error.message}`)
+			console.warn(`${filePath} Invalid .uplugin file format: ${error.message}`)
+			return null
 		} else {
-			throw new Error(`Error reading .uplugin file`)
+			console.warn(`${filePath} Error reading .uplugin file`)
+			return null
 		}
 	}
 }
@@ -437,7 +441,7 @@ export function displayUPluginInfo(uplugin: UPlugin): void {
 	}
 }
 
-export async function readUProjectFile(filePath: string): Promise<UProject> {
+export async function readUProjectFile(filePath: string): Promise<UProject | null> {
 	try {
 		// Read the file
 		const text = await Deno.readTextFile(filePath)
@@ -448,11 +452,14 @@ export async function readUProjectFile(filePath: string): Promise<UProject> {
 		return uprojectData
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
-			throw new Error(`File not found: ${filePath}`)
+			console.warn(`File not found: ${filePath}`)
+			return null
 		} else if (error instanceof SyntaxError) {
-			throw new Error(`Invalid .uproject file format: ${error.message}`)
+			console.warn(`Invalid .uproject file format: ${error.message}`)
+			return null
 		} else {
-			throw new Error(`Error reading .uproject file`)
+			console.warn(`Error reading .uproject file`)
+			return null
 		}
 	}
 }
@@ -499,23 +506,23 @@ export async function findPluginFile(
 	enginePath?: string,
 ): Promise<string | null> {
 	const pluginFiles = await findFilesByExtension(path.join(projectPath, 'Plugins'), 'uplugin', true)
-	const regex = new RegExp(pluginName)
+	const regex = new RegExp(`${pluginName}\.uplugin`)
 	const matches = pluginFiles.filter((element) => regex.test(element))
 
-	console.log('looking for plugin')
 	if (matches.length <= 0 && enginePath) {
 		const enginePlugins = await findFilesByExtension(path.join(enginePath, 'Engine', 'Plugins'), 'uplugin', true)
 		const engineMatches = enginePlugins.filter((element) => regex.test(element))
 		matches.push(...engineMatches)
 	}
 
-	if (matches.length > 0) {
-		console.log('found matches')
-		console.log(matches.length)
-		console.log(matches)
+	if (matches.length == 1) {
 		return matches[0]
+	} else if (matches.length > 1) {
+		console.log(`found more than one plugin with name ${pluginName}`)
+		console.log(matches)
+		return null
 	} else {
-		console.log("didn't find")
+		console.log(`could not find ${pluginName}`)
 		return null
 	}
 }
