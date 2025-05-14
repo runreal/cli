@@ -1,7 +1,7 @@
 import { Command, EnumType } from '@cliffy/command'
-import { Config } from '../../lib/config.ts'
-import { createProject } from '../../lib/project.ts'
-import type { GlobalOptions } from '../../lib/types.ts'
+import { Config } from '../lib/config.ts'
+import { createProject } from '../lib/project.ts'
+import type { GlobalOptions } from '../lib/types.ts'
 import {
 	CookStyle,
 	CookTarget,
@@ -10,7 +10,7 @@ import {
 	EngineTarget,
 	GameTarget,
 	getPlatformCookTarget,
-} from '../../lib/engine.ts'
+} from '../lib/engine.ts'
 
 export type PkgOptions = typeof pkg extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never

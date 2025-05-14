@@ -13,7 +13,7 @@ import {
 	GameTarget,
 	TargetInfo,
 } from '../lib/engine.ts'
-import { copyBuildGraphScripts, exec, findProjectFile } from '../lib/utils.ts'
+import { copyBuildGraphScripts, exec, findProjectFile, parseCSForTargetType } from '../lib/utils.ts'
 
 const TargetError = (target: string, targets: string[]) => {
 	return new ValidationError(`Invalid Target: ${target}
@@ -92,6 +92,7 @@ export class Project {
 		clean = false,
 		nouht = false,
 		noxge = true,
+		projected = true,
 	}: {
 		target?: EngineTarget | GameTarget
 		configuration?: EngineConfiguration
@@ -101,9 +102,45 @@ export class Project {
 		clean?: boolean
 		nouht?: boolean
 		noxge?: boolean
+		projected?: boolean
+	}) {
+		const projectTarget = await this.getProjectTarget(target)
+
+		this.compileTarget({
+			target: projectTarget,
+			configuration: configuration,
+			platform: platform,
+			extraArgs: extraArgs,
+			dryRun: dryRun,
+			clean: clean,
+			nouht: nouht,
+			noxge: noxge,
+			projected: projected,
+		})
+	}
+
+	async compileTarget({
+		target,
+		configuration = EngineConfiguration.Development,
+		extraArgs = [],
+		dryRun = false,
+		platform = this.engine.getPlatformName(),
+		clean = false,
+		nouht = false,
+		noxge = true,
+		projected = false,
+	}: {
+		target: string
+		configuration?: EngineConfiguration
+		platform?: EnginePlatform
+		extraArgs?: string[]
+		dryRun?: boolean
+		clean?: boolean
+		nouht?: boolean
+		noxge?: boolean
+		projected?: boolean
 	}) {
 		const args = [
-			this.projectFileVars.projectArgument,
 			'-NoUBTMakefiles',
 			'-NoHotReload',
 			'-NoCodeSign',
@@ -113,6 +150,9 @@ export class Project {
 			...extraArgs,
 		]
 
+		if (projected) {
+			args.push(this.projectFileVars.projectArgument)
+		}
 		if (noxge) {
 			args.push('-NoXGE')
 		}
@@ -123,10 +163,10 @@ export class Project {
 			args.push('-NoBuildUHT')
 		}
 
-		const projectTarget = await this.getProjectTarget(target)
+		await this.checkTarget(target)
 
 		await this.engine.runUBT({
-			target: projectTarget,
+			target: target,
 			configuration: configuration,
 			platform: platform,
 			extraArgs: args,
@@ -135,12 +175,12 @@ export class Project {
 	}
 
 	async getProjectTarget(target: EngineTarget | GameTarget): Promise<string> {
-		let projectTarget = `${this.projectFileVars.projectName}`
-		if (target != EngineTarget.Game) {
-			projectTarget = projectTarget + `${target}`
+		const targetResult = await this.getTargetByType(target)
+		if (targetResult && targetResult.className) {
+			return targetResult.className
+		} else {
+			return `Unreal${target}`
 		}
-		await this.checkTarget(projectTarget)
-		return projectTarget
 	}
 
 	async package({
@@ -292,6 +332,48 @@ export class Project {
 		if (!validTargets.includes(target)) {
 			throw TargetError(target, validTargets)
 		}
+	}
+
+	async readTargets(targetDir: string): Promise<
+		Array<{
+			className: string | null
+			targetType: string | null
+		}>
+	> {
+		const targetArray: Array<{
+			className: string | null
+			targetType: string | null
+		}> = []
+
+		const files = await Deno.readDir(targetDir)
+		for await (const file of files) {
+			if (file.isFile && file.name.endsWith('.cs')) {
+				const result = await parseCSForTargetType(path.join(targetDir, file.name))
+				targetArray.push(result)
+			}
+		}
+
+		return targetArray
+	}
+
+	async getTargetByType(targetType: EngineTarget | GameTarget): Promise<
+		{
+			className: string | null
+			targetType: string | null
+		} | null
+	> {
+		let outTarget = null
+		const targetDir = path.join(this.projectFileVars.projectDir, 'Source')
+
+		const targets = await this.readTargets(targetDir)
+
+		targets.forEach((target) => {
+			if (target.targetType == targetType) {
+				outTarget = target
+			}
+		})
+
+		return outTarget
 	}
 
 	async genProjectFiles(args: string[]) {
