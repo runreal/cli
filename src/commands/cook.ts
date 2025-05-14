@@ -1,9 +1,9 @@
 import { Command, EnumType } from '@cliffy/command'
 
-import { createProject } from '../../lib/project.ts'
-import type { GlobalOptions } from '../../lib/types.ts'
-import { Config } from '../../lib/config.ts'
-import { CookTarget } from '../../lib/engine.ts'
+import { createProject } from '../lib/project.ts'
+import type { GlobalOptions } from '../lib/types.ts'
+import { Config } from '../lib/config.ts'
+import { CookTarget } from '../lib/engine.ts'
 
 export type CookOptions = typeof cook extends Command<void, void, infer Options, infer Argument, GlobalOptions>
 	? Options

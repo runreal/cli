@@ -5,16 +5,16 @@ import { createProject } from '../../lib/project.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
 import { Config } from '../../lib/config.ts'
 
-export type CompileOptions = typeof build extends Command<void, void, infer Options, infer Argument, GlobalOptions>
+export type CompileOptions = typeof client extends Command<void, void, infer Options, infer Argument, GlobalOptions>
 	? Options
 	: never
 
-export const build = new Command<GlobalOptions>()
-	.description('Builds a target. Can be Editor, Client, Server, or Game')
-	.type('Target', new EnumType(EngineTarget))
+export const client = new Command<GlobalOptions>()
+	.description('Builds the client runtime')
 	.type('Configuration', new EnumType(EngineConfiguration))
 	.type('Platform', new EnumType(EnginePlatform))
-	.arguments('<target:Target> [ubtArgs...]')
+	.arguments('[ubtArgs...]')
+	.option('--projected', 'Add the -project argument. Defaults to true', { default: true })
 	.option('-p, --platform <platform:Platform>', 'Platform to build, defaults to host platform', {
 		default: Engine.getCurrentPlatform(),
 	})
@@ -26,8 +26,8 @@ export const build = new Command<GlobalOptions>()
 	.option('--noxge', 'Disables Incredibuild', { default: true })
 	.option('--dry-run', 'Dry run', { default: false })
 	.stopEarly()
-	.action(async (options, target = EngineTarget.Editor, ...ubtArgs: Array<string>) => {
-		const { platform, configuration, dryRun, clean, nouht, noxge } = options as CompileOptions
+	.action(async (options, ...ubtArgs: Array<string>) => {
+		const { platform, configuration, dryRun, clean, nouht, noxge, projected } = options as CompileOptions
 
 		const config = Config.getInstance()
 		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
@@ -35,18 +35,19 @@ export const build = new Command<GlobalOptions>()
 		})
 		const project = await createProject(enginePath, projectPath)
 
-		if (options.clean) {
-			const result = await project.compile({
-				target: target as EngineTarget,
+		if (clean) {
+			await project.compile({
+				target: EngineTarget.Client,
 				configuration: configuration as EngineConfiguration,
 				platform: platform as EnginePlatform,
 				dryRun: dryRun,
 				clean: true,
+				projected: projected,
 			})
 		}
 
 		await project.compile({
-			target: target as EngineTarget,
+			target: EngineTarget.Client,
 			configuration: configuration as EngineConfiguration,
 			platform: platform as EnginePlatform,
 			dryRun: dryRun,
@@ -54,5 +55,6 @@ export const build = new Command<GlobalOptions>()
 			clean: false,
 			nouht: nouht,
 			noxge: noxge,
+			projected: projected,
 		})
 	})

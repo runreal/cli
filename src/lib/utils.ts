@@ -435,3 +435,38 @@ export async function findFilesByExtension(
 
 	return files
 }
+
+export async function parseCSForTargetType(filePath: string): Promise<{
+	targetName: string | null
+	targetType: string | null
+}> {
+	// Read the file
+	const fileContent = await Deno.readTextFile(filePath)
+
+	// Results object
+	const result = {
+		targetName: null as string | null,
+		targetType: null as string | null,
+	}
+
+	// Find the class name using regex
+	const classRegex = /class\s+(\S+)Target[\s:]/g
+	let classMatch
+
+	while ((classMatch = classRegex.exec(fileContent)) !== null) {
+		result.targetName = classMatch[1]
+		break // Get only the first class name
+	}
+
+	// Find variables named TargetType
+	// This pattern looks for field declarations that have 'TargetType' as variable name
+	const targetTypeRegex = /\s*TargetType\.(.+)\s*;/g
+	let targetTypeMatch
+
+	while ((targetTypeMatch = targetTypeRegex.exec(fileContent)) !== null) {
+		result.targetType = targetTypeMatch[1]
+		break
+	}
+
+	return result
+}

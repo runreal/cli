@@ -9,9 +9,11 @@ import { run } from './commands/run/index.ts'
 import { plugin } from './commands/plugin/index.ts'
 import { engine } from './commands/engine/index.ts'
 import { info } from './commands/info/index.ts'
-import { project } from './commands/project/index.ts'
+import { build } from './commands/build/index.ts'
 import { sln } from './commands/sln/index.ts'
 import { init } from './commands/init.ts'
+import { cook } from './commands/cook.ts'
+import { pkg } from './commands/pkg.ts'
 import { uat } from './commands/uat.ts'
 import { ubt } from './commands/ubt.ts'
 import { workflow } from './commands/workflow/index.ts'
@@ -56,8 +58,10 @@ export const cli = cmd
 	.command('buildgraph', buildgraph)
 	.command('run', run)
 	.command('engine', engine)
-	.command('project', project)
 	.command('plugin', plugin)
+	.command('build', build)
+	.command('cook', cook)
+	.command('pkg', pkg)
 	.command('sln', sln)
 	.command('uasset', uasset)
 	.command('workflow', workflow)
