@@ -176,8 +176,8 @@ export class Project {
 
 	async getProjectTarget(target: EngineTarget | GameTarget): Promise<string> {
 		const targetResult = await this.getTargetByType(target)
-		if (targetResult && targetResult.className) {
-			return targetResult.className
+		if (targetResult && targetResult.targetName) {
+			return targetResult.targetName
 		} else {
 			return `Unreal${target}`
 		}
@@ -336,12 +336,12 @@ export class Project {
 
 	async readTargets(targetDir: string): Promise<
 		Array<{
-			className: string | null
+			targetName: string | null
 			targetType: string | null
 		}>
 	> {
 		const targetArray: Array<{
-			className: string | null
+			targetName: string | null
 			targetType: string | null
 		}> = []
 
@@ -358,7 +358,7 @@ export class Project {
 
 	async getTargetByType(targetType: EngineTarget | GameTarget): Promise<
 		{
-			className: string | null
+			targetName: string | null
 			targetType: string | null
 		} | null
 	> {

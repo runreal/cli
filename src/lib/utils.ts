@@ -437,7 +437,7 @@ export async function findFilesByExtension(
 }
 
 export async function parseCSForTargetType(filePath: string): Promise<{
-	className: string | null
+	targetName: string | null
 	targetType: string | null
 }> {
 	// Read the file
@@ -445,7 +445,7 @@ export async function parseCSForTargetType(filePath: string): Promise<{
 
 	// Results object
 	const result = {
-		className: null as string | null,
+		targetName: null as string | null,
 		targetType: null as string | null,
 	}
 
@@ -454,7 +454,7 @@ export async function parseCSForTargetType(filePath: string): Promise<{
 	let classMatch
 
 	while ((classMatch = classRegex.exec(fileContent)) !== null) {
-		result.className = classMatch[1]
+		result.targetName = classMatch[1]
 		break // Get only the first class name
 	}
 
@@ -465,6 +465,7 @@ export async function parseCSForTargetType(filePath: string): Promise<{
 
 	while ((targetTypeMatch = targetTypeRegex.exec(fileContent)) !== null) {
 		result.targetType = targetTypeMatch[1]
+		break
 	}
 
 	return result
