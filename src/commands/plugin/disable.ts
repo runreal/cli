@@ -1,10 +1,24 @@
 import { Command } from '@cliffy/command'
 import { Config } from '../../lib/config.ts'
 import type { GlobalOptions } from '../../lib/types.ts'
+import { createProject } from '../../lib/project.ts'
+import { readUProjectFile, UnrealEnginePluginReference, UProject, writeUProjectFile } from '../../lib/project-info.ts'
+
+export type DisableOptions = typeof disable extends Command<void, void, infer Options, infer Argument, GlobalOptions>
+	? Options
+	: never
 
 export const disable = new Command<GlobalOptions>()
-	.description('Disable a plugin for the project')
-	.action((options) => {
+	.description('Disables a plugin for the project')
+	.arguments('<target:string>')
+	.action(async (options, target) => {
 		const config = Config.getInstance()
-		const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
+		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
+			cliOptions: options,
+		})
+		const project = await createProject(enginePath, projectPath)
+		project.enablePlugin({
+			pluginName: target,
+			shouldEnable: false,
+		})
 	})

@@ -140,7 +140,7 @@ interface LocalizationTarget {
  * Description for a Unreal Engine plugin reference
  * Contains the information required to enable or disable a plugin for a given platform
  */
-interface UnrealEnginePluginReference {
+export interface UnrealEnginePluginReference {
 	/** Name of the plugin */
 	Name: string
 
@@ -374,13 +374,13 @@ export async function readUPluginFile(filePath: string): Promise<UPlugin | null>
 		return upluginData
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
-			console.warn(`File not found: ${filePath}`)
+			//console.warn(`File not found: ${filePath}`)
 			return null
 		} else if (error instanceof SyntaxError) {
-			console.warn(`${filePath} Invalid .uplugin file format: ${error.message}`)
+			//console.warn(`${filePath} Invalid .uplugin file format: ${error.message}`)
 			return null
 		} else {
-			console.warn(`${filePath} Error reading .uplugin file`)
+			//console.warn(`${filePath} Error reading .uplugin file`)
 			return null
 		}
 	}
@@ -452,16 +452,20 @@ export async function readUProjectFile(filePath: string): Promise<UProject | nul
 		return uprojectData
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
-			console.warn(`File not found: ${filePath}`)
+			//console.warn(`File not found: ${filePath}`)
 			return null
 		} else if (error instanceof SyntaxError) {
-			console.warn(`Invalid .uproject file format: ${error.message}`)
+			//console.warn(`Invalid .uproject file format: ${error.message}`)
 			return null
 		} else {
-			console.warn(`Error reading .uproject file`)
+			//console.warn(`Error reading .uproject file`)
 			return null
 		}
 	}
+}
+
+export async function writeUProjectFile(filePath: string, projectData: UProject) {
+	await Deno.writeTextFile(filePath, JSON.stringify(projectData))
 }
 
 export function displayUProjectInfo(uproject: UProject): void {
