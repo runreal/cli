@@ -2,7 +2,7 @@
 
 ![hero](assets/hero.png)
 
-<p align="center">The Open-Source Unreal Engine toolkit.
+<p align="center">The open-source Unreal Engine toolkit.
   <br />
   <a href="https://docs.runreal.dev/cli"><strong>Documentation »</strong></a>
   <br />
