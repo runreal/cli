@@ -4,15 +4,16 @@ import { ValidationError } from '@cliffy/command'
 import { logger } from '../lib/logger.ts'
 
 import {
+	CookTarget,
 	createEngine,
 	Engine,
 	EngineConfiguration,
 	EnginePlatform,
 	EngineTarget,
-	getPlatformCookTarget,
+	GameTarget,
 	TargetInfo,
 } from '../lib/engine.ts'
-import { copyBuildGraphScripts, exec, findProjectFile } from '../lib/utils.ts'
+import { copyBuildGraphScripts, exec, findProjectFile, parseCSForTargetType } from '../lib/utils.ts'
 
 const TargetError = (target: string, targets: string[]) => {
 	return new ValidationError(`Invalid Target: ${target}
@@ -21,13 +22,10 @@ Valid Targets: ${targets.join(', ')}
 }
 
 const defaultBCRArgs = [
-	'-build',
-	'-cook',
 	'-stage',
 	'-package',
 	'-prereqs',
 	'-manifests',
-	'-pak',
 	'-compressed',
 	'-nop4',
 	'-utf8output',
@@ -91,33 +89,98 @@ export class Project {
 		extraArgs = [],
 		dryRun = false,
 		platform = this.engine.getPlatformName(),
+		clean = false,
+		nouht = false,
+		noxge = true,
+		projected = true,
 	}: {
-		target?: EngineTarget
+		target?: EngineTarget | GameTarget
 		configuration?: EngineConfiguration
 		platform?: EnginePlatform
 		extraArgs?: string[]
 		dryRun?: boolean
+		clean?: boolean
+		nouht?: boolean
+		noxge?: boolean
+		projected?: boolean
+	}) {
+		const projectTarget = await this.getProjectTarget(target)
+
+		this.compileTarget({
+			target: projectTarget,
+			configuration: configuration,
+			platform: platform,
+			extraArgs: extraArgs,
+			dryRun: dryRun,
+			clean: clean,
+			nouht: nouht,
+			noxge: noxge,
+			projected: projected,
+		})
+	}
+
+	async compileTarget({
+		target,
+		configuration = EngineConfiguration.Development,
+		extraArgs = [],
+		dryRun = false,
+		platform = this.engine.getPlatformName(),
+		clean = false,
+		nouht = false,
+		noxge = true,
+		projected = false,
+	}: {
+		target: string
+		configuration?: EngineConfiguration
+		platform?: EnginePlatform
+		extraArgs?: string[]
+		dryRun?: boolean
+		clean?: boolean
+		nouht?: boolean
+		noxge?: boolean
+		projected?: boolean
 	}) {
 		const args = [
-			this.projectFileVars.projectArgument,
 			'-NoUBTMakefiles',
-			'-NoXGE',
 			'-NoHotReload',
 			'-NoCodeSign',
 			'-NoP4',
 			'-TraceWrites',
-		].concat(extraArgs)
+			'-Progress',
+			...extraArgs,
+		]
 
-		const projectTarget = `${this.projectFileVars.projectName}${target}`
+		if (projected) {
+			args.push(this.projectFileVars.projectArgument)
+		}
+		if (noxge) {
+			args.push('-NoXGE')
+		}
+		if (clean) {
+			args.push('-Clean')
+		}
+		if (nouht) {
+			args.push('-NoBuildUHT')
+		}
 
-		await this.checkTarget(projectTarget)
+		await this.checkTarget(target)
+
 		await this.engine.runUBT({
-			target: projectTarget,
+			target: target,
 			configuration: configuration,
 			platform: platform,
 			extraArgs: args,
 			dryRun: dryRun,
 		})
+	}
+
+	async getProjectTarget(target: EngineTarget | GameTarget): Promise<string> {
+		const targetResult = await this.getTargetByType(target)
+		if (targetResult && targetResult.targetName) {
+			return targetResult.targetName
+		} else {
+			return `Unreal${target}`
+		}
 	}
 
 	async package({
@@ -138,7 +201,7 @@ export class Project {
 		dryRun?: boolean
 	}) {
 		const profileArgs = profiles[profile as keyof typeof profiles] || []
-		const bcrArgs = Array.from(new Set([...profileArgs, ...extraArgs]))
+		const bcrArgs = Array.from(new Set([...profileArgs, ...extraArgs, ...defaultBCRArgs]))
 
 		bcrArgs.push(this.projectFileVars.projectArgument)
 		bcrArgs.push(`-platform=${platform}`)
@@ -183,59 +246,72 @@ export class Project {
 		}
 	}
 
-	async compileAndRunEditor({
-		extraCompileArgs = [],
-		extraRunArgs = [],
-	}: {
-		extraCompileArgs?: string[]
-		extraRunArgs?: string[]
-	}) {
-		await this.compile({ extraArgs: extraCompileArgs })
-		await this.runEditor({ extraArgs: extraRunArgs })
-	}
-
 	async runEditor({
-		extraArgs = [],
+		useCmd = false,
+		dryRun = false,
+		debug = false,
+		extraArgs,
 	}: {
-		extraArgs?: string[]
+		useCmd?: boolean
+		dryRun?: boolean
+		debug?: boolean
+		extraArgs: Array<string>
 	}) {
-		const args = [
-			this.projectFileVars.projectFullPath,
-		].concat(extraArgs)
-
-		console.log(`Running editor with: ${this.engine.getEditorBin} ${args.join(' ')}`)
-
-		try {
-			const result = await exec(this.engine.getEditorBin(), args)
-			return result
-		} catch (error: unknown) {
-			console.log(`Error running Editor: ${error instanceof Error ? error.message : String(error)}`)
-			Deno.exit(1)
-		}
+		await this.engine.runEditor({
+			useCmd: useCmd,
+			dryRun: dryRun,
+			debug: debug,
+			args: [this.projectFileVars.projectFullPath, ...extraArgs],
+		})
 	}
 
 	async cookContent({
+		target,
+		cultures,
+		onTheFly = false,
+		iterate = true,
+		noxge = true,
+		debug = false,
+		dryRun = false,
 		extraArgs = [],
 	}: {
+		target: CookTarget
 		extraArgs?: string[]
+		cultures?: Array<string>
+		onTheFly?: boolean
+		iterate?: boolean
+		noxge?: boolean
+		dryRun?: boolean
+		debug?: boolean
 	}) {
-		const platformTarget = getPlatformCookTarget(this.engine.getPlatformName())
 		const args = [
 			this.projectFileVars.projectFullPath,
 			'-run=Cook',
-			`-targetplatform=${platformTarget}`,
+			`-targetplatform=${target}`,
 			'-fileopenlog',
-		].concat(extraArgs)
+			'-unversioned',
+			'-stdout',
+			...extraArgs,
+		]
 
-		console.log(`Running editor with: ${this.engine.getEditorCmdBin} ${args.join(' ')}`)
-
-		try {
-			const result = await exec(this.engine.getEditorCmdBin(), args)
-			return result
-		} catch (error: unknown) {
-			console.log(`Error running Editor: ${error instanceof Error ? error.message : String(error)}`)
-			Deno.exit(1)
+		if (cultures && cultures.length > 0) {
+			const cultureArg: string = cultures.join('+')
+			args.push(`-cookcultures=${cultureArg}`)
 		}
+
+		if (onTheFly) {
+			args.push('-cookonthefly')
+		}
+
+		if (iterate) {
+			args.push('-iterate')
+		}
+
+		if (noxge) {
+			args.push('noxge')
+		}
+
+		await this.engine.runEditor({ useCmd: true, dryRun: dryRun, debug: debug, args: args })
 	}
 
 	async parseProjectTargets(): Promise<string[]> {
@@ -256,6 +332,48 @@ export class Project {
 		if (!validTargets.includes(target)) {
 			throw TargetError(target, validTargets)
 		}
+	}
+
+	async readTargets(targetDir: string): Promise<
+		Array<{
+			targetName: string | null
+			targetType: string | null
+		}>
+	> {
+		const targetArray: Array<{
+			targetName: string | null
+			targetType: string | null
+		}> = []
+
+		const files = await Deno.readDir(targetDir)
+		for await (const file of files) {
+			if (file.isFile && file.name.endsWith('.cs')) {
+				const result = await parseCSForTargetType(path.join(targetDir, file.name))
+				targetArray.push(result)
+			}
+		}
+
+		return targetArray
+	}
+
+	async getTargetByType(targetType: EngineTarget | GameTarget): Promise<
+		{
+			targetName: string | null
+			targetType: string | null
+		} | null
+	> {
+		let outTarget = null
+		const targetDir = path.join(this.projectFileVars.projectDir, 'Source')
+
+		const targets = await this.readTargets(targetDir)
+
+		targets.forEach((target) => {
+			if (target.targetType == targetType) {
+				outTarget = target
+			}
+		})
+
+		return outTarget
 	}
 
 	async genProjectFiles(args: string[]) {
@@ -282,16 +400,6 @@ export class Project {
 				}
 			}
 		}
-	}
-
-	async runPython(scriptPath: string, extraArgs: Array<string>) {
-		const args = [
-			'-run=pythonscript',
-			`-script=${scriptPath}`,
-			...extraArgs,
-		]
-		logger.info(`Running Python script: ${scriptPath}`)
-		await this.runEditor({ extraArgs: args })
 	}
 
 	async runBuildGraph(buildGraphScript: string, args: string[] = []) {

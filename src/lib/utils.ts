@@ -410,3 +410,63 @@ ${blueprint}
 `
 	return html
 }
+
+export async function findFilesByExtension(
+	rootDir: string,
+	extension: string,
+	recursive: boolean,
+): Promise<string[]> {
+	const files: string[] = []
+
+	try {
+		for await (const entry of Deno.readDir(rootDir)) {
+			const checkPath = `${rootDir}/${entry.name}`
+
+			if (entry.isDirectory && recursive) {
+				const subFiles = await findFilesByExtension(checkPath, extension, recursive)
+				files.push(...subFiles)
+			} else if (entry.isFile && checkPath.endsWith(extension)) {
+				files.push(checkPath)
+			}
+		}
+	} catch (error) {
+		console.error(`Error reading directory ${rootDir}:`, error)
+	}
+
+	return files
+}
+
+export async function parseCSForTargetType(filePath: string): Promise<{
+	targetName: string | null
+	targetType: string | null
+}> {
+	// Read the file
+	const fileContent = await Deno.readTextFile(filePath)
+
+	// Results object
+	const result = {
+		targetName: null as string | null,
+		targetType: null as string | null,
+	}
+
+	// Find the class name using regex
+	const classRegex = /class\s+(\S+)Target[\s:]/g
+	let classMatch
+
+	while ((classMatch = classRegex.exec(fileContent)) !== null) {
+		result.targetName = classMatch[1]
+		break // Get only the first class name
+	}
+
+	// Find variables named TargetType
+	// This pattern looks for field declarations that have 'TargetType' as variable name
+	const targetTypeRegex = /\s*TargetType\.(.+)\s*;/g
+	let targetTypeMatch
+
+	while ((targetTypeMatch = targetTypeRegex.exec(fileContent)) !== null) {
+		result.targetType = targetTypeMatch[1]
+		break
+	}
+
+	return result
+}
