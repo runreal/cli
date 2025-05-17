@@ -50,7 +50,7 @@ steps:
         label: ":cityscape: acme build"
         build:
           message: ":test_tube: test runreal/cli ${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-          branch: cc-refactor
+          branch: ${RUNREAL_ACME_BRANCH:-main}
           env:
             RUNREAL_FROM_SOURCE: true
             RUNREAL_FROM_REF: $BUILDKITE_COMMIT
