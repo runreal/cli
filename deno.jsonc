@@ -1,7 +1,7 @@
 {
 	"$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
 	"name": "@runreal/cli",
-	"version": "1.6.0",
+	"version": "1.8.0",
 	"description": "The open source Unreal Engine toolkit",
 	"license": "MIT",
 	"tasks": {
