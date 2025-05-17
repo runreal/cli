@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/runreal/cli/compare/v1.7.0...v1.8.0) (2025-05-17)
+
+
+### Features
+
+* new commands for local dev ([#80](https://github.com/runreal/cli/issues/80)) ([a448cfa](https://github.com/runreal/cli/commit/a448cfa6ad1e999cbad514a839fe52f5915bb80e))
+
 ## [1.7.0](https://github.com/runreal/cli/compare/v1.6.0...v1.7.0) (2025-05-09)
 
 
