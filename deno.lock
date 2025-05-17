@@ -12,6 +12,7 @@
     "jsr:@david/which@~0.4.1": "0.4.1",
     "jsr:@luca/esbuild-deno-loader@0.11.1": "0.11.1",
     "jsr:@rebeccastevens/deepmerge@7.1.5": "7.1.5",
+    "jsr:@runreal/sdk-ts@^0.0.4": "0.0.4",
     "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/assert@1.0.12": "1.0.12",
     "jsr:@std/assert@^1.0.12": "1.0.12",
@@ -51,7 +52,8 @@
     "npm:nanoid@5.1": "5.1.5",
     "npm:ueblueprint@2.0.0": "2.0.0",
     "npm:zod-to-json-schema@3.24.5": "3.24.5_zod@3.24.2",
-    "npm:zod@3.24.2": "3.24.2"
+    "npm:zod@3.24.2": "3.24.2",
+    "npm:zod@^3.23.4": "3.24.2"
   },
   "jsr": {
     "@cliffy/ansi@1.0.0-rc.7": {
@@ -132,6 +134,12 @@
     },
     "@rebeccastevens/deepmerge@7.1.5": {
       "integrity": "edefc338e7ee643606002c0c532e3c652e86348ab577b9188b4c974afee7b421"
+    },
+    "@runreal/sdk-ts@0.0.4": {
+      "integrity": "01afddf4af4070a1f01ae9d0c50cedbcf30fffbb5d76b69fb1fd67ae16ac030d",
+      "dependencies": [
+        "npm:zod@^3.23.4"
+      ]
     },
     "@std/assert@0.221.0": {
       "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
@@ -460,6 +468,7 @@
       "jsr:@david/dax@0.42.0",
       "jsr:@luca/esbuild-deno-loader@0.11.1",
       "jsr:@rebeccastevens/deepmerge@7.1.5",
+      "jsr:@runreal/sdk-ts@^0.0.4",
       "jsr:@std/assert@1.0.12",
       "jsr:@std/dotenv@0.225.3",
       "jsr:@std/fmt@1.0.6",
