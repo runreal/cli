@@ -57,9 +57,7 @@ export const pkg = new Command()
 				break
 		}
 
-		console.log(`${buildargs}`)
 		if (buildargs) {
-			console.log(`Recieved build arguments - ${buildargs}`)
 			project.compile({
 				target: target as GameTarget,
 				configuration: configuration as EngineConfiguration,
@@ -72,7 +70,6 @@ export const pkg = new Command()
 			args.push('-build')
 		}
 		if (cookargs) {
-			console.log(`Recieved cook arguments - ${cookargs}`)
 			const cookTarget = getPlatformCookTarget(platform, target)
 			project.cookContent({
 				target: cookTarget as CookTarget,
