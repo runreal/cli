@@ -35,7 +35,7 @@ async function getEnabledPlugins(pluginName: string, projectPath: string, engine
 			pluginArray.push(...subPlugins)
 		}
 	} else {
-		console.log('could not find plugin')
+		console.log(`Unable to find the plugin ${pluginName}`)
 	}
 	return pluginArray
 }
@@ -105,6 +105,7 @@ export const list = new Command<GlobalOptions>()
 					}
 				}
 				const uniquePlugins = [...new Set(allEnabledPlugins)]
+				console.log('All Referenced Plugins:')
 				console.log(uniquePlugins)
 				break
 			}
@@ -133,13 +134,12 @@ export const list = new Command<GlobalOptions>()
 						console.log(path.basename(plugin, '.uplugin'))
 					}
 				}
-				console.log('Engine Plugins:\n')
+				console.log('Engine Plugins enabled by default:\n')
 				const enginePlugins = await findFilesByExtension(path.join(enginePath, 'Engine', 'Plugins'), 'uplugin', true)
 				for (const plugin of enginePlugins) {
 					const uplugin = await readUPluginFile(plugin)
 					if (uplugin && uplugin.EnabledByDefault) {
 						console.log(path.basename(plugin, '.uplugin'))
-						console.log(uplugin.EnabledByDefault)
 					}
 				}
 				break

@@ -20,9 +20,9 @@ export const plugin = new Command<GlobalOptions>()
 			if (pluginData) {
 				displayUPluginInfo(pluginData)
 			} else {
-				console.log('plugin could not be loaded')
+				console.log(`The plugin ${pluginName} could not be loaded`)
 			}
 		} else {
-			console.log('could not find plugin')
+			console.log(`Unable to find the plugin ${pluginName}`)
 		}
 	})

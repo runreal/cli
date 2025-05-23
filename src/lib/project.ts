@@ -98,10 +98,8 @@ export class Project {
 		if (projectData && projectData.Plugins) {
 			for (const plugin of projectData.Plugins) {
 				if (plugin.Name === pluginName) {
-					console.log('found plugin')
 					foundPlugin = true
 					if (plugin.Enabled == shouldEnable) {
-						console.log(`plugin was already ${shouldEnable}d. Exiting.`)
 						Deno.exit()
 					}
 					plugin.Enabled = shouldEnable
@@ -109,7 +107,7 @@ export class Project {
 				}
 			}
 			if (!foundPlugin) {
-				console.log(`could not find ${pluginName} in project plugin list, adding new entry`)
+				console.log(`Could not find ${pluginName} in project plugin list, adding new entry`)
 				const newPlugin: UnrealEnginePluginReference = {
 					Name: pluginName,
 					Enabled: shouldEnable,
@@ -118,7 +116,7 @@ export class Project {
 			}
 			writeUProjectFile(this.projectFileVars.projectFullPath, projectData as UProject)
 		} else {
-			console.log('failed to parse project file')
+			console.log('Failed to parse project file')
 		}
 	}
 

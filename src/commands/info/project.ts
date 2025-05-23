@@ -18,6 +18,6 @@ export const project = new Command<GlobalOptions>()
 		if (projectData) {
 			displayUProjectInfo(projectData)
 		} else {
-			console.log('project could not be loaded')
+			console.log('The project file could not be loaded')
 		}
 	})
