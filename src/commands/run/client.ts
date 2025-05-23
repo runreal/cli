@@ -28,7 +28,7 @@ export const client = new Command<GlobalOptions>()
 			await project.compile({
 				target: EngineTarget.Client,
 				configuration: configuration as EngineConfiguration,
-				dryRun: options.dryRun,
+				dryRun: dryRun,
 			})
 		}
 

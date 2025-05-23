@@ -24,13 +24,16 @@ export const editor = new Command<GlobalOptions>()
 
 		const project = await createProject(enginePath, projectPath)
 
+		console.log(compile)
 		if (compile) {
+			console.log('compiling')
 			await project.compile({
 				target: EngineTarget.Editor,
 				configuration: configuration as EngineConfiguration,
-				dryRun: options.dryRun,
+				dryRun: dryRun,
 			})
 		}
 
+		console.log('running')
 		await project.runEditor({ extraArgs: [...runArguments] })
 	})

@@ -14,6 +14,7 @@ import {
 	TargetInfo,
 } from '../lib/engine.ts'
 import { copyBuildGraphScripts, exec, findProjectFile, parseCSForTargetType } from '../lib/utils.ts'
+import { readUProjectFile, UnrealEnginePluginReference, UProject, writeUProjectFile } from './project-info.ts'
 
 const TargetError = (target: string, targets: string[]) => {
 	return new ValidationError(`Invalid Target: ${target}
@@ -83,6 +84,44 @@ export class Project {
 		this.projectFileVars = projectFileVars
 	}
 
+	async enablePlugin({
+		pluginName,
+		shouldEnable = true,
+	}: {
+		pluginName: string
+		shouldEnable?: boolean
+	}) {
+		const projectData = await readUProjectFile(this.projectFileVars.projectFullPath)
+
+		let foundPlugin = false
+
+		if (projectData && projectData.Plugins) {
+			for (const plugin of projectData.Plugins) {
+				if (plugin.Name === pluginName) {
+					console.log('found plugin')
+					foundPlugin = true
+					if (plugin.Enabled == shouldEnable) {
+						console.log(`plugin was already ${shouldEnable}d. Exiting.`)
+						Deno.exit()
+					}
+					plugin.Enabled = shouldEnable
+					break
+				}
+			}
+			if (!foundPlugin) {
+				console.log(`could not find ${pluginName} in project plugin list, adding new entry`)
+				const newPlugin: UnrealEnginePluginReference = {
+					Name: pluginName,
+					Enabled: shouldEnable,
+				}
+				projectData.Plugins.push(newPlugin)
+			}
+			writeUProjectFile(this.projectFileVars.projectFullPath, projectData as UProject)
+		} else {
+			console.log('failed to parse project file')
+		}
+	}
+
 	async compile({
 		target = EngineTarget.Editor,
 		configuration = EngineConfiguration.Development,
@@ -106,11 +145,14 @@ export class Project {
 	}) {
 		const projectTarget = await this.getProjectTarget(target)
 
-		this.compileTarget({
+		const targetFullString =
+			`\-Target="${projectTarget} ${platform} ${configuration} ${this.projectFileVars.projectArgument}\"`
+
+		await this.compileTarget({
 			target: projectTarget,
 			configuration: configuration,
 			platform: platform,
-			extraArgs: extraArgs,
+			extraArgs: [targetFullString, ...extraArgs],
 			dryRun: dryRun,
 			clean: clean,
 			nouht: nouht,
