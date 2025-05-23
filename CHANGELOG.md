@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0](https://github.com/runreal/cli/compare/v1.7.0...v1.8.0) (2025-05-23)
+
+
+### Features
+
+* conditional steps in workflow configs ([#82](https://github.com/runreal/cli/issues/82)) ([9054bc8](https://github.com/runreal/cli/commit/9054bc8d5ffbe237f024096adfd5d3302e0d4e48))
+* new commands for local dev ([#80](https://github.com/runreal/cli/issues/80)) ([a448cfa](https://github.com/runreal/cli/commit/a448cfa6ad1e999cbad514a839fe52f5915bb80e))
+* plugin utils ([6c689df](https://github.com/runreal/cli/commit/6c689dfcfe69f3215cc9a759fa6d8bfd135d3005))
+
 ## [1.7.0](https://github.com/runreal/cli/compare/v1.6.0...v1.7.0) (2025-05-09)
 
 
