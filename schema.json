@@ -102,6 +102,10 @@
                     "type": "string"
                   },
                   "description": "Command arguments"
+                },
+                "condition": {
+                  "type": "string",
+                  "description": "Condition to execute the step"
                 }
               },
               "required": [
