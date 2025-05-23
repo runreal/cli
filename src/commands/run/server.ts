@@ -28,7 +28,7 @@ export const server = new Command<GlobalOptions>()
 			await project.compile({
 				target: EngineTarget.Server,
 				configuration: configuration as EngineConfiguration,
-				dryRun: options.dryRun,
+				dryRun: dryRun,
 			})
 		}
 

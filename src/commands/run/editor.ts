@@ -28,7 +28,7 @@ export const editor = new Command<GlobalOptions>()
 			await project.compile({
 				target: EngineTarget.Editor,
 				configuration: configuration as EngineConfiguration,
-				dryRun: options.dryRun,
+				dryRun: dryRun,
 			})
 		}
 

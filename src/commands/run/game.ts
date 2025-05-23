@@ -28,7 +28,7 @@ export const game = new Command<GlobalOptions>()
 			await project.compile({
 				target: EngineTarget.Game,
 				configuration: configuration as EngineConfiguration,
-				dryRun: options.dryRun,
+				dryRun: dryRun,
 			})
 		}
 
