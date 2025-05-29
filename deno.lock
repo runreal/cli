@@ -54,7 +54,6 @@
     "npm:esbuild@0.25.2": "0.25.2",
     "npm:nanoid@5.1": "5.1.5",
     "npm:ueblueprint@2.0.0": "2.0.0",
-    "npm:zod-to-json-schema@3.24.5": "3.24.5_zod@4.0.0-beta.20250505T195954",
     "npm:zod@next": "4.0.0-beta.20250505T195954"
   },
   "jsr": {
@@ -475,12 +474,6 @@
     "undici-types@6.20.0": {
       "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
     },
-    "zod-to-json-schema@3.24.5_zod@4.0.0-beta.20250505T195954": {
-      "integrity": "sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==",
-      "dependencies": [
-        "zod"
-      ]
-    },
     "zod@4.0.0-beta.20250505T195954": {
       "integrity": "sha512-iB8WvxkobVIXMARvQu20fKvbS7mUTiYRpcD8OQV1xjRhxO0EEpYIRJBk6yfBzHAHEdOSDh3SxDITr5Eajr2vtg==",
       "dependencies": [
@@ -510,7 +503,6 @@
       "npm:esbuild@0.25.2",
       "npm:nanoid@5.1",
       "npm:ueblueprint@2.0.0",
-      "npm:zod-to-json-schema@3.24.5",
       "npm:zod@next"
     ]
   }

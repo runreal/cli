@@ -67,7 +67,6 @@
 		"esbuild": "npm:esbuild@0.25.2",
 		"ueblueprint": "npm:ueblueprint@2.0.0",
 		"zod": "npm:zod@next",
-		"zod-to-json-schema": "npm:zod-to-json-schema@3.24.5",
 		"nanoid": "npm:nanoid@5.1"
 	},
 	"exports": {
