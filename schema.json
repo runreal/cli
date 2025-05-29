@@ -97,8 +97,8 @@
                   }
                 },
                 "condition": {
-                  "type": "string",
-                  "description": "Condition to execute the step"
+                  "description": "Condition to execute the workflow",
+                  "type": "string"
                 }
               },
               "required": [
