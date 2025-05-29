@@ -9,12 +9,9 @@ export const plugin = new Command<GlobalOptions>()
 	.description('Displays information about a plugin')
 	.arguments('<pluginName>')
 	.action(async (options, pluginName: string) => {
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
+		const cfg = Config.instance().process(options)
 
-		const match = await findPluginFile(pluginName, projectPath, enginePath)
+		const match = await findPluginFile(pluginName, cfg.project.path, cfg.engine.path)
 		if (match) {
 			const pluginData = await readUPluginFile(match)
 			if (pluginData) {

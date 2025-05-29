@@ -9,7 +9,6 @@ export type DebugBuildIdOptions = typeof buildId extends
 export const buildId = new Command<GlobalOptions>()
 	.description('debug buildId')
 	.action((options) => {
-		const config = Config.getInstance()
-		const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
+		const cfg = Config.instance().process(options)
 		console.log(cfg.build.id)
 	})

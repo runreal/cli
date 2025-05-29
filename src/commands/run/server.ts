@@ -17,12 +17,8 @@ export const server = new Command<GlobalOptions>()
 	.stopEarly()
 	.action(async (options, configuration = EngineConfiguration.Development, ...runArguments: Array<string>) => {
 		const { dryRun, compile } = options as ServerOptions
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		if (compile) {
 			await project.compile({

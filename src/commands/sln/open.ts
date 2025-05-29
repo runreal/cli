@@ -8,18 +8,15 @@ export const open = new Command()
 	.description('open')
 	.option('--dry-run', 'Dry run', { default: false })
 	.action(async (options) => {
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		const projectSlnFiles = await findFilesByExtension(
 			path.join(`${project.projectFileVars.projectDir}`, '..'),
 			'sln',
 			false,
 		)
-		const engineSlnFiles = await findFilesByExtension(enginePath, 'sln', false)
+		const engineSlnFiles = await findFilesByExtension(cfg.engine.path, 'sln', false)
 
 		const slnFiles = [...projectSlnFiles, ...engineSlnFiles]
 

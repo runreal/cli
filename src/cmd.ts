@@ -1,6 +1,8 @@
 import { Command, EnumType } from '@cliffy/command'
+import * as dotenv from '@std/dotenv'
+
 import { ulid } from './lib/ulid.ts'
-import { Config } from './lib/config.ts'
+import { Config, ConfigError } from './lib/config.ts'
 import { logger, LogLevel } from './lib/logger.ts'
 import { VERSION } from './version.ts'
 
@@ -21,6 +23,8 @@ import { script } from './commands/script.ts'
 import { uasset } from './commands/uasset/index.ts'
 import { auth } from './commands/auth.ts'
 const LogLevelType = new EnumType(LogLevel)
+
+dotenv.loadSync({ export: true })
 
 export const cmd = new Command()
 	.globalOption('--session-id <sessionId:string>', 'Session Id', {
@@ -44,8 +48,12 @@ export const cmd = new Command()
 	.globalEnv('RUNREAL_BUILD_TS=<buildTs:string>', 'Overide build timestamp', { prefix: 'RUNREAL_' })
 	.globalOption('--build-ts <buildTs:string>', 'Overide build timestamp')
 	.globalAction(async (options) => {
-		// We load the config here so that the singleton should be instantiated before any command is run
-		await Config.create({ path: options.configPath })
+		await Config.initialize({ path: options.configPath }).catch((error) => {
+			if (error instanceof ConfigError) {
+				return
+			}
+			throw error
+		})
 	})
 
 export const cli = cmd

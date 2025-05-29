@@ -1,0 +1,11 @@
+{
+	"engine": {
+		"path": "./engine",
+		"gitDependenciesCachePath": "../cache"
+	},
+	"project": {
+		"name": "RelativeProject",
+		"path": ".",
+		"buildPath": "./build/output"
+	}
+}

@@ -30,7 +30,7 @@ export const script = new Command<GlobalOptions>()
 			const outfilePath = path.join(Deno.cwd(), '.runreal', 'scripts', `${scriptName}.esm.js`)
 			const outfileUrl = toFileUrl(outfilePath)
 
-			const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
+			const cfg = Config.instance().process(options)
 			const context: ScriptContext = {
 				config: cfg,
 				lib: {

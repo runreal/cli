@@ -27,11 +27,8 @@ export const clean = new Command<GlobalOptions>()
 	.action(async (options, target = EngineTarget.Editor, ...ubtArgs: Array<string>) => {
 		const { platform, configuration, dryRun, projected } = options as CleanOptions
 
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		await project.compile({
 			target: target as EngineTarget,

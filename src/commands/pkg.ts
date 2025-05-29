@@ -37,11 +37,8 @@ export const pkg = new Command()
 	.action(async (options, target, platform, configuration, style, ...uatArgs: Array<string>) => {
 		const { dryRun, zip, buildargs, cookargs, archiveDirectory } = options as PkgOptions
 
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		const args = uatArgs
 

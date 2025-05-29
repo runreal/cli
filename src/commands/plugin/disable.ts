@@ -12,11 +12,8 @@ export const disable = new Command<GlobalOptions>()
 	.description('Disables a plugin for the project')
 	.arguments('<target:string>')
 	.action(async (options, target) => {
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 		project.enablePlugin({
 			pluginName: target,
 			shouldEnable: false,

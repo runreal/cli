@@ -12,10 +12,7 @@ export const generate = new Command()
 	.option('--dry-run', 'Dry run', { default: false })
 	.stopEarly()
 	.action(async (options, ...genArguments: Array<string>) => {
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 		project.genProjectFiles(genArguments)
 	})

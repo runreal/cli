@@ -24,12 +24,8 @@ export const cook = new Command<GlobalOptions>()
 	.stopEarly()
 	.action(async (options, target = CookTarget.Windows, ...cookArguments: Array<string>) => {
 		const { dryRun, noxge, debug, iterate, onthefly, cultures } = options as CookOptions
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		let cultureArgs: string[] = []
 		if (cultures) {

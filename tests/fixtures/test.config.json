@@ -69,7 +69,7 @@
 					"command": "runreal buildgraph run",
 					"args": [
 						"${project.path}\\Build\\MinimalProject.xml",
-						"-set:BuildId=${build.id}-${buildkite.buildNumber}",
+						"-set:BuildId=${build.id}-${metadata.buildkite.buildNumber}",
 						"-set:ProjectName=${project.name}",
 						"-set:ProjectPath=${project.path}",
 						"-set:OutputPath=${build.path}",
@@ -90,7 +90,7 @@
 					"command": "runreal buildgraph run",
 					"args": [
 						"${project.path}\\Build\\MinimalProject.xml",
-						"-set:BuildId=${build.id}-${buildkite.buildNumber}",
+						"-set:BuildId=${build.id}-${metadata.buildkite.buildNumber}",
 						"-set:ProjectName=${project.name}",
 						"-set:ProjectPath=${project.path}",
 						"-set:OutputPath=${build.path}",

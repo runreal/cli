@@ -29,11 +29,8 @@ export const program = new Command<GlobalOptions>()
 	.action(async (options, program: string, ...ubtArgs: Array<string>) => {
 		const { platform, configuration, dryRun, clean, nouht, noxge, projected } = options as CompileOptions
 
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		if (clean) {
 			await project.compileTarget({

@@ -18,15 +18,12 @@ export const run = new Command<GlobalOptions>()
 	)
 	.stopEarly()
 	.action(async (options, buildGraphScript: string, ...buildGraphArgs: Array<string>) => {
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
+		const cfg = Config.instance().process(options)
 
-		const project = await createProject(enginePath, projectPath)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 		const { success, code } = await project.runBuildGraph(buildGraphScript, buildGraphArgs)
 		if (!success) {
-			const logs = await project.engine.getAutomationToolLogs(enginePath)
+			const logs = await project.engine.getAutomationToolLogs(cfg.engine.path)
 
 			for (const log of logs.filter(({ level }) => level === 'Error')) {
 				logger.info(`[BUILDGRAPH RUN] ${log.message}`)

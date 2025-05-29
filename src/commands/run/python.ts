@@ -18,12 +18,8 @@ export const python = new Command<GlobalOptions>()
 	.action(
 		async (options, configuration = EngineConfiguration.Development, scriptPath, ...runArguments: Array<string>) => {
 			const { dryRun, compile } = options as PythonOptions
-			const config = Config.getInstance()
-			const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-				cliOptions: options,
-			})
-
-			const project = await createProject(enginePath, projectPath)
+			const cfg = Config.instance().process(options)
+			const project = await createProject(cfg.engine.path, cfg.project.path)
 
 			if (compile) {
 				await project.compile({

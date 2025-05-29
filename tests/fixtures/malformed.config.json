@@ -1,0 +1,11 @@
+{
+	"engine": {
+		"path": "/engine/path"
+	},
+	"project": {
+		"name": "TestProject",
+		"path": "/project/path"
+	},
+	// Missing comma and invalid comment
+	"invalid": "syntax"
+}

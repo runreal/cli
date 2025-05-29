@@ -69,17 +69,18 @@ export const list = new Command<GlobalOptions>()
 	})
 	.action(async (options, target = ListTarget.Project) => {
 		const { recursive } = options as ListOptions
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 		const projectData = await readUProjectFile(project.projectFileVars.projectFullPath)
 
 		switch (target) {
 			case ListTarget.All: {
-				const projectPlugins = await findFilesByExtension(path.join(projectPath, 'Plugins'), 'uplugin', true)
-				const enginePlugins = await findFilesByExtension(path.join(enginePath, 'Engine', 'Plugins'), 'uplugin', true)
+				const projectPlugins = await findFilesByExtension(path.join(cfg.project.path, 'Plugins'), 'uplugin', true)
+				const enginePlugins = await findFilesByExtension(
+					path.join(cfg.engine.path, 'Engine', 'Plugins'),
+					'uplugin',
+					true,
+				)
 				console.log('Project Plugins:\n')
 				projectPlugins.forEach((plugin) => {
 					console.log(path.basename(plugin, '.uplugin'))
@@ -99,7 +100,12 @@ export const list = new Command<GlobalOptions>()
 							allEnabledPlugins.push(plugin.Name)
 						}
 						if (recursive) {
-							const enabledPlugins = await getEnabledPlugins(plugin.Name, projectPath, enginePath, allEnabledPlugins)
+							const enabledPlugins = await getEnabledPlugins(
+								plugin.Name,
+								cfg.project.path,
+								cfg.engine.path,
+								allEnabledPlugins,
+							)
 							allEnabledPlugins.push(...enabledPlugins)
 						}
 					}
@@ -110,7 +116,7 @@ export const list = new Command<GlobalOptions>()
 				break
 			}
 			case ListTarget.Project: {
-				const projectPlugins = await findFilesByExtension(path.join(projectPath, 'Plugins'), 'uplugin', true)
+				const projectPlugins = await findFilesByExtension(path.join(cfg.project.path, 'Plugins'), 'uplugin', true)
 				console.log('Project Plugins:\n')
 				projectPlugins.forEach((plugin) => {
 					console.log(path.basename(plugin, '.uplugin'))
@@ -118,7 +124,11 @@ export const list = new Command<GlobalOptions>()
 				break
 			}
 			case ListTarget.Engine: {
-				const enginePlugins = await findFilesByExtension(path.join(enginePath, 'Engine', 'Plugins'), 'uplugin', true)
+				const enginePlugins = await findFilesByExtension(
+					path.join(cfg.engine.path, 'Engine', 'Plugins'),
+					'uplugin',
+					true,
+				)
 				console.log('Engine Plugins:\n')
 				enginePlugins.forEach((plugin) => {
 					console.log(path.basename(plugin, '.uplugin'))
@@ -126,7 +136,7 @@ export const list = new Command<GlobalOptions>()
 				break
 			}
 			case ListTarget.Default: {
-				const projectPlugins = await findFilesByExtension(path.join(projectPath, 'Plugins'), 'uplugin', true)
+				const projectPlugins = await findFilesByExtension(path.join(cfg.project.path, 'Plugins'), 'uplugin', true)
 				console.log('Project Plugins enabled by default:\n')
 				for (const plugin of projectPlugins) {
 					const uplugin = await readUPluginFile(plugin)
@@ -135,7 +145,11 @@ export const list = new Command<GlobalOptions>()
 					}
 				}
 				console.log('Engine Plugins enabled by default:\n')
-				const enginePlugins = await findFilesByExtension(path.join(enginePath, 'Engine', 'Plugins'), 'uplugin', true)
+				const enginePlugins = await findFilesByExtension(
+					path.join(cfg.engine.path, 'Engine', 'Plugins'),
+					'uplugin',
+					true,
+				)
 				for (const plugin of enginePlugins) {
 					const uplugin = await readUPluginFile(plugin)
 					if (uplugin && uplugin.EnabledByDefault) {

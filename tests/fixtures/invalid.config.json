@@ -1,0 +1,11 @@
+{
+	"engine": "invalid-string-instead-of-object",
+	"project": {
+		"name": 123,
+		"path": null
+	},
+	"build": {
+		"id": true
+	},
+	"workflows": "not-an-array"
+}

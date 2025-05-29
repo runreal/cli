@@ -6,4 +6,6 @@ scratch/
 .runreal/dist/script.esm.js
 .runreal/dist/hello-world.esm.js
 .DS_Store
+test/
+cli.code-workspace
 docs/

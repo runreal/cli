@@ -88,8 +88,7 @@ export const exec = new Command<GlobalOptions>()
 	.arguments('<workflow>')
 	.action(async (options, workflow) => {
 		const { dryRun, mode } = options
-		const config = Config.getInstance()
-		const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
+		const cfg = Config.instance().process(options)
 
 		if (!cfg.workflows) {
 			throw new ValidationError('No workflows defined in config')

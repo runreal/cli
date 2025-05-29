@@ -20,11 +20,9 @@ export const add = new Command<GlobalOptions>()
 	.option('-e, --enable', 'Enable this plugin in the project, defaults to true', { default: true })
 	.action(async (options, url, pluginName) => {
 		const { folder, enable } = options as AddOptions
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const project = await createProject(enginePath, projectPath)
+
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
 		const target_loc = path.relative(
 			Deno.cwd(),

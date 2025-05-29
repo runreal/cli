@@ -1,5 +1,5 @@
 import * as fmt from '@std/fmt/colors'
-import { createConfigDirSync, DefaultMap, getRandomInt } from './utils.ts'
+import { DefaultMap, getRandomInt } from './utils.ts'
 
 export enum LogLevel {
 	DEBUG = 'DEBUG',
@@ -30,7 +30,7 @@ class Logger {
 	private sessionId = null as string | null
 	private logToFile = true
 	private logLevel = LogLevel.DEBUG
-	private logDir = createConfigDirSync()
+	// private logDir = createConfigDirSync()
 	private writeQueue: Promise<void>[] = []
 
 	setContext(context: string) {
@@ -77,10 +77,10 @@ class Logger {
 
 	private writeToFile(message: string) {
 		if (this.logToFile && this.sessionId) {
-			const file = `${this.logDir}/${this.sessionId}.log`
-			const msg = `${fmt.stripAnsiCode(message)}\n`
-			const p = Deno.writeTextFile(file, msg, { append: true }).catch((e) => {})
-			this.writeQueue.push(p)
+			// const file = `${this.logDir}/${this.sessionId}.log`
+			// const msg = `${fmt.stripAnsiCode(message)}\n`
+			// const p = Deno.writeTextFile(file, msg, { append: true }).catch((e) => {})
+			// this.writeQueue.push(p)
 		}
 	}
 

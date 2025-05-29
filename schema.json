@@ -2,76 +2,68 @@
   "type": "object",
   "properties": {
     "$schema": {
-      "type": "string",
-      "description": "Runreal JSON-Schema spec version"
+      "description": "Runreal JSON-Schema spec version",
+      "type": "string"
     },
     "engine": {
       "type": "object",
       "properties": {
         "path": {
-          "type": "string",
-          "description": "Path to the engine folder"
+          "description": "Path to the engine folder",
+          "type": "string"
         },
         "repoType": {
-          "type": "string",
-          "description": "git or perforce"
+          "description": "git or perforce",
+          "type": "string"
         },
         "gitSource": {
-          "type": "string",
-          "description": "git source repository"
+          "description": "git source repository",
+          "type": "string"
         },
         "gitBranch": {
-          "type": "string",
           "description": "git branch to checkout",
-          "default": "main"
+          "type": "string"
         },
         "gitDependenciesCachePath": {
-          "type": "string",
-          "description": "Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>"
+          "description": "Path to git dependencies cache folder <RUNREAL_GIT_DEPENDENCIES_CACHE_PATH>",
+          "type": "string"
         }
       },
-      "required": [
-        "path",
-        "repoType"
-      ],
-      "additionalProperties": false
+      "required": []
     },
     "project": {
       "type": "object",
       "properties": {
         "name": {
-          "type": "string",
-          "description": "Project name"
+          "description": "Project name",
+          "type": "string"
         },
         "path": {
-          "type": "string",
-          "description": "Path to the project folder <RUNREAL_PROJECT_PATH>"
+          "description": "Path to the project folder <RUNREAL_PROJECT_PATH>",
+          "type": "string"
         },
         "buildPath": {
-          "type": "string",
-          "description": "Path to the build folder <RUNREAL_BUILD_PATH>"
+          "description": "Path to the build folder <RUNREAL_BUILD_PATH>",
+          "type": "string"
         },
         "repoType": {
-          "type": "string",
-          "description": "git or perforce"
+          "description": "git or perforce",
+          "type": "string"
         }
       },
-      "required": [
-        "path",
-        "buildPath",
-        "repoType"
-      ],
-      "additionalProperties": false
+      "required": []
     },
     "build": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
-          "description": "Build id <RUNREAL_BUILD_ID>"
+          "description": "Build id <RUNREAL_BUILD_ID>",
+          "type": "string"
         }
       },
-      "additionalProperties": false
+      "required": [
+        "id"
+      ]
     },
     "workflows": {
       "type": "array",
@@ -79,13 +71,14 @@
         "type": "object",
         "properties": {
           "id": {
+            "description": "Workflow id",
             "type": "string",
-            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-]*$",
-            "description": "Workflow id"
+            "format": "regex",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-]*$"
           },
           "name": {
-            "type": "string",
-            "description": "Workflow name"
+            "description": "Workflow name",
+            "type": "string"
           },
           "steps": {
             "type": "array",
@@ -93,41 +86,35 @@
               "type": "object",
               "properties": {
                 "command": {
-                  "type": "string",
-                  "description": "Command to execute"
+                  "description": "Command to execute",
+                  "type": "string"
                 },
                 "args": {
+                  "description": "Command arguments",
                   "type": "array",
                   "items": {
                     "type": "string"
-                  },
-                  "description": "Command arguments"
+                  }
                 },
                 "condition": {
-                  "type": "string",
-                  "description": "Condition to execute the step"
+                  "description": "Condition to execute the workflow",
+                  "type": "string"
                 }
               },
               "required": [
                 "command"
-              ],
-              "additionalProperties": false
+              ]
             }
           }
         },
         "required": [
           "name",
           "steps"
-        ],
-        "additionalProperties": false
+        ]
       }
     }
   },
   "required": [
-    "engine",
-    "project",
-    "build"
-  ],
-  "additionalProperties": false,
-  "$schema": "http://json-schema.org/draft-07/schema#"
+    "project"
+  ]
 }
