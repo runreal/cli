@@ -12,14 +12,11 @@ export const ubt = new Command<GlobalOptions>()
 	.arguments('<command> [args...]')
 	.stopEarly()
 	.action(async (options, command, ...args) => {
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
-		const engine = createEngine(enginePath)
+		const cfg = Config.instance().process(options)
+		const engine = createEngine(cfg.engine.path)
 		if (command !== 'run') {
 			args.unshift(command)
-			const projectFile = await findProjectFile(projectPath).catch(() => null)
+			const projectFile = await findProjectFile(cfg.project.path).catch(() => null)
 			if (projectFile) {
 				args.push(`-project=${projectFile}`)
 			}

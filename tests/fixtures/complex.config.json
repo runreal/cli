@@ -1,0 +1,36 @@
+{
+	"$schema": "https://example.com/runreal-config-schema.json",
+	"engine": {
+		"path": "/custom/engine/path",
+		"repoType": "git",
+		"gitSource": "https://github.com/EpicGames/UnrealEngine.git",
+		"gitBranch": "5.3",
+		"gitDependenciesCachePath": "/cache/git-deps"
+	},
+	"project": {
+		"name": "ComplexProject",
+		"path": "/projects/complex",
+		"buildPath": "Build/Output",
+		"repoType": "perforce"
+	},
+	"build": {
+		"id": "complex-build-123"
+	},
+	"workflows": [
+		{
+			"id": "build-and-test",
+			"name": "Build and Test",
+			"steps": [
+				{
+					"command": "runreal compile",
+					"args": ["--target=Game", "--config=Development"]
+				},
+				{
+					"command": "runreal test",
+					"args": ["--suite=UnitTests"],
+					"condition": "success"
+				}
+			]
+		}
+	]
+}

@@ -1,7 +1,8 @@
 import { Command } from '@cliffy/command'
-import { createEngine } from '../lib/engine.ts'
-import type { GlobalOptions } from '../lib/types.ts'
-import { Config } from '../lib/config.ts'
+import { createProject } from '../../lib/project.ts'
+import { createEngine } from '../../lib/engine.ts'
+import type { GlobalOptions } from '../../lib/types.ts'
+import { Config } from '../../lib/config.ts'
 
 export type ListTargetsOptions = typeof listTargets extends
 	Command<void, void, infer Options, infer Argument, GlobalOptions> ? Options
@@ -19,19 +20,15 @@ export const listTargets = new Command<GlobalOptions>()
 	.option('-p, --project-only', 'list only project targets', { conflicts: ['engine-only'] })
 	.action(async (options) => {
 		const { engineOnly, projectOnly } = options as ListTargetsOptions
-		const config = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = config.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
+		const cfg = Config.instance().process(options)
 
-		const engine = createEngine(enginePath)
+		const engine = createEngine(cfg.engine.path)
 		const engineTargets = await engine.parseEngineTargets()
 		let projectTargets: string[] = []
 
-		if (projectPath) {
-			projectTargets = (await engine.parseProjectTargets(projectPath)).filter((target) =>
-				!engineTargets.includes(target)
-			)
+		if (cfg.project.path) {
+			const project = await createProject(cfg.engine.path, cfg.project.path)
+			projectTargets = (await project.parseProjectTargets()).filter((target) => !engineTargets.includes(target))
 		}
 
 		if (engineOnly) {

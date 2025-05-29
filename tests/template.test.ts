@@ -6,9 +6,16 @@ Deno.test('template tests', () => {
 	const tmpl =
 		'{"name": "${project.name}", "engine": "${engine.path}\\BuildGraph\\Build.xml", "project": "${project.path}"}'
 	const cfg = {
-		project: { name: 'Deno' },
-		engine: { path: 'C:\\Program Files\\V8', repoType: 'git', gitBranch: 'main' },
-		metadata: { ts: '2024-02-29T12:34:56Z' },
+		project: { name: 'Deno', path: '', buildPath: '', repoType: 'git' },
+		engine: { path: 'C:\\Program Files\\V8', gitBranch: 'main' },
+		metadata: {
+			ts: '2024-02-29T12:34:56Z',
+			safeRef: '',
+			git: { ref: '', branch: '', branchSafe: '', commit: '', commitShort: '' },
+			perforce: { ref: '', stream: '', changelist: '' },
+		},
+		build: { id: '' },
+		workflows: [],
 	} as RunrealConfig
 
 	const result = render([tmpl], cfg)
@@ -20,20 +27,28 @@ Deno.test('template tests', () => {
 Deno.test('getSubstitutions should correctly extract values from config', () => {
 	const cfg: RunrealConfig = {
 		project: { name: 'Project', path: '/projects/project', buildPath: '/output/path', repoType: 'git' },
-		engine: { path: '/engines/5.1', repoType: 'git', gitBranch: 'main' },
+		engine: { path: '/engines/5.1', gitBranch: 'main' },
 		build: { id: '1234' },
-		buildkite: { buildNumber: '5678' },
 		metadata: {
 			ts: '2024-02-29T12:34:56Z',
 			safeRef: 'safeRef',
 			git: {
+				ref: 'ref',
 				branch: 'longbranch',
 				branchSafe: 'safebranch',
 				commit: 'commit',
 				commitShort: 'shortcommit',
 			},
-			perforce: { changelist: 'cl', stream: 'stream' },
+			perforce: { ref: 'ref', changelist: 'cl', stream: 'stream' },
+			buildkite: {
+				branch: '',
+				checkout: '',
+				buildNumber: '5678',
+				buildCheckoutPath: '',
+				buildPipelineSlug: '',
+			},
 		},
+		workflows: [],
 	}
 	const expected = {
 		'engine.path': '/engines/5.1',
@@ -42,7 +57,7 @@ Deno.test('getSubstitutions should correctly extract values from config', () => 
 		'project.buildPath': '/output/path',
 		'build.path': '/output/path',
 		'build.id': '1234',
-		'buildkite.buildNumber': '5678',
+		'metadata.buildkite.buildNumber': '5678',
 		'metadata.safeRef': 'safeRef',
 		'metadata.git.branch': 'safebranch',
 		'metadata.git.commit': 'shortcommit',
@@ -65,9 +80,15 @@ Deno.test('render should replace placeholders with correct values', () => {
 	]
 	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.1', repoType: 'git', gitBranch: 'main' },
+		engine: { path: '/engines/5.1', gitBranch: 'main' },
 		build: { id: '1234' },
-		metadata: { ts: '2024-02-29T12:34:56Z' },
+		metadata: {
+			ts: '2024-02-29T12:34:56Z',
+			safeRef: '',
+			git: { ref: '', branch: '', branchSafe: '', commit: '', commitShort: '' },
+			perforce: { ref: '', stream: '', changelist: '' },
+		},
+		workflows: [],
 	}
 	const expected = [
 		'Project uses /engines/5.1',
@@ -83,9 +104,14 @@ Deno.test('render should replace placeholders with correct values', () => {
 Deno.test('renderConfig should deeply replace all placeholders in config object', () => {
 	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.0', repoType: 'git', gitBranch: 'main' },
+		engine: { path: '/engines/5.0', gitBranch: 'main' },
 		build: { id: '1234' },
-		metadata: { ts: '2024-02-29T12:34:56Z' },
+		metadata: {
+			ts: '2024-02-29T12:34:56Z',
+			safeRef: '',
+			git: { ref: '', branch: '', branchSafe: '', commit: '', commitShort: '' },
+			perforce: { ref: '', stream: '', changelist: '' },
+		},
 		workflows: [
 			{
 				id: 'compile',
@@ -105,9 +131,14 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 	}
 	const expected: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.0', repoType: 'git', gitBranch: 'main' },
+		engine: { path: '/engines/5.0', gitBranch: 'main' },
 		build: { id: '1234' },
-		metadata: { ts: '2024-02-29T12:34:56Z' },
+		metadata: {
+			ts: '2024-02-29T12:34:56Z',
+			safeRef: '',
+			git: { ref: '', branch: '', branchSafe: '', commit: '', commitShort: '' },
+			perforce: { ref: '', stream: '', changelist: '' },
+		},
 		workflows: [
 			{
 				id: 'compile',
@@ -132,9 +163,14 @@ Deno.test('renderConfig should deeply replace all placeholders in config object'
 Deno.test('replace paths in template', () => {
 	const cfg: Partial<RunrealConfig> = {
 		project: { name: 'Project', path: '/projects/project', repoType: 'git', buildPath: '/output/path' },
-		engine: { path: '/engines/5.0', repoType: 'git', gitBranch: 'main' },
+		engine: { path: '/engines/5.0', gitBranch: 'main' },
 		build: { id: '1234' },
-		metadata: { ts: '2024-02-29T12:34:56Z' },
+		metadata: {
+			ts: '2024-02-29T12:34:56Z',
+			safeRef: '',
+			git: { ref: '', branch: '', branchSafe: '', commit: '', commitShort: '' },
+			perforce: { ref: '', stream: '', changelist: '' },
+		},
 		workflows: [
 			{
 				id: 'compile',

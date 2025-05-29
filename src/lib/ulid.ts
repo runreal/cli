@@ -1,3 +1,2 @@
-import { monotonicFactory } from 'ulid'
-const ulid = monotonicFactory()
+import { ulid } from '@std/ulid'
 export { ulid }

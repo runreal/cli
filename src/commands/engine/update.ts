@@ -39,8 +39,11 @@ export const update = new Command<GlobalOptions>()
 			dryRun,
 		} = options as UpdateOptions
 
-		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
+		const cfg = Config.instance().process(options)
 		const branchArg = branch || cfg.engine.gitBranch
+		if (!branchArg) {
+			throw new ValidationError('Branch is required')
+		}
 
 		const isRepo = await isGitRepo(cfg.engine.path)
 		if (!isRepo) {

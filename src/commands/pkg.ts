@@ -1,125 +1,90 @@
-import * as path from '@std/path'
-import { Command, EnumType, ValidationError } from '@cliffy/command'
-import { createEngine, Engine, EngineConfiguration, EnginePlatform, EngineTarget } from '../lib/engine.ts'
-import { findProjectFile, getProjectName } from '../lib/utils.ts'
+import { Command, EnumType } from '@cliffy/command'
 import { Config } from '../lib/config.ts'
+import { createProject } from '../lib/project.ts'
 import type { GlobalOptions } from '../lib/types.ts'
-
-const defaultBCRArgs = [
-	'-build',
-	'-cook',
-	'-stage',
-	'-package',
-	'-prereqs',
-	'-manifests',
-	'-pak',
-	'-compressed',
-	'-nop4',
-	'-utf8output',
-	'-nullrhi',
-	'-unattended',
-	// Might want to keep these off by default
-	'-nocompileeditor',
-	'-skipcompileeditor',
-	'-nocompile',
-	'-nocompileuat',
-	'-nodebuginfo',
-]
-
-const clientBCRArgs = [
-	'-client',
-	...defaultBCRArgs,
-]
-
-const gameBCRArgs = [
-	'-game',
-	...defaultBCRArgs,
-]
-
-const serverBCRArgs = [
-	'-server',
-	'-noclient',
-	...defaultBCRArgs,
-]
-
-const profiles = {
-	'client': clientBCRArgs,
-	'game': gameBCRArgs,
-	'server': serverBCRArgs,
-}
-
-const profileNameMap = { client: 'Client', game: 'Game', server: 'Server' }
+import {
+	CookStyle,
+	CookTarget,
+	EngineConfiguration,
+	EnginePlatform,
+	EngineTarget,
+	GameTarget,
+	getPlatformCookTarget,
+} from '../lib/engine.ts'
 
 export type PkgOptions = typeof pkg extends Command<void, void, infer Options, [], GlobalOptions> ? Options
 	: never
 
-export const pkg = new Command<GlobalOptions>()
-	.description('package')
+export const pkg = new Command()
+	.description('Package a project')
+	.type('Style', new EnumType(CookStyle))
+	.type('Target', new EnumType(GameTarget))
 	.type('Configuration', new EnumType(EngineConfiguration))
 	.type('Platform', new EnumType(EnginePlatform))
-	.option('-p, --platform <platform:Platform>', 'Platform', { default: Engine.getCurrentPlatform() })
-	.option('-c, --configuration <configuration:Configuration>', 'Configuration', {
-		default: EngineConfiguration.Development,
-	})
-	.option('-a, --archive-directory <path:file>', 'Path to archive directory', { default: Deno.cwd() })
+	.arguments('<target:Target> <platform:Platform> <configuration:Configuration> <style:Style> [uatArgs...]')
+	.option('--dry-run', 'Dry run', { default: false })
 	.option('-z, --zip', 'Should we zip the archive')
-	.option('-d, --dry-run', 'Dry run')
-	.option('--profile <profile:string>', 'Build profile', { default: 'client', required: true })
-	.action(async (options) => {
-		const { platform, configuration, dryRun, profile, archiveDirectory, zip } = options as PkgOptions
-		const cfg = Config.getInstance()
-		const { engine: { path: enginePath }, project: { path: projectPath } } = cfg.mergeConfigCLIConfig({
-			cliOptions: options,
-		})
+	.option(
+		'--buildargs <buildargs:string>',
+		'Build code prior to staging, comma separated list of arguments for the build',
+	)
+	.option(
+		'--cookargs <cookargs:string>',
+		'Cook content prior to staging, comma separated list of arguments for the cook',
+	)
+	.option('-a, --archive-directory <path:file>', 'Path to archive directory')
+	.stopEarly()
+	.action(async (options, target, platform, configuration, style, ...uatArgs: Array<string>) => {
+		const { dryRun, zip, buildargs, cookargs, archiveDirectory } = options as PkgOptions
 
-		const literal = pkg.getLiteralArgs().map((arg) => arg.toLowerCase())
-		const profileArgs = profiles[profile as keyof typeof profiles] || []
-		const bcrArgs = Array.from(new Set([...profileArgs, ...literal]))
+		const cfg = Config.instance().process(options)
+		const project = await createProject(cfg.engine.path, cfg.project.path)
 
-		const engine = createEngine(enginePath)
-		const projectFile = await findProjectFile(projectPath).catch(() => null)
-		const projectName = await getProjectName(projectPath)
+		const args = uatArgs
 
-		if (projectFile) {
-			bcrArgs.push(`-project=${projectFile}`)
+		switch (style) {
+			case CookStyle.pak:
+				args.push('-pak')
+				break
+			case CookStyle.zen:
+				args.push('-zen')
+				break
+			case CookStyle.nopak:
+				args.push('-nopak')
+				break
+		}
+
+		if (buildargs) {
+			project.compile({
+				target: target as GameTarget,
+				configuration: configuration as EngineConfiguration,
+				platform: platform as EnginePlatform,
+				dryRun: dryRun,
+				extraArgs: (buildargs as string).split(','),
+			})
+			args.push('-skipbuild')
 		} else {
-			throw new ValidationError('.uproject file not found')
+			args.push('-build')
 		}
-		bcrArgs.push(`-platform=${platform}`)
-		if (profile === 'server') {
-			bcrArgs.push(`-serverconfig=${configuration}`)
-		}
-		if (profile === 'client') {
-			bcrArgs.push(`-clientconfig=${configuration}`)
-		}
-		if (profile === 'game') {
-			bcrArgs.push(`-gameconfig=${configuration}`)
-		}
-		if (archiveDirectory) {
-			bcrArgs.push('-archive')
-			bcrArgs.push(`-archiveDirectory=${archiveDirectory}`)
-			bcrArgs.push('-archivemetadata')
-		}
-		if (dryRun) {
-			console.log(`[package] package ${profile} ${configuration} ${platform}`)
-			console.log('[package] BCR args:')
-			console.log(bcrArgs)
-			return
+		if (cookargs) {
+			const cookTarget = getPlatformCookTarget(platform, target)
+			project.cookContent({
+				target: cookTarget as CookTarget,
+				dryRun: dryRun,
+				extraArgs: cookargs,
+			})
+			args.push('-skipcook')
+		} else {
+			args.push('-cook')
 		}
 
-		await engine.runUAT(['BuildCookRun', ...bcrArgs])
-
-		if (zip) {
-			// Reverse the EnginePlatform enum to get the build output platform name, ie Win64 => Windows
-			const platformName =
-				Object.keys(EnginePlatform)[Object.values(EnginePlatform).indexOf(platform as EnginePlatform)]
-			const profileName = profileNameMap[profile as keyof typeof profileNameMap] || ''
-			const archivePath = path.join(archiveDirectory, `${projectName}-${profileName}-${platformName}`)
-			const zipArgs = [
-				`-add=${archivePath}`,
-				`-archive=${archivePath}.zip`,
-				'-compression=5',
-			]
-			await engine.runUAT(['ZipUtils', ...zipArgs])
-		}
+		project.package({
+			profile: target,
+			configuration: configuration,
+			extraArgs: args,
+			dryRun: dryRun,
+			platform: platform,
+			zip: zip,
+			archiveDirectory: archiveDirectory,
+		})
 	})

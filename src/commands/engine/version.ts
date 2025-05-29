@@ -12,8 +12,7 @@ export const version = new Command<GlobalOptions>()
 	.action(
 		(options, ..._args) => {
 			logger.setContext(version.getName())
-			const config = Config.getInstance()
-			const cfg = config.mergeConfigCLIConfig({ cliOptions: options })
+			const cfg = Config.instance().process(options)
 			const engine = createEngine(cfg.engine.path)
 			const engineVersion = engine.getEngineVersion('full')
 			logger.info(engineVersion)

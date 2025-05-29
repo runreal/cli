@@ -1,6 +1,5 @@
 import { mergeReadableStreams } from '@std/streams'
 import * as path from '@std/path'
-import { xml2js } from 'xml2js'
 import { createEngine } from './engine.ts'
 import type { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 
@@ -84,74 +83,6 @@ export async function findProjectFile(projectPath: string): Promise<string> {
 export async function getProjectName(projectPath: string): Promise<string> {
 	const projectFile = await findProjectFile(projectPath)
 	return path.basename(projectFile, '.uproject')
-}
-
-export async function getHomeDir(): Promise<string> {
-	// Check if the Deno permissions for environment access are granted
-	if (await Deno.permissions.query({ name: 'env' })) {
-		// Determine the home directory based on the operating system
-		const homeDir = Deno.build.os === 'windows' ? Deno.env.get('USERPROFILE') : Deno.env.get('HOME')
-
-		if (homeDir) {
-			return homeDir
-		}
-		throw new Error('Could not determine the home directory.')
-	}
-	throw new Error('Permission denied: Cannot access environment variables.')
-}
-
-export function getHomeDirSync(): string {
-	// Check if the Deno permissions for environment access are granted
-	if (Deno.permissions.querySync({ name: 'env' })) {
-		// Determine the home directory based on the operating system
-		const homeDir = Deno.build.os === 'windows' ? Deno.env.get('USERPROFILE') : Deno.env.get('HOME')
-
-		if (homeDir) {
-			return homeDir
-		}
-		throw new Error('Could not determine the home directory.')
-	}
-	throw new Error('Permission denied: Cannot access environment variables.')
-}
-
-export async function createConfigDir(): Promise<string> {
-	const homeDir = await getHomeDir()
-	const configDir = `${homeDir}/.runreal`
-	await Deno.mkdir(configDir, { recursive: true })
-	return configDir
-}
-
-export function createConfigDirSync(): string {
-	const homeDir = getHomeDirSync()
-	const configDir = `${homeDir}/.runreal`
-	Deno.mkdirSync(configDir, { recursive: true })
-	return configDir
-}
-
-export async function readConfigFile(): Promise<Record<string, string>> {
-	const configDir = await createConfigDir()
-	const configFile = `${configDir}/config.json`
-	try {
-		const file = await Deno.readTextFile(configFile)
-		return JSON.parse(file)
-	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
-			return {}
-		}
-		throw error
-	}
-}
-
-export async function writeConfigFile(config: Record<string, string>): Promise<void> {
-	const configDir = await createConfigDir()
-	const configFile = `${configDir}/config.json`
-	const file = JSON.stringify(config, null, 2)
-	await Deno.writeTextFile(configFile, file)
-}
-
-export async function updateConfigFile(config: Record<string, string>): Promise<void> {
-	const currentConfig = await readConfigFile()
-	await writeConfigFile({ ...currentConfig, ...config })
 }
 
 export const getRepoName = (repoUrl: string) => {
@@ -259,6 +190,8 @@ export const deleteEngineHooks = async (enginePath: string) => {
 	await Deno.remove(hooksPath, { recursive: true }).catch(() => {})
 }
 
+/*
+@deprecated - revist with alternative xml parser
 export const getDepsList = async (enginePath: string) => {
 	const ueDependenciesManifest = path.join(enginePath, '.uedependencies')
 	const data = await Deno.readTextFile(ueDependenciesManifest)
@@ -270,6 +203,7 @@ export const getDepsList = async (enginePath: string) => {
 		timestamp: Timestamp,
 	}))
 }
+*/
 
 export const getGitIgnoreList = (
 	enginePath: string,
@@ -407,4 +341,64 @@ ${blueprint}
 	</html>
 `
 	return html
+}
+
+export async function findFilesByExtension(
+	rootDir: string,
+	extension: string,
+	recursive: boolean,
+): Promise<string[]> {
+	const files: string[] = []
+
+	try {
+		for await (const entry of Deno.readDir(rootDir)) {
+			const checkPath = `${rootDir}/${entry.name}`
+
+			if (entry.isDirectory && recursive) {
+				const subFiles = await findFilesByExtension(checkPath, extension, recursive)
+				files.push(...subFiles)
+			} else if (entry.isFile && checkPath.endsWith(extension)) {
+				files.push(checkPath)
+			}
+		}
+	} catch (error) {
+		console.error(`Error reading directory ${rootDir}:`, error)
+	}
+
+	return files
+}
+
+export async function parseCSForTargetType(filePath: string): Promise<{
+	targetName: string | null
+	targetType: string | null
+}> {
+	// Read the file
+	const fileContent = await Deno.readTextFile(filePath)
+
+	// Results object
+	const result = {
+		targetName: null as string | null,
+		targetType: null as string | null,
+	}
+
+	// Find the class name using regex
+	const classRegex = /class\s+(\S+)Target[\s:]/g
+	let classMatch
+
+	while ((classMatch = classRegex.exec(fileContent)) !== null) {
+		result.targetName = classMatch[1]
+		break // Get only the first class name
+	}
+
+	// Find variables named TargetType
+	// This pattern looks for field declarations that have 'TargetType' as variable name
+	const targetTypeRegex = /\s*TargetType\.(.+)\s*;/g
+	let targetTypeMatch
+
+	while ((targetTypeMatch = targetTypeRegex.exec(fileContent)) !== null) {
+		result.targetType = targetTypeMatch[1]
+		break
+	}
+
+	return result
 }

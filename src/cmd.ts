@@ -1,9 +1,30 @@
 import { Command, EnumType } from '@cliffy/command'
-import { ulid } from './lib/ulid.ts'
-import { Config } from './lib/config.ts'
-import { logger, LogLevel } from './lib/logger.ts'
+import * as dotenv from '@std/dotenv'
 
+import { ulid } from './lib/ulid.ts'
+import { Config, ConfigError } from './lib/config.ts'
+import { logger, LogLevel } from './lib/logger.ts'
+import { VERSION } from './version.ts'
+
+import { buildgraph } from './commands/buildgraph/index.ts'
+import { run } from './commands/run/index.ts'
+import { plugin } from './commands/plugin/index.ts'
+import { engine } from './commands/engine/index.ts'
+import { info } from './commands/info/index.ts'
+import { build } from './commands/build/index.ts'
+import { sln } from './commands/sln/index.ts'
+import { init } from './commands/init.ts'
+import { cook } from './commands/cook.ts'
+import { pkg } from './commands/pkg.ts'
+import { uat } from './commands/uat.ts'
+import { ubt } from './commands/ubt.ts'
+import { workflow } from './commands/workflow/index.ts'
+import { script } from './commands/script.ts'
+import { uasset } from './commands/uasset/index.ts'
+import { auth } from './commands/auth.ts'
 const LogLevelType = new EnumType(LogLevel)
+
+dotenv.loadSync({ export: true })
 
 export const cmd = new Command()
 	.globalOption('--session-id <sessionId:string>', 'Session Id', {
@@ -27,6 +48,34 @@ export const cmd = new Command()
 	.globalEnv('RUNREAL_BUILD_TS=<buildTs:string>', 'Overide build timestamp', { prefix: 'RUNREAL_' })
 	.globalOption('--build-ts <buildTs:string>', 'Overide build timestamp')
 	.globalAction(async (options) => {
-		// We load the config here so that the singleton should be instantiated before any command is run
-		await Config.create({ path: options.configPath })
+		await Config.initialize({ path: options.configPath }).catch((error) => {
+			if (error instanceof ConfigError) {
+				return
+			}
+			throw error
+		})
 	})
+
+export const cli = cmd
+	.name('runreal')
+	.version(VERSION)
+	.description('the Unreal Engine runner')
+	.action(function () {
+		this.showHelp()
+	})
+	.command('buildgraph', buildgraph)
+	.command('run', run)
+	.command('engine', engine)
+	.command('plugin', plugin)
+	.command('build', build)
+	.command('cook', cook)
+	.command('pkg', pkg)
+	.command('sln', sln)
+	.command('uasset', uasset)
+	.command('workflow', workflow)
+	.command('info', info)
+	.command('init', init)
+	.command('uat', uat)
+	.command('ubt', ubt)
+	.command('script', script)
+	.command('auth', auth)

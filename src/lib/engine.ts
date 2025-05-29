@@ -1,7 +1,6 @@
 import * as path from '@std/path'
-import { globber } from 'globber'
-import { copyBuildGraphScripts, exec, findProjectFile } from './utils.ts'
-import { Config } from './config.ts'
+import * as ndjson from '../lib/ndjson.ts'
+import { exec } from '../lib/utils.ts'
 
 interface EngineVersionData {
 	MajorVersion: number
@@ -25,6 +24,42 @@ interface EngineVersionData {
   "BranchName": "++UE5+Release-5.0"
 }
 */
+
+export enum CookStyle {
+	pak = 'pak',
+	zen = 'zen',
+	nopak = 'nopak',
+}
+
+export enum CookTarget {
+	Windows = 'Windows',
+	WindowsClient = 'WindowsClient',
+	WindowsNoEditor = 'WindowsNoEditor',
+	WindowsServer = 'WindowsServer',
+	Linux = 'Linux',
+	LinuxClient = 'LinuxClient',
+	LinuxNoEditor = 'LinuxNoEditor',
+	LinuxServer = 'LinuxServer',
+	Mac = 'Mac',
+	MacClient = 'MacClient',
+	MacNoEditor = 'MacNoEditor',
+	MacServer = 'MacServer',
+	Android = 'Android',
+	Android_ASTC = 'Android_ASTC',
+	Android_DXT = 'Android_DXT',
+	Android_ETC2 = 'Android_ETC2',
+	IOS = 'IOS',
+	PS4 = 'PS4',
+	PS5 = 'PS5',
+	Switch = 'Switch',
+	XboxOne = 'XboxOne',
+	XSX = 'XSX',
+	TVOS = 'TVOS',
+	HoloLens = 'HoloLens',
+	AllDesktop = 'AllDesktop',
+	HTML5 = 'HTML5',
+}
+
 export enum EngineConfiguration {
 	Debug = 'Debug',
 	DebugGame = 'DebugGame',
@@ -40,8 +75,7 @@ export enum EngineTarget {
 	Server = 'Server',
 }
 
-export enum ProjectTarget {
-	Editor = 'Editor',
+export enum GameTarget {
 	Game = 'Game',
 	Client = 'Client',
 	Server = 'Server',
@@ -59,14 +93,25 @@ export enum EnginePlatform {
 	Unknown = 'Unknown',
 }
 
-interface TargetInfo {
+export interface AutomationToolLogs {
+	time: string
+	level: string
+	message: string
+	format: string
+	properties: Record<string, any>
+	id?: number
+	line?: number
+	lineCount?: number
+}
+
+export interface TargetInfo {
 	Name: string
 	Path: string
 	Type: string
 }
 
 interface UBTOptions {
-	target: ProjectTarget | string
+	target: EngineTarget | string
 	configuration?: EngineConfiguration
 	platform?: EnginePlatform
 	extraArgs?: string[]
@@ -98,6 +143,8 @@ export abstract class Engine {
 	abstract getGenerateScript(): string
 	abstract getGitDependencesBin(): string
 	abstract parseEngineTargets(): Promise<string[]>
+	abstract getEditorBin(cmdBin?: boolean, debug?: boolean): string
+	abstract getEditorCmdBin(): string
 
 	getEngineVersionData(): EngineVersionData {
 		const engineVersionFile = path.join(
@@ -155,64 +202,43 @@ export abstract class Engine {
 		return await exec(buildScript, args)
 	}
 
+	async runEditor({
+		useCmd = false,
+		dryRun = false,
+		debug = false,
+		args,
+	}: {
+		useCmd?: boolean
+		dryRun?: boolean
+		debug?: boolean
+		args: Array<string>
+	}) {
+		const editorBin = this.getEditorBin(useCmd, debug)
+
+		console.log(`Running editor with: ${editorBin} ${args.join(' ')}`)
+
+		if (dryRun) {
+			return
+		}
+
+		try {
+			const result = await exec(editorBin, args)
+			return result
+		} catch (error: unknown) {
+			console.log(`Error running Editor: ${error instanceof Error ? error.message : String(error)}`)
+			Deno.exit(1)
+		}
+	}
+
 	async ubt(args: string[] = [], options = { quiet: false }) {
 		const buildScript = this.getBuildScript()
 		return await exec(buildScript, args, options)
 	}
 
-	async parseProjectTargets(projectPath: string): Promise<string[]> {
-		const projectFile = await findProjectFile(projectPath)
-		const args = ['-Mode=QueryTargets', `-Project=${projectFile}`]
-		await this.ubt(args, { quiet: true })
-		try {
-			const targetInfoJson = path.resolve(path.join(projectPath, 'Intermediate', 'TargetInfo.json'))
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
-			const targets = Targets.map((target: TargetInfo) => target.Name)
-			return targets
-		} catch (e) {
-			return []
-		}
-	}
-
-	static async runClean({
-		dryRun = false,
-	}: {
-		dryRun?: boolean
-	}) {
-		console.log('[runClean]', { dryRun })
-		const config = Config.getInstance()
-		const binaryGlob = path.join(config.getConfig().project.path, '**/Binaries')
-		const intermediateGlob = path.join(config.getConfig().project.path, '**/Intermediate')
-		const cwd = config.getConfig().project?.path
-		const iterator = globber({
-			cwd,
-			include: [binaryGlob, intermediateGlob],
-		})
-		for await (const file of iterator) {
-			if (dryRun) {
-				console.log('Would delete:', file.relative)
-				continue
-			}
-			console.log('Deleting:', file.relative)
-			await Deno.remove(file.relative)
-		}
-	}
-
-	async runBuildGraph(buildGraphScript: string, args: string[] = []) {
-		let bgScriptPath = path.resolve(buildGraphScript)
-		if (!bgScriptPath.endsWith('.xml')) {
-			throw new Error('Invalid buildgraph script')
-		}
-		if (path.relative(this.enginePath, bgScriptPath).startsWith('..')) {
-			console.log('Buildgraph script is outside of engine folder, copying...')
-			bgScriptPath = await copyBuildGraphScripts(this.enginePath, bgScriptPath)
-		}
-		const uatArgs = [
-			'BuildGraph',
-			`-Script=${bgScriptPath}`,
-			...args,
-		]
-		return await this.runUAT(uatArgs)
+	async getAutomationToolLogs(enginePath: string) {
+		const logJson = path.join(enginePath, 'Engine', 'Programs', 'AutomationTool', 'Saved', 'Logs', 'Log.json')
+		const logs = await ndjson.safeParse<AutomationToolLogs[]>(logJson, [])
+		return logs
 	}
 }
 
@@ -274,6 +300,33 @@ class WindowsEngine extends Engine {
 			console.log(e)
 			return []
 		}
+	}
+	override getEditorBin(cmdBin?: boolean, debug?: boolean): string {
+		let exeName = 'UnrealEditor'
+		if (cmdBin) {
+			exeName = exeName + '-Cmd'
+		}
+		if (debug) {
+			exeName = exeName + 'Win64-Debug'
+		}
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Win64',
+			`${exeName}.exe`,
+		)
+		return editorPath
+	}
+	override getEditorCmdBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Win64',
+			'UnrealEditor-Cmd.exe',
+		)
+		return editorPath
 	}
 }
 
@@ -338,6 +391,26 @@ class MacosEngine extends Engine {
 			return []
 		}
 	}
+	override getEditorBin(cmdBin?: boolean, debug?: boolean): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Mac',
+			'UnrealEditor',
+		)
+		return editorPath
+	}
+	override getEditorCmdBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Mac',
+			'UnrealEditor-Cmd',
+		)
+		return editorPath
+	}
 }
 
 class LinuxEngine extends Engine {
@@ -401,6 +474,26 @@ class LinuxEngine extends Engine {
 			return []
 		}
 	}
+	override getEditorBin(cmdBin?: boolean, debug?: boolean): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Linux',
+			'UnrealEditor',
+		)
+		return editorPath
+	}
+	override getEditorCmdBin(): string {
+		const editorPath = path.join(
+			this.enginePath,
+			'Engine',
+			'Binaries',
+			'Linux',
+			'UnrealEditor-Cmd',
+		)
+		return editorPath
+	}
 }
 
 // Factory function to create the appropriate Engine instance
@@ -449,4 +542,16 @@ export function getEditorPath(enginePath: string, platform: EnginePlatform): str
 		default:
 			throw new Error(`Unsupported platform: ${platform}`)
 	}
+}
+
+/**
+ * Get the platform-specific cook target
+ */
+export function getPlatformCookTarget(platform: EnginePlatform, gameTarget: GameTarget): string {
+	const prefix = platform
+	let suffix = gameTarget as string
+	if (gameTarget == GameTarget.Game) {
+		suffix = ''
+	}
+	return prefix + suffix
 }

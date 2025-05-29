@@ -41,7 +41,7 @@ export const install = new Command<GlobalOptions>()
 			setup,
 		} = options as InstallOptions
 
-		const cfg = Config.getInstance().mergeConfigCLIConfig({ cliOptions: options })
+		const cfg = Config.instance().process(options)
 		source = source || cfg.engine.gitSource
 		destination = destination || cfg.engine.path
 

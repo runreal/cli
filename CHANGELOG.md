@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.8.0](https://github.com/runreal/cli/compare/v1.7.0...v1.8.0) (2025-05-23)
+
+
+### Features
+
+* conditional steps in workflow configs ([#82](https://github.com/runreal/cli/issues/82)) ([9054bc8](https://github.com/runreal/cli/commit/9054bc8d5ffbe237f024096adfd5d3302e0d4e48))
+* new commands for local dev ([#80](https://github.com/runreal/cli/issues/80)) ([a448cfa](https://github.com/runreal/cli/commit/a448cfa6ad1e999cbad514a839fe52f5915bb80e))
+* plugin utils ([6c689df](https://github.com/runreal/cli/commit/6c689dfcfe69f3215cc9a759fa6d8bfd135d3005))
+
+## [1.7.0](https://github.com/runreal/cli/compare/v1.6.0...v1.7.0) (2025-05-09)
+
+
+### Features
+
+* new editor and project commands ([#66](https://github.com/runreal/cli/issues/66)) ([0e97f69](https://github.com/runreal/cli/commit/0e97f695e6da36cabe800d030170d8e349588880))
+
+
+### Bug Fixes
+
+* script runner os + compiled build fixes ([#73](https://github.com/runreal/cli/issues/73)) ([0ea35ab](https://github.com/runreal/cli/commit/0ea35abe28ee41ccb70f0f8b2600bfb778f635dc))
+* update version ([e6a5cdd](https://github.com/runreal/cli/commit/e6a5cddd977bce9cc424a70acb6e57b95a68434a))
+
+## [1.6.0](https://github.com/runreal/cli/compare/v1.5.0...v1.6.0) (2025-05-04)
+
+
+### Features
+
+* add list-targets cmd ([bc61ba9](https://github.com/runreal/cli/commit/bc61ba9fbb8a2d9c33525ac97b8dc87d88bf25b3))
+* add runreal auth ([#54](https://github.com/runreal/cli/issues/54)) ([449eca8](https://github.com/runreal/cli/commit/449eca8d5f9ce30914e173ea6305cb45fba5bdcb))
+
+
+### Bug Fixes
+
+* add game profile to pkg ([59fa15a](https://github.com/runreal/cli/commit/59fa15ab2c465124dc70ff4d9d9d266e32a9d432))
+* TargetInfo path resoluton ([7e94ccc](https://github.com/runreal/cli/commit/7e94cccc60f80df2ebf854eeb5a98409c4c61e06))
+
 ## [1.5.0](https://github.com/runreal/cli/compare/v1.4.1...v1.5.0) (2025-04-11)
 
 
