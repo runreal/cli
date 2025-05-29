@@ -238,23 +238,34 @@ export class Config {
 	 */
 	process(cliOptions: CliOptions, render: boolean = true): RunrealConfig {
 		try {
-			let newConfig = this.pipeline.merge(this.config, cliOptions)
-			newConfig = this.pipeline.resolve(newConfig)
-			const metadata = this.initializeMetadata(newConfig)
-			const id = this.getBuildId(newConfig)
-			newConfig = {
-				...newConfig,
+			// Merge CLI options and resolve paths
+			let processedConfig = this.pipeline.merge(this.config, cliOptions)
+			processedConfig = this.pipeline.resolve(processedConfig)
+			
+			// Initialize metadata and merge it into config
+			const metadata = this.initializeMetadata(processedConfig)
+			processedConfig = {
+				...processedConfig,
 				...metadata,
+			}
+
+			// Generate build ID
+			const buildId = this.getBuildId(processedConfig)
+			processedConfig = {
+				...processedConfig,
 				build: {
-					id,
+					id: buildId,
 				},
 			}
-			this.updateConfig(newConfig)
+
+			this.updateConfig(processedConfig)
+			
 			if (render) {
-				newConfig = this.pipeline.render(newConfig as RunrealConfig)
-				this.updateConfig(newConfig)
+				processedConfig = this.pipeline.render(processedConfig as RunrealConfig)
+				this.updateConfig(processedConfig)
 			}
-			return newConfig as RunrealConfig
+			
+			return processedConfig as RunrealConfig
 		} catch (error) {
 			if (error instanceof ConfigError) {
 				throw error
