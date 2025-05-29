@@ -65,7 +65,7 @@ Deno.test('source should handle non-existent directories gracefully', () => {
 	assertEquals(perfData.stream, '')
 })
 
-// TODO: This test is flaky on Buildkite, so we're ignoring it for now
+// This test is flaky on Buildkite, so we're ignoring it for now
 Deno.test.ignore('source should work with explicit current directory', () => {
 	const currentDir = Deno.cwd()
 

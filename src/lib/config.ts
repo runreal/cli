@@ -241,7 +241,7 @@ export class Config {
 			// Merge CLI options and resolve paths
 			let processedConfig = this.pipeline.merge(this.config, cliOptions)
 			processedConfig = this.pipeline.resolve(processedConfig)
-			
+
 			// Initialize metadata and merge it into config
 			const metadata = this.initializeMetadata(processedConfig)
 			processedConfig = {
@@ -259,12 +259,12 @@ export class Config {
 			}
 
 			this.updateConfig(processedConfig)
-			
+
 			if (render) {
 				processedConfig = this.pipeline.render(processedConfig as RunrealConfig)
 				this.updateConfig(processedConfig)
 			}
-			
+
 			return processedConfig as RunrealConfig
 		} catch (error) {
 			if (error instanceof ConfigError) {
