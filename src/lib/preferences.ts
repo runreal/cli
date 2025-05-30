@@ -1,19 +1,22 @@
+import * as os from 'node:os'
+import * as path from 'node:path'
+import * as fs from 'node:fs/promises'
 import { UserRunrealPreferencesSchema } from './schema.ts'
 import { UserRunrealPreferences } from './types.ts'
 
-const homeDir = Deno.env.get('HOME')
-const preferencesPath = `${homeDir}/.runreal/`
+const homeDir = os.homedir()
+const preferencesPath = path.join(homeDir, '.runreal')
 const preferencesFile = 'preferences.json'
-const preferencesFullPath = `${preferencesPath}${preferencesFile}`
+const preferencesFullPath = path.join(preferencesPath, preferencesFile)
 
 const get = async (): Promise<UserRunrealPreferences> => {
 	let prefs: UserRunrealPreferences = {}
 	try {
-		const fileInfo = await Deno.stat(preferencesFullPath)
-		if (!fileInfo.isFile) {
+		const fileInfo = await fs.stat(preferencesFullPath)
+		if (!fileInfo.isFile()) {
 			return prefs
 		}
-		const file = await Deno.readTextFile(preferencesFullPath)
+		const file = await fs.readFile(preferencesFullPath, 'utf8')
 		const parsed = JSON.parse(file)
 		try {
 			prefs = UserRunrealPreferencesSchema.parse(parsed)
@@ -23,7 +26,7 @@ const get = async (): Promise<UserRunrealPreferences> => {
 		}
 	} catch (e) {
 		console.error('Error reading preferences file:', e)
-		if (e instanceof Deno.errors.NotFound) {
+		if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
 			return prefs
 		}
 		throw e
@@ -34,20 +37,20 @@ const get = async (): Promise<UserRunrealPreferences> => {
 
 const set = async (prefs: UserRunrealPreferences): Promise<UserRunrealPreferences> => {
 	try {
-		const fileInfo = await Deno.stat(preferencesFullPath)
-		if (!fileInfo.isFile) {
-			await Deno.mkdir(preferencesPath, { recursive: true })
+		const fileInfo = await fs.stat(preferencesFullPath)
+		if (!fileInfo.isFile()) {
+			await fs.mkdir(preferencesPath, { recursive: true })
 		}
 	} catch (e) {
-		if (e instanceof Deno.errors.NotFound) {
-			await Deno.mkdir(preferencesPath, { recursive: true })
+		if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+			await fs.mkdir(preferencesPath, { recursive: true })
 		} else {
 			throw e
 		}
 	}
 
 	const data = JSON.stringify(prefs, null, 2)
-	await Deno.writeTextFile(preferencesFullPath, data)
+	await fs.writeFile(preferencesFullPath, data, 'utf8')
 
 	return prefs
 }

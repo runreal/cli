@@ -51,6 +51,8 @@
     "jsr:@std/text@~1.0.7": "1.0.13",
     "jsr:@std/ulid@1": "1.0.0",
     "npm:@types/node@*": "22.12.0",
+    "npm:@types/node@22.15": "22.15.14",
+    "npm:ansis@*": "4.1.0",
     "npm:esbuild@0.25.2": "0.25.2",
     "npm:nanoid@5.1": "5.1.5",
     "npm:ueblueprint@2.0.0": "2.0.0",
@@ -394,7 +396,13 @@
     "@types/node@22.12.0": {
       "integrity": "sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==",
       "dependencies": [
-        "undici-types"
+        "undici-types@6.20.0"
+      ]
+    },
+    "@types/node@22.15.14": {
+      "integrity": "sha512-BL1eyu/XWsFGTtDWOYULQEs4KR0qdtYfCxYAUYRoB7JP7h9ETYLgQTww6kH8Sj2C0pFGgrpM0XKv6/kbIzYJ1g==",
+      "dependencies": [
+        "undici-types@6.21.0"
       ]
     },
     "@types/trusted-types@2.0.7": {
@@ -402,6 +410,9 @@
     },
     "@zod/core@0.11.6": {
       "integrity": "sha512-03Bv82fFSfjDAvMfdHHdGSS6SOJs0iCcJlWJv1kJHRtoTT02hZpyip/2Lk6oo4l4FtjuwTrsEQTwg/LD8I7dJA=="
+    },
+    "ansis@4.1.0": {
+      "integrity": "sha512-BGcItUBWSMRgOCe+SVZJ+S7yTRG0eGt9cXAHev72yuGcY23hnLA7Bky5L/xLyPINoSN95geovfBkqoTlNZYa7w=="
     },
     "esbuild@0.25.2": {
       "integrity": "sha512-16854zccKPnC+toMywC+uKNeYSv+/eXkevRAfwRD/G9Cleq66m8XFIrigkbvauLLlCfDL45Q2cWegSg53gGBnQ==",
@@ -474,6 +485,9 @@
     "undici-types@6.20.0": {
       "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
     },
+    "undici-types@6.21.0": {
+      "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
+    },
     "zod@4.0.0-beta.20250505T195954": {
       "integrity": "sha512-iB8WvxkobVIXMARvQu20fKvbS7mUTiYRpcD8OQV1xjRhxO0EEpYIRJBk6yfBzHAHEdOSDh3SxDITr5Eajr2vtg==",
       "dependencies": [
@@ -500,6 +514,7 @@
       "jsr:@std/streams@^1.0.9",
       "jsr:@std/testing@1.0.11",
       "jsr:@std/ulid@1",
+      "npm:@types/node@22.15",
       "npm:esbuild@0.25.2",
       "npm:nanoid@5.1",
       "npm:ueblueprint@2.0.0",

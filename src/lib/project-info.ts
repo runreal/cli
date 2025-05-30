@@ -1,5 +1,5 @@
-import * as path from '@std/path'
-
+import * as path from 'node:path'
+import * as fs from 'node:fs/promises'
 import { findFilesByExtension } from './utils.ts'
 
 /**
@@ -366,14 +366,14 @@ export interface UProject {
 export async function readUPluginFile(filePath: string): Promise<UPlugin | null> {
 	try {
 		// Read the file
-		const text = await Deno.readTextFile(filePath)
+		const text = await fs.readFile(filePath, 'utf8')
 
 		// Parse the JSON content
 		const upluginData: UPlugin = await JSON.parse(text)
 
 		return upluginData
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
+		if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
 			//console.warn(`File not found: ${filePath}`)
 			return null
 		} else if (error instanceof SyntaxError) {
@@ -444,14 +444,14 @@ export function displayUPluginInfo(uplugin: UPlugin): void {
 export async function readUProjectFile(filePath: string): Promise<UProject | null> {
 	try {
 		// Read the file
-		const text = await Deno.readTextFile(filePath)
+		const text = await fs.readFile(filePath, 'utf8')
 
 		// Parse the JSON content
 		const uprojectData: UProject = JSON.parse(text)
 
 		return uprojectData
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
+		if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
 			//console.warn(`File not found: ${filePath}`)
 			return null
 		} else if (error instanceof SyntaxError) {
@@ -465,7 +465,7 @@ export async function readUProjectFile(filePath: string): Promise<UProject | nul
 }
 
 export async function writeUProjectFile(filePath: string, projectData: UProject) {
-	await Deno.writeTextFile(filePath, JSON.stringify(projectData))
+	await fs.writeFile(filePath, JSON.stringify(projectData))
 }
 
 export function displayUProjectInfo(uproject: UProject): void {

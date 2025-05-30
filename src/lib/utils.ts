@@ -1,5 +1,6 @@
-import { mergeReadableStreams } from '@std/streams'
-import * as path from '@std/path'
+import * as path from 'node:path'
+import * as fs from 'node:fs/promises'
+import * as child_process from 'node:child_process'
 import { createEngine } from './engine.ts'
 import type { GitIgnoreFiles, UeDepsManifest } from './types.ts'
 
@@ -7,7 +8,7 @@ export async function exec(
 	cmd: string,
 	args: string[],
 	options: { cwd?: string | URL; dryRun?: boolean; quiet?: boolean } = { dryRun: false, quiet: false },
-) {
+): Promise<{ success: boolean; code: number; signal: string | null; output: string }> {
 	const { dryRun, quiet } = options
 
 	if (dryRun) {
@@ -15,34 +16,44 @@ export async function exec(
 		return { success: true, code: 0, signal: null, output: '' }
 	}
 
-	const command = new Deno.Command(cmd, {
-		args,
-		cwd: options.cwd,
-		stderr: 'piped',
-		stdout: 'piped',
-	})
-	const process = command.spawn()
-	const joined = mergeReadableStreams(process.stdout, process.stderr)
-	let output = ''
+	return new Promise((resolve, reject) => {
+		const process = child_process.spawn(cmd, args, {
+			cwd: options.cwd?.toString(),
+			stdio: quiet ? 'pipe' : 'inherit',
+		})
 
-	for await (const chunk of joined) {
-		if (!quiet) {
-			Deno.stdout.write(chunk)
+		let output = ''
+		if (process.stdout) {
+			process.stdout.on('data', (data: Buffer) => {
+				output += data.toString()
+			})
 		}
-		output += new TextDecoder().decode(chunk)
-	}
+		if (process.stderr) {
+			process.stderr.on('data', (data: Buffer) => {
+				output += data.toString()
+			})
+		}
 
-	output = output.trim()
+		process.on('close', (code: number | null, signal: NodeJS.Signals | null) => {
+			resolve({
+				success: code === 0,
+				code: code || 0,
+				signal: signal || null,
+				output: output.trim(),
+			})
+		})
 
-	const { success, code, signal } = await process.status
-	return { success, code, signal, output }
+		process.on('error', (error: Error) => {
+			reject(error)
+		})
+	})
 }
 
 export function execSync(
 	cmd: string,
 	args: string[],
 	options: { cwd?: string | URL; dryRun?: boolean; quiet?: boolean } = { dryRun: false, quiet: false },
-) {
+): { success: boolean; code: number; signal: string | null; output: string } {
 	const { dryRun, quiet } = options
 
 	if (dryRun) {
@@ -50,31 +61,39 @@ export function execSync(
 		return { success: true, code: 0, signal: null, output: '' }
 	}
 
-	const command = new Deno.Command(cmd, {
-		args,
-		cwd: options.cwd,
-		stderr: 'piped',
-		stdout: 'piped',
-	})
-	const process = command.outputSync()
-	let output = ''
-	if (!quiet) {
-		Deno.stdout.writeSync(process.stdout)
-		Deno.stderr.writeSync(process.stderr)
-	}
-	output += new TextDecoder().decode(process.stdout)
-	output += new TextDecoder().decode(process.stderr)
-	output = output.trim()
+	try {
+		const result = child_process.spawnSync(cmd, args, {
+			cwd: options.cwd?.toString(),
+			stdio: quiet ? 'pipe' : 'inherit',
+			encoding: 'utf8',
+		})
 
-	const { success, code, signal } = process
-	return { success, code, signal, output }
+		let output = ''
+		if (result.stdout) output += result.stdout
+		if (result.stderr) output += result.stderr
+		output = output.trim()
+
+		return {
+			success: result.status === 0,
+			code: result.status || 0,
+			signal: result.signal || null,
+			output,
+		}
+	} catch (error) {
+		return {
+			success: false,
+			code: 1,
+			signal: null,
+			output: error instanceof Error ? error.message : String(error),
+		}
+	}
 }
 
 export async function findProjectFile(projectPath: string): Promise<string> {
-	const files = await Deno.readDir(projectPath)
-	for await (const file of files) {
-		if (file.isFile && file.name.endsWith('.uproject')) {
-			return path.normalize(`${projectPath}/${file.name}`)
+	const files = await fs.readdir(projectPath, { withFileTypes: true })
+	for (const file of files) {
+		if (file.isFile() && file.name.endsWith('.uproject')) {
+			return path.normalize(path.join(projectPath, file.name))
 		}
 	}
 	throw new Error(`Could not find .uproject file in ${projectPath}`)
@@ -85,17 +104,17 @@ export async function getProjectName(projectPath: string): Promise<string> {
 	return path.basename(projectFile, '.uproject')
 }
 
-export const getRepoName = (repoUrl: string) => {
+export const getRepoName = (repoUrl: string): string => {
 	const parts = repoUrl.replace(/\/$/, '').split('/')
 	return parts[parts.length - 1]?.replace(/\.git$/, '') ?? ''
 }
 
-export const getRepoOrg = (repoUrl: string) => {
+export const getRepoOrg = (repoUrl: string): string => {
 	const parts = repoUrl.replace(/\/$/, '').split('/')
 	return parts[parts.length - 2] ?? ''
 }
 
-export const isGitRepo = async (path: string) => {
+export const isGitRepo = async (path: string): Promise<boolean> => {
 	try {
 		const { success } = await exec('git', ['status'], { cwd: path, quiet: true })
 		return success
@@ -104,15 +123,15 @@ export const isGitRepo = async (path: string) => {
 	}
 }
 
-export const createOrUpdateMirror = async (source: string, destination: string, dryRun?: boolean) => {
+export const createOrUpdateMirror = async (source: string, destination: string, dryRun?: boolean): Promise<string> => {
 	const repoName = getRepoName(source)
 	const repoOrg = getRepoOrg(source)
 	const dest = path.join(destination, `${repoOrg}-${repoName}`)
 	console.log(`creating mirror ${dest}`)
 	try {
-		await Deno.mkdir(dest)
+		await fs.mkdir(dest)
 	} catch (e) {
-		if (e instanceof Deno.errors.AlreadyExists) {
+		if ((e as NodeJS.ErrnoException).code === 'EEXIST') {
 			console.log(`mirror ${destination} already exists, updating`)
 			const args1 = ['--git-dir', dest, 'remote', 'set-url', 'origin', source]
 			await exec('git', args1, { dryRun })
@@ -142,7 +161,7 @@ export const cloneRepo = async (
 		mirrorPath?: string
 		dryRun?: boolean
 	},
-) => {
+): Promise<string> => {
 	const cloneArgs = ['clone', '--progress']
 	if (useMirror && mirrorPath) {
 		// console.log(`using mirror ${mirrorPath}`)
@@ -187,28 +206,28 @@ export const runEngineSetup = async (
 
 export const deleteEngineHooks = async (enginePath: string) => {
 	const hooksPath = path.join(enginePath, '.git', 'hooks')
-	await Deno.remove(hooksPath, { recursive: true }).catch(() => {})
+	await fs.rm(hooksPath, { recursive: true, force: true }).catch(() => {})
 }
 
 /*
 @deprecated - revist with alternative xml parser
 export const getDepsList = async (enginePath: string) => {
-	const ueDependenciesManifest = path.join(enginePath, '.uedependencies')
-	const data = await Deno.readTextFile(ueDependenciesManifest)
-	const { WorkingManifest: { Files: { File } } } = xml2js(data, { compact: true }) as unknown as UeDepsManifest
-	return File.map(({ _attributes: { Name, Hash, ExpectedHash, Timestamp } }) => ({
-		name: Name,
-		hash: Hash,
-		expectedHash: ExpectedHash,
-		timestamp: Timestamp,
-	}))
+  const ueDependenciesManifest = path.join(enginePath, '.uedependencies')
+  const data = await Deno.readTextFile(ueDependenciesManifest)
+  const { WorkingManifest: { Files: { File } } } = xml2js(data, { compact: true }) as unknown as UeDepsManifest
+  return File.map(({ _attributes: { Name, Hash, ExpectedHash, Timestamp } }) => ({
+    name: Name,
+    hash: Hash,
+    expectedHash: ExpectedHash,
+    timestamp: Timestamp,
+  }))
 }
 */
 
 export const getGitIgnoreList = (
 	enginePath: string,
 	relevantDirs: string[] = ['Engine/'],
-) => {
+): GitIgnoreFiles => {
 	const { output = '' } = execSync('git', [
 		'status',
 		'--ignored',
@@ -234,12 +253,13 @@ Temporarily copy the scripts to the ${enginePath}/BuildGraph folder
 BuildGraph expects scripts to be contained inside the engine folder
 until we apply a patch to BuildGraph that allows external scripts
 */
-export const copyBuildGraphScripts = async (enginePath: string, bgScriptPath: string) => {
+export const copyBuildGraphScripts = async (enginePath: string, bgScriptPath: string): Promise<string> => {
 	const engineBg = path.join(enginePath, 'BuildGraph')
-	await Deno.mkdir(engineBg, { recursive: true })
-	for await (const entry of Deno.readDir(path.dirname(bgScriptPath))) {
-		if (path.extname(entry.name) === '.xml') {
-			await Deno.copyFile(
+	await fs.mkdir(engineBg, { recursive: true })
+	const entries = await fs.readdir(path.dirname(bgScriptPath), { withFileTypes: true })
+	for (const entry of entries) {
+		if (entry.isFile() && path.extname(entry.name) === '.xml') {
+			await fs.copyFile(
 				path.join(path.dirname(bgScriptPath), entry.name),
 				path.join(engineBg, entry.name),
 			)
@@ -248,7 +268,7 @@ export const copyBuildGraphScripts = async (enginePath: string, bgScriptPath: st
 	return path.join(engineBg, path.basename(bgScriptPath))
 }
 
-export const randomBuildkiteEmoji = () => {
+export const randomBuildkiteEmoji = (): string => {
 	const emojis = [
 		':mr-bones:',
 		':heart_on_fire:',
@@ -292,7 +312,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 	}
 }
 
-export const getRandomInt = (max: number) => Math.floor(Math.random() * max)
+export const getRandomInt = (max: number): number => Math.floor(Math.random() * max)
 
 /**
  * Format a timestamp string to a human-readable date string.
@@ -309,7 +329,7 @@ export function formatIsoTimestamp(
 	return new Intl.DateTimeFormat(locale, options).format(new Date(ts))
 }
 
-export const generateBlueprintHtml = (blueprint: string) => {
+export const generateBlueprintHtml = (blueprint: string): string => {
 	const html = `
 	<!DOCTYPE html>
 	<html lang="en">
@@ -351,13 +371,14 @@ export async function findFilesByExtension(
 	const files: string[] = []
 
 	try {
-		for await (const entry of Deno.readDir(rootDir)) {
-			const checkPath = `${rootDir}/${entry.name}`
+		const entries = await fs.readdir(rootDir, { withFileTypes: true })
+		for (const entry of entries) {
+			const checkPath = path.join(rootDir, entry.name)
 
-			if (entry.isDirectory && recursive) {
+			if (entry.isDirectory() && recursive) {
 				const subFiles = await findFilesByExtension(checkPath, extension, recursive)
 				files.push(...subFiles)
-			} else if (entry.isFile && checkPath.endsWith(extension)) {
+			} else if (entry.isFile() && checkPath.endsWith(extension)) {
 				files.push(checkPath)
 			}
 		}
@@ -373,7 +394,7 @@ export async function parseCSForTargetType(filePath: string): Promise<{
 	targetType: string | null
 }> {
 	// Read the file
-	const fileContent = await Deno.readTextFile(filePath)
+	const fileContent = await fs.readFile(filePath, 'utf8')
 
 	// Results object
 	const result = {

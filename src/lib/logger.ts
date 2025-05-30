@@ -1,4 +1,5 @@
-import * as fmt from '@std/fmt/colors'
+import * as util from 'node:util'
+import ansis from 'npm:ansis'
 import { DefaultMap, getRandomInt } from './utils.ts'
 
 export enum LogLevel {
@@ -49,19 +50,19 @@ class Logger {
 		this.logLevel = level
 	}
 
-	private formatMessage(level: LogLevel, message: string) {
+	private formatMessage(level: LogLevel, message: string): string {
 		const timestamp = new Date().toISOString()
-		const messageStr = typeof message === 'object' ? `\n${Deno.inspect(message, { colors: true })}` : message
+		const messageStr = typeof message === 'object' ? `\n${util.inspect(message, { colors: true })}` : message
 		let levelStr: string
 		switch (level) {
 			case LogLevel.INFO:
-				levelStr = fmt.bold(fmt.green(level))
+				levelStr = ansis.bold.green(level)
 				break
 			case LogLevel.ERROR:
-				levelStr = fmt.bold(fmt.red(level))
+				levelStr = ansis.bold.red(level)
 				break
 			case LogLevel.DEBUG:
-				levelStr = fmt.bold(fmt.yellow(level))
+				levelStr = ansis.bold.yellow(level)
 				break
 			default:
 				levelStr = level
@@ -69,7 +70,7 @@ class Logger {
 		let str = `[${timestamp}] [${levelStr}]`
 		if (this.commandContext) {
 			const color = randomColorForStr(this.commandContext)
-			str += ` [${fmt.rgb24(this.commandContext.toUpperCase(), color)}]`
+			str += ` [${ansis.rgb(color.r, color.g, color.b)(this.commandContext.toUpperCase())}]`
 		}
 		str += ` ${messageStr}`
 		return str
@@ -84,12 +85,12 @@ class Logger {
 		}
 	}
 
-	async drainWriteQueue() {
+	async drainWriteQueue(): Promise<void> {
 		await Promise.all(this.writeQueue)
 		this.writeQueue = []
 	}
 
-	private shouldLog(level: LogLevel) {
+	private shouldLog(level: LogLevel): boolean {
 		return level >= this.logLevel
 	}
 
@@ -118,7 +119,7 @@ class Logger {
 export const logger = new Logger()
 
 // Before the program exits, ensure all logs are written to the file.
-Deno.addSignalListener('SIGINT', async () => {
+process.on('SIGINT', async () => {
 	await logger.drainWriteQueue()
-	Deno.exit()
+	process.exit()
 })

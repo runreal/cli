@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import * as path from '@std/path'
+import * as path from 'node:path'
 
-const env = (key: string) => Deno.env.get(key) || ''
+const env = (key: string) => process.env[key] || ''
 
 export const InternalConfigSchema = z.object({
 	metadata: z.object({
@@ -24,7 +24,7 @@ export const InternalConfigSchema = z.object({
 			checkout: z.string().default(env('BUILDKITE_COMMIT')).describe('Buildkite commit hash'),
 			buildNumber: z.string().default(env('BUILDKITE_BUILD_NUMBER') || '0').describe('Buildkite build number'),
 			buildCheckoutPath: z.string().default(
-				env('BUILDKITE_BUILD_CHECKOUT_PATH') || Deno.cwd(),
+				env('BUILDKITE_BUILD_CHECKOUT_PATH') || process.cwd(),
 			).describe('Buildkite build checkout path'),
 			buildPipelineSlug: z.string().default(env('BUILDKITE_PIPELINE_SLUG') || '').describe('Buildkite pipeline slug'),
 		}).optional(),
@@ -34,7 +34,7 @@ export const InternalConfigSchema = z.object({
 export const UserConfigSchema = z.object({
 	'$schema': z.string().optional().describe('Runreal JSON-Schema spec version'),
 	engine: z.object({
-		path: z.string().optional().default(Deno.cwd()).describe('Path to the engine folder'),
+		path: z.string().optional().default(process.cwd()).describe('Path to the engine folder'),
 		repoType: z.string().optional().describe('git or perforce'),
 		gitSource: z.string().optional().describe('git source repository'),
 		gitBranch: z.string().optional().default('main').describe('git branch to checkout'),
@@ -45,9 +45,9 @@ export const UserConfigSchema = z.object({
 	}),
 	project: z.object({
 		name: z.string().optional().describe('Project name'),
-		path: z.string().optional().default(Deno.cwd()).describe('Path to the project folder <RUNREAL_PROJECT_PATH>'),
+		path: z.string().optional().default(process.cwd()).describe('Path to the project folder <RUNREAL_PROJECT_PATH>'),
 		buildPath: z.string().optional().default(
-			path.join(Deno.cwd(), 'build'),
+			path.join(process.cwd(), 'build'),
 		).describe('Path to the build folder <RUNREAL_BUILD_PATH>'),
 		repoType: z.string().optional().default('git').describe('git or perforce'),
 	}),

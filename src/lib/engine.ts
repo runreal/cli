@@ -1,4 +1,6 @@
-import * as path from '@std/path'
+import * as path from 'node:path'
+import * as fs from 'node:fs'
+import * as os from 'node:os'
 import * as ndjson from '../lib/ndjson.ts'
 import { exec } from '../lib/utils.ts'
 
@@ -125,8 +127,8 @@ export abstract class Engine {
 	}
 
 	static getCurrentPlatform(): EnginePlatform {
-		switch (Deno.build.os) {
-			case 'windows':
+		switch (os.platform()) {
+			case 'win32':
 				return EnginePlatform.Windows
 			case 'darwin':
 				return EnginePlatform.Mac
@@ -154,7 +156,7 @@ export abstract class Engine {
 			'Build.version',
 		)
 		const engineVersionData = JSON.parse(
-			Deno.readTextFileSync(engineVersionFile),
+			fs.readFileSync(engineVersionFile, 'utf8'),
 		)
 		return engineVersionData
 	}
@@ -226,7 +228,7 @@ export abstract class Engine {
 			return result
 		} catch (error: unknown) {
 			console.log(`Error running Editor: ${error instanceof Error ? error.message : String(error)}`)
-			Deno.exit(1)
+			process.exit(1)
 		}
 	}
 
@@ -293,7 +295,7 @@ class WindowsEngine extends Engine {
 		await this.ubt(args, { quiet: true })
 		try {
 			const targetInfoJson = path.resolve(path.join(this.enginePath, 'Engine', 'Intermediate', 'TargetInfo.json'))
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const { Targets } = JSON.parse(fs.readFileSync(targetInfoJson, 'utf8'))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
 		} catch (e) {
@@ -383,7 +385,7 @@ class MacosEngine extends Engine {
 		await this.ubt(args, { quiet: true })
 		try {
 			const targetInfoJson = path.resolve(path.join(this.enginePath, 'Engine', 'Intermediate', 'TargetInfo.json'))
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const { Targets } = JSON.parse(fs.readFileSync(targetInfoJson, 'utf8'))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
 		} catch (e) {
@@ -466,7 +468,7 @@ class LinuxEngine extends Engine {
 		await this.ubt(args, { quiet: true })
 		try {
 			const targetInfoJson = path.resolve(path.join(this.enginePath, 'Engine', 'Intermediate', 'TargetInfo.json'))
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const { Targets } = JSON.parse(fs.readFileSync(targetInfoJson, 'utf8'))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
 		} catch (e) {
@@ -498,15 +500,15 @@ class LinuxEngine extends Engine {
 
 // Factory function to create the appropriate Engine instance
 export function createEngine(enginePath: string): Engine {
-	switch (Deno.build.os) {
-		case 'windows':
+	switch (os.platform()) {
+		case 'win32':
 			return new WindowsEngine(enginePath)
 		case 'darwin':
 			return new MacosEngine(enginePath)
 		case 'linux':
 			return new LinuxEngine(enginePath)
 		default:
-			throw new Error(`Unsupported platform: ${Deno.build.os}`)
+			throw new Error(`Unsupported platform: ${os.platform()}`)
 	}
 }
 

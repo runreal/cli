@@ -1,5 +1,7 @@
-import * as path from '@std/path'
-import { expandGlob } from '@std/fs'
+import * as path from 'node:path'
+import * as fs from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
+import { glob } from 'npm:glob'
 import { ValidationError } from '@cliffy/command'
 import { logger } from '../lib/logger.ts'
 
@@ -100,7 +102,7 @@ export class Project {
 				if (plugin.Name === pluginName) {
 					foundPlugin = true
 					if (plugin.Enabled == shouldEnable) {
-						Deno.exit()
+						process.exit()
 					}
 					plugin.Enabled = shouldEnable
 					break
@@ -359,7 +361,7 @@ export class Project {
 		await this.engine.ubt(args, { quiet: true })
 		try {
 			const targetInfoJson = path.resolve(path.join(this.projectFileVars.projectDir, 'Intermediate', 'TargetInfo.json'))
-			const { Targets } = JSON.parse(Deno.readTextFileSync(targetInfoJson))
+			const { Targets } = JSON.parse(readFileSync(targetInfoJson, 'utf8'))
 			const targets = Targets.map((target: TargetInfo) => target.Name)
 			return targets
 		} catch (e) {
@@ -385,9 +387,9 @@ export class Project {
 			targetType: string | null
 		}> = []
 
-		const files = await Deno.readDir(targetDir)
-		for await (const file of files) {
-			if (file.isFile && file.name.endsWith('.cs')) {
+		const files = await fs.readdir(targetDir, { withFileTypes: true })
+		for (const file of files) {
+			if (file.isFile() && file.name.endsWith('.cs')) {
 				const result = await parseCSForTargetType(path.join(targetDir, file.name))
 				targetArray.push(result)
 			}
@@ -427,17 +429,26 @@ export class Project {
 
 	async runClean(dryRun?: boolean) {
 		const cwd = this.projectFileVars.projectDir
-		const patterns = ['**/Binaries/**', '**/Intermediate/**']
+		const patterns = ['**/Binaries', '**/Intermediate']
+
 		for (const pattern of patterns) {
-			for await (const file of expandGlob(pattern, { root: cwd })) {
-				if (file.isFile) {
+			try {
+				const matches = await glob(pattern, {
+					cwd,
+					onlyDirectories: true,
+					absolute: true,
+				})
+
+				for (const dir of matches) {
 					if (dryRun) {
-						logger.info(`[dry-run] deleting ${file.path}`)
+						logger.info(`[dry-run] deleting ${dir}`)
 					} else {
-						logger.info(`deleting ${file.path}`)
-						await Deno.remove(file.path)
+						logger.info(`deleting ${dir}`)
+						await fs.rm(dir, { recursive: true, force: true })
 					}
 				}
+			} catch (e) {
+				// Directory may not exist or glob pattern failed
 			}
 		}
 	}
@@ -465,7 +476,7 @@ export async function createProject(enginePath: string, projectPath: string): Pr
 
 	if (projectFile == null) {
 		console.log(`Could not find project file in path ${projectPath}`)
-		Deno.exit(1)
+		return process.exit(1)
 	}
 
 	const projectFileVars = {

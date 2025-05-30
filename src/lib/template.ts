@@ -1,5 +1,5 @@
 import type { RunrealConfig } from './types.ts'
-import * as path from '@std/path'
+import * as path from 'node:path'
 import { formatIsoTimestamp } from './utils.ts'
 
 /**

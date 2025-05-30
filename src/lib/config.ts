@@ -1,4 +1,5 @@
-import * as path from '@std/path'
+import * as path from 'node:path'
+import * as fs from 'node:fs/promises'
 import { deepmerge } from '@rebeccastevens/deepmerge'
 import { z } from 'zod'
 import { ulid } from './ulid.ts'
@@ -346,11 +347,11 @@ export class Config {
 	 */
 	private async searchForConfigFile(): Promise<string | undefined> {
 		// Highest precedence: explicit env variable
-		const envPath = Deno.env.get('RUNREAL_CONFIG')
+		const envPath = process.env['RUNREAL_CONFIG']
 		if (envPath) {
 			try {
-				const info = await Deno.stat(envPath)
-				if (info.isFile) return envPath
+				const info = await fs.stat(envPath)
+				if (info.isFile()) return envPath
 			} catch { /* pass */ }
 		}
 
@@ -358,13 +359,13 @@ export class Config {
 		const configFileNames = [
 			'runreal.config.json',
 		]
-		let dir = Deno.cwd()
+		let dir = process.cwd()
 		while (true) {
 			for (const fileName of configFileNames) {
 				const candidate = path.join(dir, fileName)
 				try {
-					const info = await Deno.stat(candidate)
-					if (info.isFile) {
+					const info = await fs.stat(candidate)
+					if (info.isFile()) {
 						return candidate
 					}
 				} catch { /* pass */ }
@@ -384,10 +385,10 @@ export class Config {
 	private async readConfigFile(configPath: string): Promise<Partial<RunrealConfig> | null> {
 		try {
 			const resolvedPath = path.resolve(configPath)
-			const data = await Deno.readTextFile(resolvedPath)
+			const data = await fs.readFile(resolvedPath, 'utf8')
 			return JSON.parse(data)
 		} catch (error) {
-			if (error instanceof Deno.errors.NotFound) {
+			if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
 				return null
 			}
 			const errorMessage = error instanceof Error ? error.message : String(error)

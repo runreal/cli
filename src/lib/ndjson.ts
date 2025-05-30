@@ -1,16 +1,18 @@
-import { TextLineStream } from '@std/streams/text-line-stream'
-import { JsonParseStream, type JsonValue } from '@std/json'
+import * as fs from 'node:fs'
+import * as readline from 'node:readline'
 
-const parse = async (file: string): Promise<JsonValue[]> => {
-	using f = await Deno.open(file, { read: true })
-	const readable = f.readable
-		.pipeThrough(new TextDecoderStream())
-		.pipeThrough(new TextLineStream())
-		.pipeThrough(new JsonParseStream())
+const parse = async (file: string): Promise<any[]> => {
+	const fileStream = fs.createReadStream(file)
+	const rl = readline.createInterface({
+		input: fileStream,
+		crlfDelay: Infinity,
+	})
 
-	const data: JsonValue[] = []
-	for await (const item of readable) {
-		data.push(item as JsonValue)
+	const data: any[] = []
+	for await (const line of rl) {
+		if (line.trim()) {
+			data.push(JSON.parse(line))
+		}
 	}
 	return data
 }

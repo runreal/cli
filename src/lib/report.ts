@@ -54,7 +54,8 @@ export function generateMarkdownReport(logs: AutomationToolLogs[]): string {
 }
 
 export async function writeMarkdownReport(logs: AutomationToolLogs[], outputPath: string): Promise<void> {
+	const { writeFile } = await import('node:fs/promises')
 	const markdown = generateMarkdownReport(logs)
-	await Deno.writeTextFile(outputPath, markdown)
+	await writeFile(outputPath, markdown, 'utf8')
 	console.log(`[BUILDGRAPH RUN] Error report generated: ${outputPath}`)
 }

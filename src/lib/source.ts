@@ -1,4 +1,5 @@
-import * as path from '@std/path'
+import * as path from 'node:path'
+import * as fs from 'node:fs'
 import { execSync } from './utils.ts'
 import type { RunrealConfig } from '../lib/types.ts'
 
@@ -60,8 +61,8 @@ export class Perforce extends Base {
 
 	isValidRepo(): boolean {
 		try {
-			const stat = Deno.statSync(this.cwd)
-			if (!stat.isDirectory) {
+			const stat = fs.statSync(this.cwd)
+			if (!stat.isDirectory()) {
 				return false
 			}
 			const result = execSync(this.executable, ['info'], { cwd: this.cwd, quiet: true })
@@ -169,8 +170,8 @@ export class Git extends Base {
 
 	isValidRepo(): boolean {
 		try {
-			const stat = Deno.statSync(this.cwd)
-			if (!stat.isDirectory) {
+			const stat = fs.statSync(this.cwd)
+			if (!stat.isDirectory()) {
 				return false
 			}
 			const result = execSync(this.executable, ['rev-parse', '--git-dir'], { cwd: this.cwd, quiet: true })
@@ -186,8 +187,8 @@ export class Git extends Base {
 	branch(): string {
 		if (!this.isValidRepo()) return ''
 		// On Buildkite, use the BUILDKITE_BRANCH env var as we may be in a detached HEAD state
-		if (Deno.env.get('BUILDKITE_BRANCH')) {
-			return Deno.env.get('BUILDKITE_BRANCH') || ''
+		if (process.env['BUILDKITE_BRANCH']) {
+			return process.env['BUILDKITE_BRANCH'] || ''
 		}
 		return this.safeExec(['branch', '--show-current'])
 	}
@@ -278,14 +279,14 @@ export function Source(cwd: string, repoType: string): Base {
 export function detectRepoType(projectPath: string): 'git' | 'perforce' | undefined {
 	try {
 		const gitDir = path.join(projectPath, '.git')
-		if (Deno.statSync(gitDir).isDirectory) {
+		if (fs.statSync(gitDir).isDirectory()) {
 			return 'git'
 		}
 	} catch { /* pass */ }
 	try {
 		// Simple check for Perforce - look for .p4config or P4CONFIG markers
 		const p4configPath = path.join(projectPath, '.p4config')
-		if (Deno.statSync(p4configPath).isFile) {
+		if (fs.statSync(p4configPath).isFile()) {
 			return 'perforce'
 		}
 	} catch { /* pass */ }
