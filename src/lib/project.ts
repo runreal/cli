@@ -143,14 +143,11 @@ export class Project {
 	}) {
 		const projectTarget = await this.getProjectTarget(target)
 
-		const targetFullString =
-			`\-Target="${projectTarget} ${platform} ${configuration} ${this.projectFileVars.projectArgument}\"`
-
 		await this.compileTarget({
 			target: projectTarget,
 			configuration: configuration,
 			platform: platform,
-			extraArgs: [targetFullString, ...extraArgs],
+			extraArgs: extraArgs,
 			dryRun: dryRun,
 			clean: clean,
 			nouht: nouht,
