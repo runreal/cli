@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0](https://github.com/runreal/cli/compare/v1.8.0...v1.9.0) (2025-06-02)
+
+
+### Bug Fixes
+
+* removed msbuild specific target string ([#84](https://github.com/runreal/cli/issues/84)) ([2562957](https://github.com/runreal/cli/commit/25629573037e7961f9a97734a512da4610d5be5f))
+
+
+### Miscellaneous Chores
+
+* release 1.9.0 ([d6db301](https://github.com/runreal/cli/commit/d6db30130294d286f18e31536b7dfb2e9ab591a3))
+
 ## [1.8.0](https://github.com/runreal/cli/compare/v1.7.0...v1.8.0) (2025-05-23)
 
 
