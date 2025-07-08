@@ -8,6 +8,7 @@ import { editor } from './editor.ts'
 import { game } from './game.ts'
 import { program } from './program.ts'
 import { server } from './server.ts'
+import { engine } from './engine.ts'
 
 export const build = new Command<GlobalOptions>()
 	.description('build')
@@ -20,3 +21,4 @@ export const build = new Command<GlobalOptions>()
 	.command('game', game)
 	.command('program', program)
 	.command('server', server)
+	.command('engine', engine)

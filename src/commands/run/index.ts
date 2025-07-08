@@ -7,6 +7,7 @@ import { editor } from './editor.ts'
 import { game } from './game.ts'
 import { python } from './python.ts'
 import { server } from './server.ts'
+import { engine } from './engine.ts'
 
 export const run = new Command<GlobalOptions>()
 	.description('Run the game, editor, or commandlet')
@@ -19,3 +20,4 @@ export const run = new Command<GlobalOptions>()
 	.command('game', game)
 	.command('python', python)
 	.command('server', server)
+	.command('engine', engine)
