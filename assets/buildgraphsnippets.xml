@@ -1,0 +1,16 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+
+	<!-- PROJECT CONFIGURATION -->
+	<Option Name="ProjectName" DefaultValue="" Restrict="" Description="Name of Project"/>
+	<Option Name="ProjectPath" DefaultValue="" Restrict="" Description="Path to the folder that contains your .uproject file"/>
+	<Property Name="Project" Value="$(ProjectPath)/$(ProjectName).uproject"/>
+
+	<!-- COMMANDLETS -->
+	<Agent Name="COMMANDLET" Type="Any">
+		<Node Name="Resave Packages">
+			<Commandlet Name="ResavePackages" Project="$(Project)" Arguments="-PROJECTONLY -BatchPackageLimit=10 -SKIPFAILS -AutoCheckOut -BatchSourceControl -AutoCheckIn -IgnoreChangelist -SkipFailedCheckouts -P4 -stdout -nosplash -nopause -nosound"/>
+		</Node>
+	</Agent>
+
+</BuildGraph>
